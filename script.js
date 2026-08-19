@@ -7,7 +7,6 @@ if (!document.querySelector(`link[href="${enhancementStylesheet}"]`)) {
 }
 
 // Replace the temporary text-based BTL mark with the official practice logo.
-// Doing this in the shared script updates every existing page consistently.
 document.querySelectorAll('.brand').forEach((brand) => {
   if (!brand.querySelector('.brand-mark')) return;
   const logo = document.createElement('img');
@@ -18,8 +17,6 @@ document.querySelectorAll('.brand').forEach((brand) => {
   brand.replaceChildren(logo);
 });
 
-// Keep shared browser metadata consistent even on older pages that were built
-// before the favicon/manifest and clean canonical URL scheme were introduced.
 if (!document.querySelector('link[rel="icon"]')) {
   const icon = document.createElement('link');
   icon.rel = 'icon';
@@ -44,6 +41,10 @@ const canonicalRoutes = {
   'index.html': '/',
   'services.html': '/services-overview',
   'medication-management.html': '/medication-management',
+  'new-patients.html': '/new-patients',
+  'insurance-payment.html': '/insurance-payment',
+  'telehealth.html': '/telehealth',
+  'faq.html': '/faq',
   'about.html': '/about-us',
   'contact.html': '/contactus',
   'anxiety.html': '/anxiety',
@@ -86,6 +87,16 @@ ensureMeta('name', 'twitter:card', 'summary');
 const header = document.querySelector('[data-header]');
 const menuToggle = document.querySelector('[data-menu-toggle]');
 const nav = document.querySelector('[data-nav]');
+
+// New patient information is now a first-class part of the site. Add the link
+// to older pages without rewriting every historical template at once.
+if (nav && !nav.querySelector('a[href="new-patients.html"]')) {
+  const newPatients = document.createElement('a');
+  newPatients.href = 'new-patients.html';
+  newPatients.textContent = 'New Patients';
+  const aboutLink = nav.querySelector('a[href="about.html"]');
+  nav.insertBefore(newPatients, aboutLink || nav.querySelector('.button'));
+}
 
 const updateHeader = () => {
   if (!header) return;
@@ -148,8 +159,6 @@ document.querySelectorAll('.condition-card').forEach((card) => {
   if (label && conditionRoutes[label]) card.setAttribute('href', conditionRoutes[label]);
 });
 
-// Convert the services overview's plain condition list into actual internal
-// links. This improves navigation, keyboard access, and crawlable site structure.
 document.querySelectorAll('.simple-list').forEach((list) => {
   [...list.children].forEach((item) => {
     if (item.tagName === 'A') return;
@@ -168,21 +177,33 @@ document.querySelectorAll('.site-footer').forEach((footer) => {
   const explore = [...footer.querySelectorAll('div')].find((section) =>
     section.querySelector('h3')?.textContent?.trim().toLowerCase() === 'explore'
   );
-  if (explore && !explore.querySelector('a[href="privacy.html"]')) {
-    const privacy = document.createElement('a');
-    privacy.href = 'privacy.html';
-    privacy.textContent = 'Privacy Policy';
-    explore.appendChild(privacy);
-  }
+  if (!explore) return;
+  const patientLinks = [
+    ['new-patients.html', 'New Patients'],
+    ['insurance-payment.html', 'Insurance & Payment'],
+    ['telehealth.html', 'Telehealth'],
+    ['faq.html', 'FAQs'],
+    ['privacy.html', 'Privacy Policy']
+  ];
+  patientLinks.forEach(([href, label]) => {
+    if (explore.querySelector(`a[href="${href}"]`)) return;
+    const link = document.createElement('a');
+    link.href = href;
+    link.textContent = label;
+    explore.appendChild(link);
+  });
 });
 
 if (nav) {
   const normalized = pageFile.includes('.') ? pageFile : `${pageFile}.html`;
-  const contentPages = new Set(['anxiety.html','depression.html','adhd.html','ptsd.html','ocd.html','bipolar.html','grief-loss.html','life-transitions.html']);
+  const contentPages = new Set(['anxiety.html','depression.html','adhd.html','ptsd.html','ocd.html','bipolar.html','grief-loss.html','life-transitions.html','medication-management.html']);
+  const patientPages = new Set(['new-patients.html','insurance-payment.html','telehealth.html','faq.html']);
   nav.querySelectorAll('a').forEach((link) => {
     link.removeAttribute('aria-current');
     const href = (link.getAttribute('href') || '').split('#')[0];
-    const isCurrent = href === normalized || (contentPages.has(normalized) && href === 'services.html');
+    const isCurrent = href === normalized ||
+      (contentPages.has(normalized) && href === 'services.html') ||
+      (patientPages.has(normalized) && href === 'new-patients.html');
     if (isCurrent) link.setAttribute('aria-current', 'page');
   });
 }
