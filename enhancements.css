@@ -127,7 +127,10 @@
   object-fit: cover;
   object-position: center center;
   background: #10272e;
-  filter: brightness(1.14) contrast(1.03) saturate(1.04);
+  /* The source footage is strongly backlit. Lift midtones enough for the
+     provider's face to read naturally against the bright page while slightly
+     reducing contrast so the window does not dominate the frame. */
+  filter: brightness(1.32) contrast(.92) saturate(1.05);
 }
 .provider-video-badge {
   position: absolute;
