@@ -68,6 +68,12 @@
   background: var(--paper);
 }
 
+/* Keep the homepage provider portrait open and approachable by ensuring the
+   callout does not cover the provider's hands. */
+@media (min-width: 821px) {
+  .hero .floating-card { bottom: -30px; }
+}
+
 .home-about {
   display: grid;
   grid-template-columns: minmax(0, .88fr) minmax(0, 1.12fr);
