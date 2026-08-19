@@ -71,7 +71,7 @@
 /* Keep the homepage provider portrait open and approachable by ensuring the
    callout does not cover the provider's hands. */
 @media (min-width: 821px) {
-  .hero .floating-card { bottom: -30px; }
+  .hero .floating-card { bottom: -75px; }
 }
 
 .home-about {
