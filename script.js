@@ -17,6 +17,31 @@ document.querySelectorAll('.brand').forEach((brand) => {
   brand.replaceChildren(logo);
 });
 
+// Turn the homepage provider placeholder into a click-to-play introduction.
+// The media files live in owned local assets so the section remains independent
+// of Odoo and does not autoplay audio on visitors.
+const providerVisual = document.querySelector('.home-about-visual');
+if (providerVisual && !providerVisual.querySelector('video')) {
+  providerVisual.classList.add('provider-video-card');
+  providerVisual.removeAttribute('role');
+  providerVisual.setAttribute('aria-label', 'Video introduction from Logan Carton, PMHNP-BC');
+  providerVisual.innerHTML = `
+    <video class="provider-intro-video" controls playsinline preload="metadata" poster="assets/images/provider-introduction-poster.jpg">
+      <source src="assets/video/provider-introduction.mp4" type="video/mp4">
+      Your browser does not support embedded video.
+    </video>
+    <div class="provider-video-badge" aria-hidden="true">
+      <span>Meet Logan</span>
+      <strong>39-second introduction</strong>
+    </div>`;
+
+  const video = providerVisual.querySelector('.provider-intro-video');
+  const source = video?.querySelector('source');
+  const markUnavailable = () => providerVisual.classList.add('video-unavailable');
+  source?.addEventListener('error', markUnavailable, { once: true });
+  video?.addEventListener('loadeddata', () => providerVisual.classList.remove('video-unavailable'), { once: true });
+}
+
 if (!document.querySelector('link[rel="icon"]')) {
   const icon = document.createElement('link');
   icon.rel = 'icon';
