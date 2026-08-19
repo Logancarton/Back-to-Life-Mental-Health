@@ -194,6 +194,32 @@ document.querySelectorAll('.site-footer').forEach((footer) => {
   });
 });
 
+// Give the homepage a practical patient-journey entry point without turning it
+// into another long information page.
+if (pageFile === 'index.html' && !document.querySelector('[data-patient-resources]')) {
+  const insuranceSection = document.querySelector('.insurance-section');
+  if (insuranceSection) {
+    const resources = document.createElement('section');
+    resources.className = 'section section-soft';
+    resources.setAttribute('data-patient-resources', '');
+    resources.innerHTML = `
+      <div class="container">
+        <div class="section-heading reveal">
+          <span class="eyebrow">Plan your visit</span>
+          <h2>The practical stuff, without the scavenger hunt.</h2>
+          <p>What happens first, how insurance works, when telehealth fits, and the questions people usually ask before scheduling.</p>
+        </div>
+        <div class="condition-grid">
+          <a class="condition-card reveal" href="new-patients.html"><span>Start here</span><strong>New Patients</strong><p>From scheduling through your first treatment plan.</p></a>
+          <a class="condition-card reveal" href="insurance-payment.html"><span>Coverage</span><strong>Insurance & Payment</strong><p>Current plans, private pay, and benefit questions.</p></a>
+          <a class="condition-card reveal" href="telehealth.html"><span>Visit options</span><strong>Telehealth</strong><p>How virtual psychiatric care works across Arizona.</p></a>
+          <a class="condition-card reveal" href="faq.html"><span>Quick answers</span><strong>FAQs</strong><p>Appointments, medication, insurance, and follow-up.</p></a>
+        </div>
+      </div>`;
+    insuranceSection.insertAdjacentElement('afterend', resources);
+  }
+}
+
 if (nav) {
   const normalized = pageFile.includes('.') ? pageFile : `${pageFile}.html`;
   const contentPages = new Set(['anxiety.html','depression.html','adhd.html','ptsd.html','ocd.html','bipolar.html','grief-loss.html','life-transitions.html','medication-management.html']);
