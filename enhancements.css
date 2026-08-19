@@ -84,40 +84,7 @@
   align-items: center;
 }
 
-.home-about-visual {
-  min-height: 430px;
-  border-radius: 120px 24px 120px 24px;
-  background: radial-gradient(circle at 24% 20%, rgba(255,255,255,.7), transparent 26%), linear-gradient(145deg, #d8e4dc, #dcc7aa);
-  position: relative;
-  overflow: hidden;
-  box-shadow: var(--shadow);
-}
-.home-about-visual::before {
-  content: "LC";
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  font-family: "Playfair Display", Georgia, serif;
-  font-size: clamp(82px, 14vw, 150px);
-  color: rgba(23,50,58,.13);
-}
-.home-about-visual::after {
-  content: "Provider photo will replace this placeholder";
-  position: absolute;
-  left: 24px;
-  right: 24px;
-  bottom: 24px;
-  padding: 12px 14px;
-  border-radius: 12px;
-  background: rgba(255,255,255,.78);
-  backdrop-filter: blur(10px);
-  color: var(--ink-soft);
-  font-size: 12px;
-  text-align: center;
-}
-
-/* Homepage provider introduction */
+/* About-page provider introduction */
 .provider-video-card {
   aspect-ratio: 6 / 5;
   min-height: 0;
@@ -169,7 +136,7 @@
 }
 .provider-video-card.video-unavailable .provider-intro-video { opacity: 0; }
 .provider-video-card.video-unavailable::before {
-  content: "Introduction video ready to add";
+  content: "Introduction video unavailable";
   position: absolute;
   inset: 0;
   display: grid;
@@ -219,7 +186,6 @@
 @media (max-width: 820px) {
   .brand-logo-image { width: 190px; max-height: 54px; }
   .home-about { grid-template-columns: 1fr; gap: 40px; }
-  .home-about-visual { min-height: 360px; }
   .provider-video-card { min-height: 0; aspect-ratio: 16 / 9; }
 }
 @media (max-width: 560px) {
