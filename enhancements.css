@@ -1,0 +1,152 @@
+/* Layered refinements loaded by script.js so the original design system stays small. */
+
+:where(a, button, input, textarea, select):focus-visible {
+  outline: 3px solid #d28a68;
+  outline-offset: 4px;
+  border-radius: 6px;
+}
+
+.site-nav a[aria-current="page"]:not(.button)::after { right: 0; }
+
+.brand:focus-visible,
+.button:focus-visible,
+.text-link:focus-visible,
+.condition-card:focus-visible { border-radius: 999px; }
+.condition-card:focus-visible { border-radius: 18px; }
+
+.insurance-logos img {
+  display: block;
+  max-width: 130px;
+  max-height: 48px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+
+.insurance-logo-card {
+  min-height: 88px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--paper);
+}
+
+.home-about {
+  display: grid;
+  grid-template-columns: minmax(0, .88fr) minmax(0, 1.12fr);
+  gap: 64px;
+  align-items: center;
+}
+
+.home-about-visual {
+  min-height: 430px;
+  border-radius: 120px 24px 120px 24px;
+  background:
+    radial-gradient(circle at 24% 20%, rgba(255,255,255,.7), transparent 26%),
+    linear-gradient(145deg, #d8e4dc, #dcc7aa);
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+.home-about-visual::before {
+  content: "LC";
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: clamp(82px, 14vw, 150px);
+  color: rgba(23,50,58,.13);
+}
+
+.home-about-visual::after {
+  content: "Provider photo will replace this placeholder";
+  position: absolute;
+  left: 24px;
+  right: 24px;
+  bottom: 24px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(255,255,255,.78);
+  backdrop-filter: blur(10px);
+  color: var(--ink-soft);
+  font-size: 12px;
+  text-align: center;
+}
+
+.credential-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 22px 0 0;
+}
+
+.credential-row span {
+  padding: 8px 11px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--cream);
+  color: var(--ink-soft);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.footer-conditions {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 12px !important;
+}
+.footer-conditions h3 { grid-column: 1 / -1; }
+
+.migration-note {
+  margin-top: 18px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--cream);
+  color: var(--ink-soft);
+  font-size: 13px;
+}
+
+.error-page {
+  min-height: 70vh;
+  display: grid;
+  place-items: center;
+  padding: 80px 0;
+  background: var(--cream);
+}
+
+.error-card {
+  width: min(760px, 100%);
+  padding: 52px;
+  border-radius: 28px;
+  background: white;
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+.error-card .error-code {
+  display: block;
+  margin-bottom: 12px;
+  color: var(--terracotta);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+}
+.error-card p { color: var(--ink-soft); font-size: 18px; }
+.error-actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 14px; margin-top: 28px; }
+
+@media (max-width: 820px) {
+  .home-about { grid-template-columns: 1fr; gap: 40px; }
+  .home-about-visual { min-height: 360px; }
+}
+
+@media (max-width: 560px) {
+  .error-card { padding: 34px 22px; }
+  .footer-conditions { grid-template-columns: 1fr; }
+  .footer-conditions h3 { grid-column: auto; }
+}

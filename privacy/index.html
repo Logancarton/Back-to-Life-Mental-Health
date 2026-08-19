@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Redirecting | Back to Life Mental Health</title>
+</head>
+<body>
+  <p>Redirecting to the updated Back to Life Mental Health page…</p>
+  <script>
+    const route = location.pathname.replace(/\/$/, '').split('/').pop();
+    const map = {
+      'services-overview': 'services.html',
+      'medication-management': 'medication-management.html',
+      'about-us': 'about.html',
+      'contactus': 'contact.html',
+      'anxiety': 'anxiety.html',
+      'depression': 'depression.html',
+      'attention-deficit-hyperactive-disorder': 'adhd.html',
+      'post-traumatic-stress-disorder': 'ptsd.html',
+      'obsessive-compulsive-disorder': 'ocd.html',
+      'bipolar': 'bipolar.html',
+      'loss-bereavement': 'grief-loss.html',
+      'life-changes': 'life-transitions.html',
+      'privacy': 'privacy.html'
+    };
+    const target = map[route] || 'index.html';
+    location.replace('../' + target + location.search + location.hash);
+  </script>
+</body>
+</html>

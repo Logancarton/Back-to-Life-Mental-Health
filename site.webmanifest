@@ -1,0 +1,9 @@
+{
+  "name": "Back to Life Mental Health",
+  "short_name": "BTLMH",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#fffdf9",
+  "theme_color": "#17323a",
+  "description": "Psychiatric evaluation and medication management in Anthem, Arizona and by telehealth across Arizona."
+}
