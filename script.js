@@ -6,6 +6,18 @@ if (!document.querySelector(`link[href="${enhancementStylesheet}"]`)) {
   document.head.appendChild(link);
 }
 
+// Replace the temporary text-based BTL mark with the official practice logo.
+// Doing this in the shared script updates every existing page consistently.
+document.querySelectorAll('.brand').forEach((brand) => {
+  if (!brand.querySelector('.brand-mark')) return;
+  const logo = document.createElement('img');
+  logo.src = 'assets/images/btlmh-logo.png';
+  logo.alt = 'Back to Life Mental Health';
+  logo.className = 'brand-logo-image';
+  brand.classList.add('brand-logo-link');
+  brand.replaceChildren(logo);
+});
+
 // Keep shared browser metadata consistent even on older pages that were built
 // before the favicon/manifest and clean canonical URL scheme were introduced.
 if (!document.querySelector('link[rel="icon"]')) {
