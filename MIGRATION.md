@@ -14,6 +14,7 @@ The current Odoo site already has public URLs that may be indexed, bookmarked, o
 | --- | --- |
 | `/services-overview` | `services.html` |
 | `/medication-management` | `medication-management.html` |
+| `/pricing` | `insurance-payment.html` |
 | `/about-us` | `about.html` |
 | `/contactus` | `contact.html` |
 | `/anxiety` | `anxiety.html` |
@@ -26,20 +27,53 @@ The current Odoo site already has public URLs that may be indexed, bookmarked, o
 | `/life-changes` | `life-transitions.html` |
 | `/privacy` | `privacy.html` |
 
-Canonical metadata and the sitemap use the established clean production URLs rather than the repository's internal `.html` filenames.
+New clean routes added by the custom site include `/new-patients`, `/insurance-payment`, `/telehealth`, and `/faq`.
 
-## Asset dependency still to remove
+Canonical metadata and the sitemap use clean production URLs rather than the repository's internal `.html` filenames.
 
-The homepage hero currently references an image hosted by the existing Odoo website. This is intentional only during migration.
+## Asset migration status
+
+Completed:
+
+- The official Back to Life Mental Health logo has been copied into `assets/images/btlmh-logo.png` and is used throughout the shared site branding.
+
+Still to remove:
+
+- The homepage hero currently references one image hosted by the existing Odoo website. This is intentional only during migration.
+- Provider and office photography can be added as owned local assets when selected.
+- Insurance logo files can be added later if branded plan logos are preferred over the current clean text presentation.
 
 Before Odoo is retired:
 
-1. Export the exact Back to Life Mental Health logo used on the current website.
-2. Export the homepage/provider/office images that should be retained.
-3. Export the accepted-insurance logo files if they will continue to be displayed.
-4. Add those files under an `assets/` directory in this repository.
-5. Replace every `back-to-life-mental-health.com/web/image/...` runtime reference with a local repository asset.
-6. Confirm that the site still renders with the Odoo site unavailable.
+1. Export or replace the remaining homepage hero image.
+2. Add selected provider/office images under `assets/`.
+3. Replace every remaining `back-to-life-mental-health.com/web/image/...` runtime reference with a local repository asset.
+4. Confirm that the site still renders with the Odoo site unavailable.
+
+## Public-page migration status
+
+The custom site now covers the useful public information currently represented on Odoo while reorganizing it into a more patient-centered structure:
+
+- Homepage
+- Services overview
+- Medication management
+- New patient guide
+- Insurance and payment
+- Telehealth
+- FAQ hub
+- About
+- Contact
+- Privacy
+- Anxiety
+- Depression
+- ADHD
+- PTSD
+- OCD
+- Bipolar disorder
+- Grief and loss
+- Life transitions
+
+The old Odoo pricing route is preserved, but the custom site does not hard-code the older cached self-pay amounts. Current private-pay rates should be confirmed before production if the practice wants exact prices displayed publicly.
 
 ## Production-domain cutover gate
 
@@ -50,7 +84,8 @@ Before changing DNS or adding a production `CNAME` file:
 - Verify every navigation and booking link.
 - Verify phone, email, fax, office address, and directions.
 - Verify accepted-insurance statements.
-- Verify every condition page.
+- Verify private-pay wording and decide whether exact current rates should be displayed.
+- Verify every condition and patient-journey page.
 - Verify privacy copy and any required practice notices.
 - Confirm legacy routes resolve correctly.
 - Confirm local images, fonts, and styles load with no Odoo dependency.
