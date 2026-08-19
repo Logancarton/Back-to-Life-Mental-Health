@@ -69,8 +69,11 @@
 }
 
 /* Keep the homepage provider portrait open and approachable by ensuring the
-   callout does not cover the provider's hands. */
+   callout does not cover the provider's hands, with enough room below the
+   lowered card that it still feels attached to the hero rather than cramped
+   against the trust strip. */
 @media (min-width: 821px) {
+  .hero { padding-bottom: 130px; }
   .hero .floating-card { bottom: -75px; }
 }
 
