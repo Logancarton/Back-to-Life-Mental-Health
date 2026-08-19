@@ -127,6 +127,7 @@
   object-fit: cover;
   object-position: center center;
   background: #10272e;
+  filter: brightness(1.14) contrast(1.03) saturate(1.04);
 }
 .provider-video-badge {
   position: absolute;
