@@ -35,20 +35,23 @@ Canonical metadata and the sitemap use clean production URLs rather than the rep
 
 Completed:
 
-- The official Back to Life Mental Health logo has been copied into `assets/images/btlmh-logo.png` and is used throughout the shared site branding.
+- The official Back to Life Mental Health logo is stored at `assets/images/btlmh-logo.png` and is used throughout the site.
+- The homepage hero now uses the owned local provider image at `assets/images/provider-introduction-poster.jpg` rather than an Odoo-hosted image.
+- The homepage social preview image also points to owned local media.
+- The About page introduction video and poster are stored under `assets/video/` and `assets/images/`.
+- The New Patients courage image is stored at `assets/images/anthem-courage-path.png`.
 
-Still to remove:
+Optional future asset work:
 
-- The homepage hero currently references one image hosted by the existing Odoo website. This is intentional only during migration.
-- Provider and office photography can be added as owned local assets when selected.
-- Insurance logo files can be added later if branded plan logos are preferred over the current clean text presentation.
+- Add selected office photography if it improves the patient experience.
+- Add branded insurance logo files later if they are preferred over the current clean text presentation.
+- Replace or supplement provider photography when a stronger dedicated hero image is available; this is a visual refinement, not an Odoo migration dependency.
 
 Before Odoo is retired:
 
-1. Export or replace the remaining homepage hero image.
-2. Add selected provider/office images under `assets/`.
-3. Replace every remaining `back-to-life-mental-health.com/web/image/...` runtime reference with a local repository asset.
-4. Confirm that the site still renders with the Odoo site unavailable.
+1. Confirm the custom site renders correctly with the Odoo site unavailable.
+2. Review all local image crops on desktop and mobile.
+3. Confirm no public page relies on an Odoo-hosted image or other builder asset.
 
 ## Public-page migration status
 
@@ -72,6 +75,8 @@ The custom site now covers the useful public information currently represented o
 - Bipolar disorder
 - Grief and loss
 - Life transitions
+
+The condition pages now share a clearer patient sequence: what the concern can feel like, what evaluation considers, treatment options, what happens next, FAQs, and a direct scheduling path.
 
 The old Odoo pricing route is preserved, but the custom site does not hard-code the older cached self-pay amounts. Current private-pay rates should be confirmed before production if the practice wants exact prices displayed publicly.
 
