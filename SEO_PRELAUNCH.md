@@ -52,6 +52,7 @@ The existing H1 copy was preserved where it was already patient-friendly. No pho
 - Condition pages include a shared next-step bridge to New Patients and Medication Management.
 - Real practice/local photography is used with descriptive accessibility-first alt text where applicable.
 - The 404 page remains `noindex`.
+- A Cloud Run/Nginx production-serving configuration now maps clean canonical routes to real HTML with HTTP 200 and redirects direct `.html` requests to clean URLs.
 
 ## Primary search themes
 
@@ -86,11 +87,22 @@ Current search review shows meaningful competition from Anthem Healthcare / Anth
 
 Compete on specificity and trust rather than generic keyword volume: accurate Anthem location information, clear PMHNP credentialing, real photography, detailed medication-management content, useful condition pages, clear new-patient information, Arizona telehealth, current insurance information, and Google Business Profile consistency.
 
-## Important launch blocker: clean URL handling
+## Clean URL implementation status
 
-Production HTML declares clean canonical URLs, but the current static compatibility layer serves `noindex` JavaScript redirect shells at those paths instead of serving the real page HTML directly.
+The static GitHub Pages compatibility layer still uses `noindex` JavaScript redirect shells at clean route directories because GitHub Pages cannot provide the desired server-side routing behavior.
 
-### Canonical routes currently affected
+A production Cloud Run serving configuration has now been added to the repository:
+
+- `Dockerfile`
+- `cloud-run/default.conf.template`
+- `scripts/verify-production-routes.sh`
+- `GOOGLE_CLOUD_DEPLOYMENT.md`
+
+The Cloud Run image deliberately does not copy the compatibility route directories. Instead, Nginx serves the corresponding real page HTML directly at the clean canonical route with HTTP 200 and redirects repository-internal `.html` URLs to the clean canonical path.
+
+The default `*.run.app` preview hostname receives `X-Robots-Tag: noindex, nofollow` so a technical preview is not treated as a second public website. The production custom hostname is intended to remain indexable.
+
+### Canonical routes handled by the Cloud Run configuration
 
 - `/services-overview`
 - `/medication-management`
@@ -110,13 +122,9 @@ Production HTML declares clean canonical URLs, but the current static compatibil
 - `/life-changes`
 - `/privacy`
 
-The legacy compatibility route `/pricing` also uses a `noindex` JavaScript redirect shell to `insurance-payment.html`; it is not a canonical sitemap URL and should remain out of the sitemap unless the routing strategy changes intentionally.
+The legacy `/pricing` route redirects server-side to `/insurance-payment` in the Cloud Run configuration and remains out of the sitemap.
 
-Before the final domain is pointed at Google Cloud, configure the hosting layer so each canonical route above serves the corresponding real page HTML with HTTP 200. A server-side rewrite is appropriate when the browser URL should remain clean; a server-side redirect is appropriate only when the canonical destination itself changes.
-
-Do not remove the current static redirect shells until the Google Cloud routing configuration is known and tested. Do not submit a production sitemap that points Google primarily at `noindex` redirect shells.
-
-Preferred final behavior: `https://www.back-to-life-mental-health.com/anxiety` directly serves the Anxiety page content with HTTP 200 and remains canonical.
+The remaining clean-route dependency is deployment and production-domain verification, not repository routing design.
 
 ## Structured data
 
@@ -129,8 +137,11 @@ Only add truthful fields. Do not invent business hours, prices, credentials, coo
 
 ## Remaining launch tasks
 
-- Configure Google Cloud clean-route rewrites so canonical routes serve real HTML with HTTP 200.
-- Test every sitemap URL against the deployed production host before DNS cutover or sitemap submission.
+- Deploy a Cloud Run preview from this repository and run `bash scripts/verify-production-routes.sh <run.app-url> preview`.
+- Complete desktop/mobile visual and functional review on the Cloud Run build.
+- Attach the production domain/front end only after the preview passes review.
+- Run `bash scripts/verify-production-routes.sh https://www.back-to-life-mental-health.com production` after cutover.
+- Test every sitemap URL against the deployed production host before sitemap submission or indexing requests.
 - Confirm every intended public page returns indexable HTML and the 404 page remains `noindex`.
 - Re-check titles, descriptions, canonicals, OpenGraph URLs/images, and JSON-LD on the deployed origin.
 - Validate `robots.txt` and confirm it references the production sitemap.
