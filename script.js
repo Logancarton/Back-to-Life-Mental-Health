@@ -412,7 +412,7 @@ if (canShowSchedulingWidget && !document.querySelector('[data-scheduler-launcher
     if (outsideDialog) closeScheduler();
   });
 
-  document.querySelectorAll(`a[href*="${schedulingHost}"]`).forEach((link) => {
+  document.querySelectorAll(`a[href*="${schedulingHost}"]:not([data-scheduler-fallback])`).forEach((link) => {
     link.addEventListener('click', (event) => {
       if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
       event.preventDefault();
