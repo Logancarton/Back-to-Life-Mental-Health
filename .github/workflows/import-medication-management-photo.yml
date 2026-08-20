@@ -1,4 +1,4 @@
-name: Import medication management photo
+name: Integrate medication management photo
 
 on:
   push:
@@ -10,7 +10,7 @@ permissions:
   contents: write
 
 jobs:
-  import-photo:
+  integrate-photo:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -18,36 +18,65 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Download generated photograph
+      - name: Integrate photograph into Medication Management page
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p assets/images
-          PRIMARY='https://photoshop-api.adobe.io/v2/short-url/urn:aaid:ps:US:682cf36c-43f8-496e-a34f-c338607d5f81'
-          FALLBACK='https://at.adobe.com/TwZ20YqLpesjgD1y'
-          curl --fail --location --retry 3 --retry-delay 2 "$PRIMARY" -o assets/images/medication-management-conversation.jpg \
-            || curl --fail --location --retry 3 --retry-delay 2 "$FALLBACK" -o assets/images/medication-management-conversation.jpg
-          test -s assets/images/medication-management-conversation.jpg
-          file assets/images/medication-management-conversation.jpg | grep -qi 'JPEG image data'
+          test -f assets/images/medication-management-conversation.jpg
+          python - <<'PY'
+          from pathlib import Path
+          import re
 
-      - name: Preserve photo as workflow artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: medication-management-conversation
-          path: assets/images/medication-management-conversation.jpg
-          if-no-files-found: error
-          retention-days: 1
+          html_path = Path('medication-management.html')
+          html = html_path.read_text(encoding='utf-8')
+          image_src = 'assets/images/medication-management-conversation.jpg'
+          if image_src not in html:
+              anchor = '<p>When medication is appropriate, the discussion includes why a specific option is being considered, likely benefits, tradeoffs, common side effects, safety considerations, and what will be monitored after starting or changing treatment.</p>'
+              photo = anchor + '<figure class="article-photo medication-management-photo"><img src="assets/images/medication-management-conversation.jpg" alt="Two adults having a collaborative psychiatric medication-management conversation in a comfortable private office" loading="lazy" decoding="async"></figure>'
+              if anchor not in html:
+                  raise SystemExit('Medication Management introduction anchor not found')
+              html = html.replace(anchor, photo, 1)
+              html_path.write_text(html, encoding='utf-8')
 
-      - name: Commit photograph
+          css_path = Path('content-pages.css')
+          css = css_path.read_text(encoding='utf-8')
+          if '.article-photo {' not in css:
+              anchor = '.article-section > p + p { margin-top: 18px; }\n'
+              styles = '''.article-section > p + p { margin-top: 18px; }\n\n.article-photo {\n  max-width: 820px;\n  margin: 32px 0 0;\n  overflow: hidden;\n  border: 1px solid var(--line);\n  border-radius: 24px;\n  background: var(--cream);\n  box-shadow: 0 16px 38px rgba(23,50,58,.07);\n}\n.article-photo img {\n  display: block;\n  width: 100%;\n  aspect-ratio: 4 / 3;\n  object-fit: cover;\n  object-position: center;\n}\n'''
+              if anchor not in css:
+                  raise SystemExit('Content page CSS anchor not found')
+              css = css.replace(anchor, styles, 1)
+              css_path.write_text(css, encoding='utf-8')
+
+          plan_path = Path('PHOTO_PLAN.md')
+          plan = plan_path.read_text(encoding='utf-8')
+          pattern = re.compile(r'### 3\. Medication-management visit\n\nFilename: `medication-management-conversation\.jpg`\n\nLocation: Medication Management page\.\n\nShot:.*?\n\nTarget ratio: 4:3 landscape\.\n', re.S)
+          replacement = '''### 3. Medication-management visit\n\nFilename: `medication-management-conversation.jpg`\n\nLocation: Medication Management page, “What to expect” introduction.\n\nShot: A psychiatric mental health nurse practitioner and an adult patient seated at equal conversational height in a warm private office. The image emphasizes attentive listening, shared decision-making, and thoughtful discussion rather than “prescribing.” No readable PHI or medication props are visible.\n\nTarget ratio: 4:3 landscape.\n\nStatus: Integrated. The current image is illustrative photography; replace it with actual practice/provider photography if a future photo session provides a stronger authentic equivalent.\n'''
+          updated, count = pattern.subn(replacement, plan, count=1)
+          if count != 1:
+              raise SystemExit('Medication Management photo-plan block not found')
+          if updated != plan:
+              plan_path.write_text(updated, encoding='utf-8')
+          PY
+
+      - name: Validate integration
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'assets/images/medication-management-conversation.jpg' medication-management.html
+          grep -q '^\.article-photo {' content-pages.css
+          grep -q 'Status: Integrated' PHOTO_PLAN.md
+
+      - name: Commit integration
         shell: bash
         run: |
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add assets/images/medication-management-conversation.jpg
+          git add medication-management.html content-pages.css PHOTO_PLAN.md
           if git diff --cached --quiet; then
-            echo 'Photo already present; nothing to commit.'
+            echo 'Integration already present; nothing to commit.'
             exit 0
           fi
-          git commit -m 'Add medication management conversation photo'
+          git commit -m 'Integrate medication management conversation photo'
           git push origin HEAD:main
