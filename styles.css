@@ -243,8 +243,8 @@ h3 { font-size: 21px; }
   inset: 0 26px 34px 0;
   border-radius: 180px 28px 180px 28px;
   background:
-    linear-gradient(180deg, rgba(23,50,58,.02), rgba(23,50,58,.18)),
-    url("https://www.back-to-life-mental-health.com/web/image/4861-d25fad03/Gemini_Generated_Image_s2d1e6s2d1e6s2d1.webp") center/cover no-repeat,
+    linear-gradient(180deg, rgba(255,255,255,.08), rgba(23,50,58,.15)),
+    url("assets/images/provider-introduction-poster.jpg") center/cover no-repeat,
     linear-gradient(135deg, #dce7df, #d8c0a4);
   box-shadow: var(--shadow);
 }
