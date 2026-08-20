@@ -1,0 +1,53 @@
+name: Import medication management photo
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/import-medication-management-photo.yml
+
+permissions:
+  contents: write
+
+jobs:
+  import-photo:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download generated photograph
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p assets/images
+          PRIMARY='https://photoshop-api.adobe.io/v2/short-url/urn:aaid:ps:US:682cf36c-43f8-496e-a34f-c338607d5f81'
+          FALLBACK='https://at.adobe.com/TwZ20YqLpesjgD1y'
+          curl --fail --location --retry 3 --retry-delay 2 "$PRIMARY" -o assets/images/medication-management-conversation.jpg \
+            || curl --fail --location --retry 3 --retry-delay 2 "$FALLBACK" -o assets/images/medication-management-conversation.jpg
+          test -s assets/images/medication-management-conversation.jpg
+          file assets/images/medication-management-conversation.jpg | grep -qi 'JPEG image data'
+
+      - name: Preserve photo as workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: medication-management-conversation
+          path: assets/images/medication-management-conversation.jpg
+          if-no-files-found: error
+          retention-days: 1
+
+      - name: Commit photograph
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets/images/medication-management-conversation.jpg
+          if git diff --cached --quiet; then
+            echo 'Photo already present; nothing to commit.'
+            exit 0
+          fi
+          git commit -m 'Add medication management conversation photo'
+          git push origin HEAD:main
