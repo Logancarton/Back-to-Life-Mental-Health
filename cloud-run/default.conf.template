@@ -23,25 +23,27 @@ server {
         return 200 "ok\n";
     }
 
-    # Canonical public routes: serve the real page HTML directly with HTTP 200.
-    location = / { try_files /index.html =404; }
-    location = /services-overview { try_files /services.html =404; }
-    location = /medication-management { try_files /medication-management.html =404; }
-    location = /new-patients { try_files /new-patients.html =404; }
-    location = /insurance-payment { try_files /insurance-payment.html =404; }
-    location = /telehealth { try_files /telehealth.html =404; }
-    location = /faq { try_files /faq.html =404; }
-    location = /about-us { try_files /about.html =404; }
-    location = /contactus { try_files /contact.html =404; }
-    location = /anxiety { try_files /anxiety.html =404; }
-    location = /depression { try_files /depression.html =404; }
-    location = /attention-deficit-hyperactive-disorder { try_files /adhd.html =404; }
-    location = /post-traumatic-stress-disorder { try_files /ptsd.html =404; }
-    location = /obsessive-compulsive-disorder { try_files /ocd.html =404; }
-    location = /bipolar { try_files /bipolar.html =404; }
-    location = /loss-bereavement { try_files /grief-loss.html =404; }
-    location = /life-changes { try_files /life-transitions.html =404; }
-    location = /privacy { try_files /privacy.html =404; }
+    # Canonical public routes: rewrite and serve the real page HTML in-place.
+    # `break` prevents a second location lookup, so the .html canonical redirects
+    # below cannot create an internal redirect loop.
+    location = / { rewrite ^ /index.html break; }
+    location = /services-overview { rewrite ^ /services.html break; }
+    location = /medication-management { rewrite ^ /medication-management.html break; }
+    location = /new-patients { rewrite ^ /new-patients.html break; }
+    location = /insurance-payment { rewrite ^ /insurance-payment.html break; }
+    location = /telehealth { rewrite ^ /telehealth.html break; }
+    location = /faq { rewrite ^ /faq.html break; }
+    location = /about-us { rewrite ^ /about.html break; }
+    location = /contactus { rewrite ^ /contact.html break; }
+    location = /anxiety { rewrite ^ /anxiety.html break; }
+    location = /depression { rewrite ^ /depression.html break; }
+    location = /attention-deficit-hyperactive-disorder { rewrite ^ /adhd.html break; }
+    location = /post-traumatic-stress-disorder { rewrite ^ /ptsd.html break; }
+    location = /obsessive-compulsive-disorder { rewrite ^ /ocd.html break; }
+    location = /bipolar { rewrite ^ /bipolar.html break; }
+    location = /loss-bereavement { rewrite ^ /grief-loss.html break; }
+    location = /life-changes { rewrite ^ /life-transitions.html break; }
+    location = /privacy { rewrite ^ /privacy.html break; }
 
     # Normalize trailing slashes on canonical routes.
     location ~ ^/(services-overview|medication-management|new-patients|insurance-payment|telehealth|faq|about-us|contactus|anxiety|depression|attention-deficit-hyperactive-disorder|post-traumatic-stress-disorder|obsessive-compulsive-disorder|bipolar|loss-bereavement|life-changes|privacy)/$ {
@@ -59,7 +61,7 @@ server {
     location = /grief-loss { return 301 /loss-bereavement; }
     location = /life-transitions { return 301 /life-changes; }
 
-    # Redirect repository-internal .html URLs to the preferred clean canonical URLs.
+    # Redirect repository-internal .html URLs to preferred clean canonical URLs.
     location = /index.html { return 301 /; }
     location = /services.html { return 301 /services-overview; }
     location = /medication-management.html { return 301 /medication-management; }
@@ -92,7 +94,7 @@ server {
     location = /404.html { try_files /404.html =404; }
 
     # CSS/JS and any other intentionally copied public files remain available.
-    # Route compatibility directories are not copied into this production image.
+    # Route compatibility directories are deliberately not copied into this image.
     location / {
         try_files $uri =404;
     }
