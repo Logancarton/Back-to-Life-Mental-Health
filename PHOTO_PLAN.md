@@ -70,11 +70,13 @@ Why: Prevents the current provider image from being repeated and makes the homep
 
 Filename: `medication-management-conversation.jpg`
 
-Location: Medication Management page.
+Location: Medication Management page, “What to expect” introduction.
 
-Shot: Logan seated in the provider chair across from an empty patient chair or photographed from the patient-side perspective. Notebook or tablet is fine if no PHI is visible. The visual should communicate listening and explanation rather than "prescribing."
+Shot: A psychiatric mental health nurse practitioner and an adult patient seated at equal conversational height in a warm private office. The image emphasizes attentive listening, shared decision-making, and thoughtful discussion rather than “prescribing.” No readable PHI or medication props are visible.
 
 Target ratio: 4:3 landscape.
+
+Status: Integrated. The current image is illustrative photography; replace it with actual practice/provider photography if a future photo session provides a stronger authentic equivalent.
 
 ### 4. Telehealth
 
