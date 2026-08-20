@@ -10,15 +10,48 @@ Prepare the new Back to Life Mental Health website for launch with accurate, loc
 
 Always use the full public name **Back to Life Mental Health**. Never shorten the practice name to “Back to Life.”
 
+## Completed pre-launch page audit
+
+A page-by-page SEO review was completed on 2026-08-20 for the primary service, condition, patient-resource, About, and Contact pages.
+
+### Metadata refined
+
+- `ptsd.html` — shortened an overlong title to `PTSD Treatment in Anthem, AZ | Back to Life Mental Health` and made the description more useful for PTSD/trauma treatment intent.
+- `ocd.html` — shortened an overlong title to `OCD Treatment in Anthem, AZ | Back to Life Mental Health` and clarified the description around evaluation, medication management, and evidence-based therapy coordination.
+- `life-transitions.html` — added natural Anthem relevance to the title and strengthened the description without changing patient-facing content.
+- `new-patients.html` — changed a generic title to `New Patients in Anthem, AZ | Back to Life Mental Health` and made the description reflect scheduling, psychiatric evaluation, and treatment planning.
+- `telehealth.html` — changed `Telehealth Psychiatry in Arizona` to the more precise `Telehealth Psychiatric Care in Arizona` and clarified statewide telehealth plus Anthem in-person availability.
+
+### Reviewed and intentionally left unchanged
+
+These pages already had clear search intent, appropriate local relevance, useful patient-facing copy, sound heading structure, descriptive internal links, appropriate image alt text where images are used, clean canonical tags, and no meaningful content-overlap problem requiring a rewrite:
+
+- `medication-management.html`
+- `adhd.html`
+- `anxiety.html`
+- `depression.html`
+- `bipolar.html`
+- `grief-loss.html`
+- `services.html`
+- `insurance-payment.html`
+- `faq.html`
+- `about.html`
+- `contact.html`
+
+The existing H1 copy was preserved where it was already patient-friendly. No photographs were replaced, and the homepage hero image was not changed.
+
 ## Current strengths
 
-- Major pages already have unique titles and meta descriptions.
-- Canonical URLs are present.
-- `robots.txt` and `sitemap.xml` exist.
+- Major pages have unique titles and meta descriptions.
+- Canonical URLs are present on public content pages.
+- `robots.txt` and `sitemap.xml` exist and remain aligned to the intended public canonical routes.
 - The homepage has `MedicalClinic` structured data.
-- Internal links connect services, conditions, new-patient information, insurance, telehealth, FAQs, About, and Contact.
-- Real practice/local photography is being integrated with descriptive alt text.
-- Shared JavaScript now adds consistent social metadata, `WebSite` site-name structured data on the homepage, and `BreadcrumbList` structured data on public information pages.
+- Shared JavaScript adds `WebSite` site-name structured data on the homepage and `BreadcrumbList` structured data on major public information pages.
+- Shared JavaScript provides OpenGraph/Twitter metadata fallbacks while preserving page-specific canonical URLs and descriptions.
+- Internal links connect services, condition pages, medication management, new-patient information, insurance, telehealth, FAQs, About, and Contact.
+- Condition pages include a shared next-step bridge to New Patients and Medication Management.
+- Real practice/local photography is used with descriptive accessibility-first alt text where applicable.
+- The 404 page remains `noindex`.
 
 ## Primary search themes
 
@@ -28,17 +61,17 @@ Use naturally; do not keyword-stuff.
 - psychiatric care Anthem AZ
 - psychiatric medication management Anthem AZ
 - psychiatric evaluation Anthem AZ
-- psychiatric nurse practitioner Anthem AZ
+- psychiatric mental health nurse practitioner Anthem AZ
 - mental health medication management Anthem AZ
 - Arizona telehealth psychiatric care
 
-Supporting geography: Anthem, North Phoenix, New River, Desert Hills, Cave Creek, Carefree, Arizona.
+Supporting geography: Anthem, North Phoenix, New River, Desert Hills, Cave Creek, Carefree, Norterra, Arizona.
 
 Do not represent the clinician as an MD/DO psychiatrist. Psychiatric care/psychiatry language is appropriate, but credential language must remain accurate to PMHNP-BC.
 
 ### Core pages
 - Medication Management: psychiatric medication management Anthem AZ; medication management Anthem AZ; psychiatric medication management Arizona telehealth
-- Telehealth: telehealth psychiatry Arizona; psychiatric telehealth Arizona; online psychiatric medication management Arizona
+- Telehealth: telehealth psychiatric care Arizona; psychiatric telehealth Arizona; online psychiatric medication management Arizona
 - Anxiety: anxiety treatment Anthem AZ; anxiety medication management Anthem AZ
 - Depression: depression treatment Anthem AZ; depression medication management Anthem AZ
 - ADHD: ADHD treatment Anthem AZ; ADHD medication management Anthem AZ; ADHD psychiatric evaluation Anthem AZ; adult/adolescent ADHD care Anthem AZ
@@ -55,63 +88,73 @@ Compete on specificity and trust rather than generic keyword volume: accurate An
 
 ## Important launch blocker: clean URL handling
 
-Production HTML currently declares clean canonical URLs such as `/services-overview`, `/new-patients`, `/anxiety`, and `/attention-deficit-hyperactive-disorder`.
+Production HTML declares clean canonical URLs, but the current static compatibility layer serves `noindex` JavaScript redirect shells at those paths instead of serving the real page HTML directly.
 
-On the current static GitHub Pages compatibility layer, many clean paths are `noindex` JavaScript redirect shells that forward to `.html` files.
+### Canonical routes currently affected
 
-Before the final domain is pointed at the new production host, the hosting layer should serve the actual page content at the clean canonical URL with HTTP 200, or use appropriate server-side rewrites/redirects. Do not submit a production sitemap that primarily points Google at `noindex` redirect shells.
+- `/services-overview`
+- `/medication-management`
+- `/new-patients`
+- `/insurance-payment`
+- `/telehealth`
+- `/faq`
+- `/about-us`
+- `/contactus`
+- `/anxiety`
+- `/depression`
+- `/attention-deficit-hyperactive-disorder`
+- `/post-traumatic-stress-disorder`
+- `/obsessive-compulsive-disorder`
+- `/bipolar`
+- `/loss-bereavement`
+- `/life-changes`
+- `/privacy`
+
+The legacy compatibility route `/pricing` also uses a `noindex` JavaScript redirect shell to `insurance-payment.html`; it is not a canonical sitemap URL and should remain out of the sitemap unless the routing strategy changes intentionally.
+
+Before the final domain is pointed at Google Cloud, configure the hosting layer so each canonical route above serves the corresponding real page HTML with HTTP 200. A server-side rewrite is appropriate when the browser URL should remain clean; a server-side redirect is appropriate only when the canonical destination itself changes.
+
+Do not remove the current static redirect shells until the Google Cloud routing configuration is known and tested. Do not submit a production sitemap that points Google primarily at `noindex` redirect shells.
 
 Preferred final behavior: `https://www.back-to-life-mental-health.com/anxiety` directly serves the Anxiety page content with HTTP 200 and remains canonical.
 
-Resolve this in the Google Cloud deployment configuration rather than duplicating every page.
-
-## Homepage review
-
-Preferred static title direction:
-
-`Psychiatric Care in Anthem, AZ | Back to Life Mental Health`
-
-Preferred description direction:
-
-`Psychiatric evaluation and medication management for adolescents and adults in Anthem, Arizona, with telehealth available throughout Arizona.`
-
-Avoid stuffing Phoenix, Anthem, Arizona, telehealth, multiple conditions, and insurance names into one title.
-
 ## Structured data
 
-Use and validate:
+Keep and validate:
 - `MedicalClinic` — homepage
 - `WebSite` — homepage, preferred site name `Back to Life Mental Health`
 - `BreadcrumbList` — major internal pages
 
-Only add truthful fields. Do not invent business hours, prices, credentials, coordinates, or services for schema completeness.
+Only add truthful fields. Do not invent business hours, prices, credentials, coordinates, reviews, or services for schema completeness.
 
-## Before launch
+## Remaining launch tasks
 
-- Resolve clean canonical URL hosting behavior.
-- Re-check every title and meta description.
-- Validate canonical tags.
-- Validate sitemap URLs against actual HTTP responses.
-- Validate `robots.txt`.
-- Run structured-data validation.
-- Run mobile/desktop PageSpeed checks.
-- Check image sizes and layout shift.
-- Verify Google Business Profile name/address/phone/website match the site.
-- Confirm no accidental `noindex` on public content pages.
+- Configure Google Cloud clean-route rewrites so canonical routes serve real HTML with HTTP 200.
+- Test every sitemap URL against the deployed production host before DNS cutover or sitemap submission.
+- Confirm every intended public page returns indexable HTML and the 404 page remains `noindex`.
+- Re-check titles, descriptions, canonicals, OpenGraph URLs/images, and JSON-LD on the deployed origin.
+- Validate `robots.txt` and confirm it references the production sitemap.
+- Validate structured data with Google-supported validation tools.
+- Run mobile and desktop PageSpeed/Core Web Vitals checks.
+- Check image dimensions, compression, lazy loading, and layout shift without replacing intentionally selected photography.
+- Verify Google Business Profile name, address, phone, and website match the production site.
+- Confirm no stale Odoo metadata or legacy host URLs appear in deployed HTML.
 
-## Immediately after launch
+## Search Console steps after launch
 
-1. Verify the domain in Google Search Console.
-2. Submit `sitemap.xml`.
-3. Request indexing for the homepage, services, medication management, new patients, contact, anxiety, depression, and ADHD.
-4. Check indexing for redirects, duplicate canonicals, and crawl errors.
-5. Track queries/pages by impressions, clicks, CTR, and average position.
-6. Refine from real Search Console data rather than generic keyword suggestions.
+1. Verify a Domain property for `back-to-life-mental-health.com` in Google Search Console.
+2. Confirm the preferred `www` production host and HTTPS behavior resolve consistently.
+3. Submit `https://www.back-to-life-mental-health.com/sitemap.xml`.
+4. Use URL Inspection on the homepage plus `/services-overview`, `/medication-management`, `/new-patients`, `/telehealth`, `/contactus`, `/anxiety`, `/depression`, and `/attention-deficit-hyperactive-disorder`.
+5. Confirm Google sees the clean URL as indexable HTML with the declared canonical—not as a `noindex` redirect shell.
+6. Request indexing for the highest-priority pages after the production routing check passes.
+7. Review Page indexing for redirect, `noindex`, duplicate-canonical, soft-404, and crawl errors during the first several weeks.
+8. Track queries and pages by impressions, clicks, CTR, and average position; refine from actual Search Console data rather than generic keyword volume.
 
 ## Ongoing local SEO
 
 - Keep Google Business Profile synchronized with the website.
 - Earn legitimate local referral links where appropriate.
-- Maintain accurate insurance/service information.
+- Maintain accurate insurance and service information.
 - Publish useful patient education rather than thin keyword pages.
 - Review Search Console monthly during the first 3–6 months after launch.
