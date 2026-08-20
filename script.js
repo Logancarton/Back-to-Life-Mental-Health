@@ -163,6 +163,17 @@ const conditionRoutes = {
   'Life transitions and adjustment concerns': 'life-transitions.html'
 };
 
+const conditionPageFiles = new Set([
+  'anxiety.html',
+  'depression.html',
+  'adhd.html',
+  'ptsd.html',
+  'ocd.html',
+  'bipolar.html',
+  'grief-loss.html',
+  'life-transitions.html'
+]);
+
 document.querySelectorAll('.condition-card').forEach((card) => {
   const label = card.querySelector('strong')?.textContent?.trim();
   if (label && conditionRoutes[label]) card.setAttribute('href', conditionRoutes[label]);
@@ -229,9 +240,52 @@ if (pageFile === 'index.html' && !document.querySelector('[data-patient-resource
   }
 }
 
+// Older condition pages already contain strong condition-specific education.
+// Add the missing practical bridge between treatment information and FAQs so
+// each page follows the same patient journey as the newer site sections.
+if (conditionPageFiles.has(pageFile)) {
+  const articleMain = document.querySelector('.article-main');
+  const faqSection = [...document.querySelectorAll('.article-main > .article-section')].find((section) =>
+    section.querySelector('.eyebrow')?.textContent?.trim().toLowerCase().includes('frequently asked')
+  );
+
+  if (articleMain && faqSection && !articleMain.querySelector('[data-condition-next-step]')) {
+    const nextStep = document.createElement('section');
+    nextStep.className = 'article-section condition-next-step reveal';
+    nextStep.setAttribute('data-condition-next-step', '');
+    nextStep.innerHTML = `
+      <span class="eyebrow">What happens next</span>
+      <h2>You should leave with a clearer understanding of the plan.</h2>
+      <p>The goal of an evaluation is not simply to attach a label. It is to understand the pattern, discuss reasonable options, and decide what should be watched over time.</p>
+      <div class="next-step-grid">
+        <div class="next-step-card"><span>01 / Understand</span><strong>Build the picture</strong><p>Symptoms, history, function, sleep, medical factors, previous treatment, and your goals are considered together.</p></div>
+        <div class="next-step-card"><span>02 / Decide</span><strong>Review the options</strong><p>Recommendations include the reasoning, likely benefits, tradeoffs, alternatives, and what would change the plan.</p></div>
+        <div class="next-step-card"><span>03 / Follow</span><strong>See what changes</strong><p>Follow-up focuses on response, side effects, functioning, new information, and whether treatment still fits.</p></div>
+      </div>
+      <div class="condition-next-links"><a href="new-patients.html">What starting care looks like →</a><a href="medication-management.html">How medication management works →</a></div>`;
+    faqSection.insertAdjacentElement('beforebegin', nextStep);
+  }
+
+  // A few older condition templates predate the shared bottom CTA. Keep the
+  // patient path consistent without duplicating a CTA where one already exists.
+  if (!document.querySelector('.cta-section')) {
+    const main = document.querySelector('main');
+    if (main) {
+      const cta = document.createElement('section');
+      cta.className = 'cta-section condition-cta-generated';
+      cta.innerHTML = `
+        <div class="container cta-card reveal">
+          <div><span class="eyebrow light">New patients welcome</span><h2>Start with a conversation.</h2><p>Schedule online or call the office with questions before booking.</p></div>
+          <div class="cta-actions"><a class="button button-light" href="https://d2oe0ra32qx05a.cloudfront.net/?practiceKey=k_1_108034" target="_blank" rel="noopener">Book an Appointment</a><a class="button button-outline-light" href="tel:+14803138583">480-313-8583</a></div>
+        </div>`;
+      main.appendChild(cta);
+    }
+  }
+}
+
 if (nav) {
   const normalized = pageFile.includes('.') ? pageFile : `${pageFile}.html`;
-  const contentPages = new Set(['anxiety.html','depression.html','adhd.html','ptsd.html','ocd.html','bipolar.html','grief-loss.html','life-transitions.html','medication-management.html']);
+  const contentPages = new Set([...conditionPageFiles, 'medication-management.html']);
   const patientPages = new Set(['new-patients.html','insurance-payment.html','telehealth.html','faq.html']);
   nav.querySelectorAll('a').forEach((link) => {
     link.removeAttribute('aria-current');
