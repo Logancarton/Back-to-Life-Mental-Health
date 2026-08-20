@@ -110,6 +110,35 @@ document.querySelectorAll('[data-year]').forEach((node) => {
   node.textContent = new Date().getFullYear();
 });
 
+// Keep social proof and social-media links available from the shared footer
+// without duplicating the same markup across every static page.
+const googleReviewsUrl = 'https://www.google.com/maps/search/?api=1&query=Back%20to%20Life%20Mental%20Health%2C%20Anthem%20AZ&query_place_id=ChIJa6pXTtlxK4cRDzcak9fsa_s';
+const facebookUrl = 'https://www.facebook.com/profile.php?id=61552499436523';
+document.querySelectorAll('.site-footer .footer-grid').forEach((footerGrid) => {
+  const contactColumn = footerGrid.querySelector('a[href^="mailto:"]')?.closest('div');
+  if (!contactColumn) return;
+
+  if (!contactColumn.querySelector('[data-google-reviews-link]')) {
+    const reviewsLink = document.createElement('a');
+    reviewsLink.href = googleReviewsUrl;
+    reviewsLink.target = '_blank';
+    reviewsLink.rel = 'noopener noreferrer';
+    reviewsLink.textContent = 'Google Reviews';
+    reviewsLink.setAttribute('data-google-reviews-link', '');
+    contactColumn.appendChild(reviewsLink);
+  }
+
+  if (!contactColumn.querySelector('[data-facebook-link]')) {
+    const facebookLink = document.createElement('a');
+    facebookLink.href = facebookUrl;
+    facebookLink.target = '_blank';
+    facebookLink.rel = 'noopener noreferrer';
+    facebookLink.textContent = 'Facebook';
+    facebookLink.setAttribute('data-facebook-link', '');
+    contactColumn.appendChild(facebookLink);
+  }
+});
+
 document.querySelectorAll('a[href="services.html#medication-management"], a[href="#medication-management"]').forEach((link) => {
   if (link.textContent.toLowerCase().includes('medication')) link.setAttribute('href', 'medication-management.html');
 });
