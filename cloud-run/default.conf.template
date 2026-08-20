@@ -30,6 +30,7 @@ server {
     location = /services-overview { rewrite ^ /services.html break; }
     location = /medication-management { rewrite ^ /medication-management.html break; }
     location = /new-patients { rewrite ^ /new-patients.html break; }
+    location = /current-patients { rewrite ^ /current-patients.html break; }
     location = /insurance-payment { rewrite ^ /insurance-payment.html break; }
     location = /telehealth { rewrite ^ /telehealth.html break; }
     location = /faq { rewrite ^ /faq.html break; }
@@ -46,7 +47,7 @@ server {
     location = /privacy { rewrite ^ /privacy.html break; }
 
     # Normalize trailing slashes on canonical routes.
-    location ~ ^/(services-overview|medication-management|new-patients|insurance-payment|telehealth|faq|about-us|contactus|anxiety|depression|attention-deficit-hyperactive-disorder|post-traumatic-stress-disorder|obsessive-compulsive-disorder|bipolar|loss-bereavement|life-changes|privacy)/$ {
+    location ~ ^/(services-overview|medication-management|new-patients|current-patients|insurance-payment|telehealth|faq|about-us|contactus|anxiety|depression|attention-deficit-hyperactive-disorder|post-traumatic-stress-disorder|obsessive-compulsive-disorder|bipolar|loss-bereavement|life-changes|privacy)/$ {
         return 301 /$1;
     }
 
@@ -66,6 +67,7 @@ server {
     location = /services.html { return 301 /services-overview; }
     location = /medication-management.html { return 301 /medication-management; }
     location = /new-patients.html { return 301 /new-patients; }
+    location = /current-patients.html { return 301 /current-patients; }
     location = /insurance-payment.html { return 301 /insurance-payment; }
     location = /telehealth.html { return 301 /telehealth; }
     location = /faq.html { return 301 /faq; }

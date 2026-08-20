@@ -36,6 +36,7 @@ const pageAliases = {
   'services-overview': 'services.html',
   'medication-management': 'medication-management.html',
   'new-patients': 'new-patients.html',
+  'current-patients': 'current-patients.html',
   'insurance-payment': 'insurance-payment.html',
   'telehealth': 'telehealth.html',
   'faq': 'faq.html',
@@ -106,6 +107,7 @@ const breadcrumbTrails = {
   'services.html': ['Home', 'Psychiatric Services'],
   'medication-management.html': ['Home', 'Psychiatric Services', 'Medication Management'],
   'new-patients.html': ['Home', 'New Patients'],
+  'current-patients.html': ['Home', 'Current Patients'],
   'insurance-payment.html': ['Home', 'New Patients', 'Insurance & Payment'],
   'telehealth.html': ['Home', 'New Patients', 'Telehealth'],
   'faq.html': ['Home', 'New Patients', 'FAQs'],
@@ -157,6 +159,17 @@ const header = document.querySelector('[data-header]');
 const menuToggle = document.querySelector('[data-menu-toggle]');
 const nav = document.querySelector('[data-nav]');
 
+// Give established patients a consistent, quiet portal entry point on every
+// full public page without duplicating another navigation system in the HTML.
+if (nav && !nav.querySelector('a[href="current-patients.html"]')) {
+  const patientPortalLink = document.createElement('a');
+  patientPortalLink.href = 'current-patients.html';
+  patientPortalLink.textContent = 'Patient Portal';
+  patientPortalLink.setAttribute('data-patient-portal-link', '');
+  const bookingLink = nav.querySelector('a[href*="practiceKey="]');
+  nav.insertBefore(patientPortalLink, bookingLink || null);
+}
+
 const updateHeader = () => {
   if (!header) return;
   header.classList.toggle('scrolled', window.scrollY > 8);
@@ -192,13 +205,23 @@ document.querySelectorAll('[data-year]').forEach((node) => {
   node.textContent = new Date().getFullYear();
 });
 
-// Keep social proof and social-media links available from the shared footer
-// without duplicating the same markup across every static page.
+// Keep social proof, current-patient access, and social-media links available
+// from the shared footer without duplicating markup across every static page.
 const googleReviewsUrl = 'https://www.google.com/maps/search/?api=1&query=Back%20to%20Life%20Mental%20Health%2C%20Anthem%20AZ&query_place_id=ChIJa6pXTtlxK4cRDzcak9fsa_s';
 const facebookUrl = 'https://www.facebook.com/profile.php?id=61552499436523';
 document.querySelectorAll('.site-footer .footer-grid').forEach((footerGrid) => {
   const contactColumn = footerGrid.querySelector('a[href^="mailto:"]')?.closest('div');
   if (!contactColumn) return;
+
+  const exploreColumn = [...footerGrid.children].find((column) => column.querySelector('h3')?.textContent?.trim() === 'Explore');
+  if (exploreColumn && !exploreColumn.querySelector('a[href="current-patients.html"]')) {
+    const currentPatientsLink = document.createElement('a');
+    currentPatientsLink.href = 'current-patients.html';
+    currentPatientsLink.textContent = 'Current Patients';
+    const newPatientsLink = exploreColumn.querySelector('a[href="new-patients.html"]');
+    if (newPatientsLink) newPatientsLink.insertAdjacentElement('afterend', currentPatientsLink);
+    else exploreColumn.appendChild(currentPatientsLink);
+  }
 
   if (!contactColumn.querySelector('[data-google-reviews-link]')) {
     const reviewsLink = document.createElement('a');
@@ -269,6 +292,23 @@ document.querySelectorAll('.simple-list').forEach((list) => {
     link.textContent = label;
     link.className = 'simple-list-link';
     item.replaceWith(link);
+  });
+});
+
+// Keep the patient-resource subnavigation consistent across the journey pages.
+document.querySelectorAll('.journey-nav-inner').forEach((journeyNav) => {
+  if (!journeyNav.querySelector('a[href="current-patients.html"]')) {
+    const currentPatientsLink = document.createElement('a');
+    currentPatientsLink.href = 'current-patients.html';
+    currentPatientsLink.textContent = 'Current Patients';
+    const newPatientsLink = journeyNav.querySelector('a[href="new-patients.html"]');
+    if (newPatientsLink) newPatientsLink.insertAdjacentElement('afterend', currentPatientsLink);
+    else journeyNav.prepend(currentPatientsLink);
+  }
+
+  journeyNav.querySelectorAll('a').forEach((link) => {
+    link.removeAttribute('aria-current');
+    if ((link.getAttribute('href') || '').split('#')[0] === pageFile) link.setAttribute('aria-current', 'page');
   });
 });
 
@@ -441,12 +481,12 @@ if (pageFile === 'index.html' && !document.querySelector('[data-patient-resource
         <div class="section-heading reveal">
           <span class="eyebrow">Plan your visit</span>
           <h2>The practical stuff, without the scavenger hunt.</h2>
-          <p>What happens first, how insurance works, when telehealth fits, and the questions people usually ask before scheduling.</p>
+          <p>What happens first, how current patients stay connected, how insurance works, and the questions people usually ask.</p>
         </div>
         <div class="condition-grid">
           <a class="condition-card reveal" href="new-patients.html"><span>Start here</span><strong>New Patients</strong><p>From scheduling through your first treatment plan.</p></a>
+          <a class="condition-card reveal" href="current-patients.html"><span>Already established?</span><strong>Current Patients</strong><p>Portal access, secure messages, records, and account help.</p></a>
           <a class="condition-card reveal" href="insurance-payment.html"><span>Coverage</span><strong>Insurance & Payment</strong><p>Current plans, private pay, and benefit questions.</p></a>
-          <a class="condition-card reveal" href="telehealth.html"><span>Visit options</span><strong>Telehealth</strong><p>How virtual psychiatric care works across Arizona.</p></a>
           <a class="condition-card reveal" href="faq.html"><span>Quick answers</span><strong>FAQs</strong><p>Appointments, medication, insurance, and follow-up.</p></a>
         </div>
       </div>`;

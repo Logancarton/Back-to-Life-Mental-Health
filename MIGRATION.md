@@ -27,7 +27,7 @@ The current Odoo site already has public URLs that may be indexed, bookmarked, o
 | `/life-changes` | `life-transitions.html` |
 | `/privacy` | `privacy.html` |
 
-New clean routes added by the custom site include `/new-patients`, `/insurance-payment`, `/telehealth`, and `/faq`.
+New clean routes added by the custom site include `/new-patients`, `/current-patients`, `/insurance-payment`, `/telehealth`, and `/faq`.
 
 Canonical metadata and the sitemap use clean production URLs rather than the repository's internal `.html` filenames.
 
@@ -61,6 +61,7 @@ The custom site now covers the useful public information currently represented o
 - Services overview
 - Medication management
 - New patient guide
+- Current patient portal guide
 - Insurance and payment
 - Telehealth
 - FAQ hub
@@ -75,6 +76,8 @@ The custom site now covers the useful public information currently represented o
 - Bipolar disorder
 - Grief and loss
 - Life transitions
+
+The current-patient guide routes established patients to Tebra for secure login, messaging, records, documents, and supported account functions. The public site does not collect portal credentials or protected clinical information.
 
 The condition pages now share a clearer patient sequence: what the concern can feel like, what evaluation considers, treatment options, what happens next, FAQs, and a direct scheduling path.
 

@@ -10,6 +10,7 @@ The current site includes:
 - Services overview
 - Dedicated medication-management page
 - New-patient guide
+- Current-patient hub with secure Tebra Patient Portal access and account guidance
 - Insurance and payment page
 - Arizona telehealth page
 - Frequently asked questions hub
@@ -34,17 +35,20 @@ This version is intentionally framework-free: plain HTML, CSS, and JavaScript. T
 
 The production-serving layer is also intentionally thin. Nginx on Cloud Run maps clean public URLs to the existing static HTML rather than duplicating or rebuilding the site in a framework.
 
+The current-patient page is intentionally an instruction-and-routing layer rather than an authentication system. Back to Life Mental Health does not collect portal credentials or clinical information on the public website; Tebra remains responsible for Patient Portal authentication, secure messaging, and protected patient information.
+
 ## Patient journey
 
 The website is organized around the questions a patient is likely to ask rather than duplicating the structure of the old website builder:
 
 1. What does the practice offer?
 2. What does starting care look like?
-3. Will my insurance work and what should I verify?
-4. Can I use telehealth?
-5. What happens during medication management?
-6. What can a condition feel like, what does evaluation consider, and what happens next?
-7. How do I schedule or contact the practice?
+3. How do current patients securely access messages, records, documents, and account help?
+4. Will my insurance work and what should I verify?
+5. Can I use telehealth?
+6. What happens during medication management?
+7. What can a condition feel like, what does evaluation consider, and what happens next?
+8. How do I schedule or contact the practice?
 
 The condition pages share the same patient-centered sequence used elsewhere on the site: symptoms and lived experience → evaluation → treatment options → what happens next → FAQs → scheduling.
 
@@ -60,7 +64,7 @@ The site should prefer a small coherent library of real provider/practice photog
 
 GitHub Pages remains configured to publish from GitHub Actions and is useful as a static preview/compatibility environment.
 
-For final production hosting, the repository now includes a Cloud Run path using `Dockerfile` and `cloud-run/default.conf.template`. This serves clean canonical routes such as `/anxiety` and `/new-patients` as real HTML with HTTP 200 while redirecting `.html` URLs to the preferred clean routes.
+For final production hosting, the repository now includes a Cloud Run path using `Dockerfile` and `cloud-run/default.conf.template`. This serves clean canonical routes such as `/anxiety`, `/new-patients`, and `/current-patients` as real HTML with HTTP 200 while redirecting `.html` URLs to the preferred clean routes.
 
 See `GOOGLE_CLOUD_DEPLOYMENT.md` for deployment and verification steps.
 
