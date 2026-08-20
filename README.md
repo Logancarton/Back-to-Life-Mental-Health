@@ -45,6 +45,12 @@ The website is organized around the questions a patient is likely to ask rather 
 
 The condition pages now share the same patient-centered sequence used elsewhere on the site: symptoms and lived experience → evaluation → treatment options → what happens next → FAQs → scheduling.
 
+## Photography
+
+`PHOTO_PLAN.md` is the source of truth for the next owned-photo pass. It defines the priority shots, filenames, crop ratios, page placements, respectful condition-page image direction, optimization rules, and integration order.
+
+The site should prefer a small coherent library of real provider/practice photography plus restrained Arizona environment images over generic behavioral-health stock photography.
+
 ## Deployment
 
 GitHub Pages is configured to publish from GitHub Actions. A push to `main` triggers `.github/workflows/deploy-pages.yml` and deploys the static site.
@@ -53,8 +59,8 @@ The production Odoo domain should remain unchanged until the replacement site ha
 
 ## Next build priorities
 
-1. Continue visual QA across desktop and mobile breakpoints, especially the homepage hero crop and the updated condition pages.
-2. Add selected office photography if useful and refine image presentation without introducing generic stock-style mental-health graphics.
+1. Capture or add the Priority 1 photographs in `PHOTO_PLAN.md`, beginning with a distinct homepage hero and secondary provider image.
+2. Continue visual QA across desktop and mobile breakpoints, especially the homepage hero crop and the updated condition pages.
 3. Continue migrating older shared markup directly into HTML where that reduces reliance on JavaScript enhancement without creating regressions.
 4. Review final insurance, payment, privacy, and practice-policy wording before production cutover.
 5. Connect the production domain only after review.
