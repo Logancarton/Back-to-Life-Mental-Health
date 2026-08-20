@@ -1,0 +1,99 @@
+map $host $robots_header {
+    default "";
+    ~*\.run\.app$ "noindex, nofollow";
+}
+
+server {
+    listen ${PORT};
+    server_name _;
+    server_tokens off;
+
+    root /usr/share/nginx/html;
+    index index.html;
+    charset utf-8;
+
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-Robots-Tag $robots_header always;
+
+    error_page 404 /404.html;
+
+    location = /healthz {
+        access_log off;
+        default_type text/plain;
+        return 200 "ok\n";
+    }
+
+    # Canonical public routes: serve the real page HTML directly with HTTP 200.
+    location = / { try_files /index.html =404; }
+    location = /services-overview { try_files /services.html =404; }
+    location = /medication-management { try_files /medication-management.html =404; }
+    location = /new-patients { try_files /new-patients.html =404; }
+    location = /insurance-payment { try_files /insurance-payment.html =404; }
+    location = /telehealth { try_files /telehealth.html =404; }
+    location = /faq { try_files /faq.html =404; }
+    location = /about-us { try_files /about.html =404; }
+    location = /contactus { try_files /contact.html =404; }
+    location = /anxiety { try_files /anxiety.html =404; }
+    location = /depression { try_files /depression.html =404; }
+    location = /attention-deficit-hyperactive-disorder { try_files /adhd.html =404; }
+    location = /post-traumatic-stress-disorder { try_files /ptsd.html =404; }
+    location = /obsessive-compulsive-disorder { try_files /ocd.html =404; }
+    location = /bipolar { try_files /bipolar.html =404; }
+    location = /loss-bereavement { try_files /grief-loss.html =404; }
+    location = /life-changes { try_files /life-transitions.html =404; }
+    location = /privacy { try_files /privacy.html =404; }
+
+    # Normalize trailing slashes on canonical routes.
+    location ~ ^/(services-overview|medication-management|new-patients|insurance-payment|telehealth|faq|about-us|contactus|anxiety|depression|attention-deficit-hyperactive-disorder|post-traumatic-stress-disorder|obsessive-compulsive-disorder|bipolar|loss-bereavement|life-changes|privacy)/$ {
+        return 301 /$1;
+    }
+
+    # Preserve useful legacy/short aliases with server-side redirects.
+    location = /pricing { return 301 /insurance-payment; }
+    location = /services { return 301 /services-overview; }
+    location = /about { return 301 /about-us; }
+    location = /contact { return 301 /contactus; }
+    location = /adhd { return 301 /attention-deficit-hyperactive-disorder; }
+    location = /ptsd { return 301 /post-traumatic-stress-disorder; }
+    location = /ocd { return 301 /obsessive-compulsive-disorder; }
+    location = /grief-loss { return 301 /loss-bereavement; }
+    location = /life-transitions { return 301 /life-changes; }
+
+    # Redirect repository-internal .html URLs to the preferred clean canonical URLs.
+    location = /index.html { return 301 /; }
+    location = /services.html { return 301 /services-overview; }
+    location = /medication-management.html { return 301 /medication-management; }
+    location = /new-patients.html { return 301 /new-patients; }
+    location = /insurance-payment.html { return 301 /insurance-payment; }
+    location = /telehealth.html { return 301 /telehealth; }
+    location = /faq.html { return 301 /faq; }
+    location = /about.html { return 301 /about-us; }
+    location = /contact.html { return 301 /contactus; }
+    location = /anxiety.html { return 301 /anxiety; }
+    location = /depression.html { return 301 /depression; }
+    location = /adhd.html { return 301 /attention-deficit-hyperactive-disorder; }
+    location = /ptsd.html { return 301 /post-traumatic-stress-disorder; }
+    location = /ocd.html { return 301 /obsessive-compulsive-disorder; }
+    location = /bipolar.html { return 301 /bipolar; }
+    location = /grief-loss.html { return 301 /loss-bereavement; }
+    location = /life-transitions.html { return 301 /life-changes; }
+    location = /privacy.html { return 301 /privacy; }
+
+    location /assets/ {
+        try_files $uri =404;
+        expires 7d;
+        add_header Cache-Control "public, max-age=604800";
+    }
+
+    location = /robots.txt { try_files /robots.txt =404; }
+    location = /sitemap.xml { try_files /sitemap.xml =404; }
+    location = /site.webmanifest { try_files /site.webmanifest =404; }
+    location = /favicon.svg { try_files /favicon.svg =404; }
+    location = /404.html { try_files /404.html =404; }
+
+    # CSS/JS and any other intentionally copied public files remain available.
+    # Route compatibility directories are not copied into this production image.
+    location / {
+        try_files $uri =404;
+    }
+}
