@@ -1,23 +1,4 @@
-const enhancementStylesheet = 'enhancements.css';
-if (!document.querySelector(`link[href="${enhancementStylesheet}"]`)) {
-  const link = document.createElement('link');
-  link.rel = 'stylesheet';
-  link.href = enhancementStylesheet;
-  document.head.appendChild(link);
-}
-
-// Replace the temporary text-based BTL mark with the official practice logo.
-document.querySelectorAll('.brand').forEach((brand) => {
-  if (!brand.querySelector('.brand-mark')) return;
-  const logo = document.createElement('img');
-  logo.src = 'assets/images/btlmh-logo.png';
-  logo.alt = 'Back to Life Mental Health';
-  logo.className = 'brand-logo-image';
-  brand.classList.add('brand-logo-link');
-  brand.replaceChildren(logo);
-});
-
-// The provider introduction now lives intentionally on the About page. Keep a
+// The provider introduction lives intentionally on the About page. Keep a
 // graceful fallback if the owned video cannot be loaded by the browser.
 document.querySelectorAll('.provider-video-card .provider-intro-video').forEach((video) => {
   const card = video.closest('.provider-video-card');
@@ -26,6 +7,7 @@ document.querySelectorAll('.provider-video-card .provider-intro-video').forEach(
   video.addEventListener('loadeddata', () => card.classList.remove('video-unavailable'), { once: true });
 });
 
+// Keep lightweight document fallbacks for utility pages such as the 404 page.
 if (!document.querySelector('link[rel="icon"]')) {
   const icon = document.createElement('link');
   icon.rel = 'icon';
@@ -46,36 +28,32 @@ if (!document.querySelector('meta[name="theme-color"]')) {
   document.head.appendChild(theme);
 }
 
-const canonicalRoutes = {
-  'index.html': '/',
-  'services.html': '/services-overview',
-  'medication-management.html': '/medication-management',
-  'new-patients.html': '/new-patients',
-  'insurance-payment.html': '/insurance-payment',
-  'telehealth.html': '/telehealth',
-  'faq.html': '/faq',
-  'about.html': '/about-us',
-  'contact.html': '/contactus',
-  'anxiety.html': '/anxiety',
-  'depression.html': '/depression',
-  'adhd.html': '/attention-deficit-hyperactive-disorder',
-  'ptsd.html': '/post-traumatic-stress-disorder',
-  'ocd.html': '/obsessive-compulsive-disorder',
-  'bipolar.html': '/bipolar',
-  'grief-loss.html': '/loss-bereavement',
-  'life-transitions.html': '/life-changes',
-  'privacy.html': '/privacy'
+// Static HTML owns canonical URLs. This mapping is used only so shared
+// behavior still identifies a page correctly when it is reached through a
+// clean public route rather than its .html filename.
+const pathToken = window.location.pathname.split('/').filter(Boolean).pop() || 'index.html';
+const pageAliases = {
+  'services-overview': 'services.html',
+  'medication-management': 'medication-management.html',
+  'new-patients': 'new-patients.html',
+  'insurance-payment': 'insurance-payment.html',
+  'telehealth': 'telehealth.html',
+  'faq': 'faq.html',
+  'about-us': 'about.html',
+  'contactus': 'contact.html',
+  'anxiety': 'anxiety.html',
+  'depression': 'depression.html',
+  'attention-deficit-hyperactive-disorder': 'adhd.html',
+  'post-traumatic-stress-disorder': 'ptsd.html',
+  'obsessive-compulsive-disorder': 'ocd.html',
+  'bipolar': 'bipolar.html',
+  'loss-bereavement': 'grief-loss.html',
+  'life-transitions': 'life-transitions.html',
+  'life-changes': 'life-transitions.html',
+  'privacy': 'privacy.html'
 };
-const pageFile = window.location.pathname.split('/').filter(Boolean).pop() || 'index.html';
-const canonicalPath = canonicalRoutes[pageFile] || canonicalRoutes['index.html'];
-const canonicalUrl = `https://www.back-to-life-mental-health.com${canonicalPath}`;
-let canonical = document.querySelector('link[rel="canonical"]');
-if (!canonical) {
-  canonical = document.createElement('link');
-  canonical.rel = 'canonical';
-  document.head.appendChild(canonical);
-}
-canonical.href = canonicalUrl;
+const pageFile = pageAliases[pathToken] || pathToken;
+const canonicalUrl = document.querySelector('link[rel="canonical"]')?.href || window.location.href;
 
 const description = document.querySelector('meta[name="description"]')?.content || '';
 const ensureMeta = (attribute, key, value) => {
@@ -91,21 +69,11 @@ ensureMeta('property', 'og:title', document.title);
 if (description) ensureMeta('property', 'og:description', description);
 ensureMeta('property', 'og:url', canonicalUrl);
 ensureMeta('property', 'og:type', 'website');
-ensureMeta('name', 'twitter:card', 'summary');
+ensureMeta('name', 'twitter:card', 'summary_large_image');
 
 const header = document.querySelector('[data-header]');
 const menuToggle = document.querySelector('[data-menu-toggle]');
 const nav = document.querySelector('[data-nav]');
-
-// New patient information is now a first-class part of the site. Add the link
-// to older pages without rewriting every historical template at once.
-if (nav && !nav.querySelector('a[href="new-patients.html"]')) {
-  const newPatients = document.createElement('a');
-  newPatients.href = 'new-patients.html';
-  newPatients.textContent = 'New Patients';
-  const aboutLink = nav.querySelector('a[href="about.html"]');
-  nav.insertBefore(newPatients, aboutLink || nav.querySelector('.button'));
-}
 
 const updateHeader = () => {
   if (!header) return;
@@ -193,27 +161,6 @@ document.querySelectorAll('.simple-list').forEach((list) => {
   });
 });
 
-document.querySelectorAll('.site-footer').forEach((footer) => {
-  const explore = [...footer.querySelectorAll('div')].find((section) =>
-    section.querySelector('h3')?.textContent?.trim().toLowerCase() === 'explore'
-  );
-  if (!explore) return;
-  const patientLinks = [
-    ['new-patients.html', 'New Patients'],
-    ['insurance-payment.html', 'Insurance & Payment'],
-    ['telehealth.html', 'Telehealth'],
-    ['faq.html', 'FAQs'],
-    ['privacy.html', 'Privacy Policy']
-  ];
-  patientLinks.forEach(([href, label]) => {
-    if (explore.querySelector(`a[href="${href}"]`)) return;
-    const link = document.createElement('a');
-    link.href = href;
-    link.textContent = label;
-    explore.appendChild(link);
-  });
-});
-
 // Mobile visitors get persistent access to the two highest-value actions while
 // desktop keeps the quieter editorial layout. This is navigation behavior, not
 // patient data collection, and uses the same practice phone and booking URL.
@@ -255,9 +202,7 @@ if (pageFile === 'index.html' && !document.querySelector('[data-patient-resource
   }
 }
 
-// Older condition pages already contain strong condition-specific education.
-// Add the missing practical bridge between treatment information and FAQs so
-// each page follows the same patient journey as the newer site sections.
+// Condition pages share a practical bridge between education and FAQs.
 if (conditionPageFiles.has(pageFile)) {
   const articleMain = document.querySelector('.article-main');
   const faqSection = [...document.querySelectorAll('.article-main > .article-section')].find((section) =>
@@ -270,7 +215,7 @@ if (conditionPageFiles.has(pageFile)) {
     nextStep.setAttribute('data-condition-next-step', '');
     nextStep.innerHTML = `
       <span class="eyebrow">What happens next</span>
-      <h2>You should leave with a clearer understanding of the plan.</h2>
+      <h2>The goal is a clearer understanding of the plan.</h2>
       <p>The goal of an evaluation is not simply to attach a label. It is to understand the pattern, discuss reasonable options, and decide what should be watched over time.</p>
       <div class="next-step-grid">
         <div class="next-step-card"><span>01 / Understand</span><strong>Build the picture</strong><p>Symptoms, history, function, sleep, medical factors, previous treatment, and your goals are considered together.</p></div>
@@ -280,34 +225,17 @@ if (conditionPageFiles.has(pageFile)) {
       <div class="condition-next-links"><a href="new-patients.html">What starting care looks like →</a><a href="medication-management.html">How medication management works →</a></div>`;
     faqSection.insertAdjacentElement('beforebegin', nextStep);
   }
-
-  // A few older condition templates predate the shared bottom CTA. Keep the
-  // patient path consistent without duplicating a CTA where one already exists.
-  if (!document.querySelector('.cta-section')) {
-    const main = document.querySelector('main');
-    if (main) {
-      const cta = document.createElement('section');
-      cta.className = 'cta-section condition-cta-generated';
-      cta.innerHTML = `
-        <div class="container cta-card reveal">
-          <div><span class="eyebrow light">New patients welcome</span><h2>Start with a conversation.</h2><p>Schedule online or call the office with questions before booking.</p></div>
-          <div class="cta-actions"><a class="button button-light" href="https://d2oe0ra32qx05a.cloudfront.net/?practiceKey=k_1_108034" target="_blank" rel="noopener">Book an Appointment</a><a class="button button-outline-light" href="tel:+14803138583">480-313-8583</a></div>
-        </div>`;
-      main.appendChild(cta);
-    }
-  }
 }
 
 if (nav) {
-  const normalized = pageFile.includes('.') ? pageFile : `${pageFile}.html`;
   const contentPages = new Set([...conditionPageFiles, 'medication-management.html']);
-  const patientPages = new Set(['new-patients.html','insurance-payment.html','telehealth.html','faq.html']);
+  const patientPages = new Set(['new-patients.html', 'insurance-payment.html', 'telehealth.html', 'faq.html']);
   nav.querySelectorAll('a').forEach((link) => {
     link.removeAttribute('aria-current');
     const href = (link.getAttribute('href') || '').split('#')[0];
-    const isCurrent = href === normalized ||
-      (contentPages.has(normalized) && href === 'services.html') ||
-      (patientPages.has(normalized) && href === 'new-patients.html');
+    const isCurrent = href === pageFile ||
+      (contentPages.has(pageFile) && href === 'services.html') ||
+      (patientPages.has(pageFile) && href === 'new-patients.html');
     if (isCurrent) link.setAttribute('aria-current', 'page');
   });
 }
