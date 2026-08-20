@@ -214,6 +214,21 @@ document.querySelectorAll('.site-footer').forEach((footer) => {
   });
 });
 
+// Mobile visitors get persistent access to the two highest-value actions while
+// desktop keeps the quieter editorial layout. This is navigation behavior, not
+// patient data collection, and uses the same practice phone and booking URL.
+if (!document.querySelector('[data-mobile-contact-bar]')) {
+  const mobileBar = document.createElement('nav');
+  mobileBar.className = 'mobile-contact-bar';
+  mobileBar.setAttribute('data-mobile-contact-bar', '');
+  mobileBar.setAttribute('aria-label', 'Quick contact');
+  mobileBar.innerHTML = `
+    <a class="mobile-contact-bar-call" href="tel:+14803138583">Call Office</a>
+    <a class="mobile-contact-bar-book" href="https://d2oe0ra32qx05a.cloudfront.net/?practiceKey=k_1_108034" target="_blank" rel="noopener">Book Appointment</a>`;
+  document.body.appendChild(mobileBar);
+  document.body.classList.add('has-mobile-contact-bar');
+}
+
 // Give the homepage a practical patient-journey entry point without turning it
 // into another long information page.
 if (pageFile === 'index.html' && !document.querySelector('[data-patient-resources]')) {
