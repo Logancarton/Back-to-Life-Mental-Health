@@ -287,6 +287,147 @@ if (!document.querySelector('[data-mobile-contact-bar]')) {
   document.body.classList.add('has-mobile-contact-bar');
 }
 
+// Keep scheduling on the public website while Tebra owns the appointment flow.
+// The iframe is created only after a visitor opens the scheduler, so Tebra does
+// not add startup cost or receive appointment interaction until it is needed.
+const schedulingHost = 'd2oe0ra32qx05a.cloudfront.net';
+const tebraSchedulerUrl = 'https://d2oe0ra32qx05a.cloudfront.net/?practiceKey=k_1_108034';
+const canShowSchedulingWidget = Boolean(header && document.querySelector('.site-footer'));
+
+if (canShowSchedulingWidget && !document.querySelector('[data-scheduler-launcher]')) {
+  const schedulerStyles = document.createElement('link');
+  schedulerStyles.rel = 'stylesheet';
+  schedulerStyles.href = 'scheduler.css';
+  schedulerStyles.setAttribute('data-scheduler-styles', '');
+  document.head.appendChild(schedulerStyles);
+
+  const launcher = document.createElement('button');
+  launcher.type = 'button';
+  launcher.className = 'scheduler-launcher';
+  launcher.setAttribute('data-scheduler-launcher', '');
+  launcher.setAttribute('aria-label', 'Schedule an appointment');
+  launcher.setAttribute('aria-haspopup', 'dialog');
+  launcher.setAttribute('aria-controls', 'tebra-scheduler-dialog');
+  launcher.setAttribute('aria-expanded', 'false');
+  launcher.innerHTML = `
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M7 2v3M17 2v3M3.5 9.5h17M5.5 4h13a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z"/>
+      <path d="M8 13h1M12 13h1M16 13h1M8 17h1M12 17h1M16 17h1"/>
+    </svg>`;
+
+  const schedulerDialog = document.createElement('dialog');
+  schedulerDialog.className = 'scheduler-dialog';
+  schedulerDialog.id = 'tebra-scheduler-dialog';
+  schedulerDialog.setAttribute('data-scheduler-dialog', '');
+  schedulerDialog.setAttribute('aria-labelledby', 'scheduler-dialog-title');
+  schedulerDialog.innerHTML = `
+    <div class="scheduler-panel">
+      <header class="scheduler-header">
+        <div>
+          <span class="scheduler-eyebrow">Secure online scheduling</span>
+          <h2 id="scheduler-dialog-title">Schedule an appointment</h2>
+        </div>
+        <button class="scheduler-close" type="button" aria-label="Close appointment scheduler" data-scheduler-close>
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6 6 18"/></svg>
+        </button>
+      </header>
+      <div class="scheduler-frame-wrap" data-scheduler-frame-wrap>
+        <div class="scheduler-loading" data-scheduler-loading role="status">Loading secure Tebra scheduling…</div>
+      </div>
+      <footer class="scheduler-footer">
+        <span>Scheduling is securely provided by Tebra.</span>
+        <a href="${tebraSchedulerUrl}" target="_blank" rel="noopener" data-scheduler-fallback>Open scheduler in a new tab</a>
+      </footer>
+    </div>`;
+
+  document.body.append(schedulerDialog, launcher);
+
+  const closeButton = schedulerDialog.querySelector('[data-scheduler-close]');
+  const frameWrap = schedulerDialog.querySelector('[data-scheduler-frame-wrap]');
+  const loadingMessage = schedulerDialog.querySelector('[data-scheduler-loading]');
+  const siteFooter = document.querySelector('.site-footer');
+  let schedulerFrame = null;
+  let loadingTimer = null;
+  let lastSchedulerTrigger = launcher;
+
+  const ensureSchedulerFrame = () => {
+    if (schedulerFrame) return schedulerFrame;
+
+    schedulerFrame = document.createElement('iframe');
+    schedulerFrame.className = 'scheduler-frame';
+    schedulerFrame.src = tebraSchedulerUrl;
+    schedulerFrame.title = 'Tebra appointment scheduler for Back to Life Mental Health';
+    schedulerFrame.loading = 'lazy';
+    schedulerFrame.referrerPolicy = 'strict-origin-when-cross-origin';
+
+    schedulerFrame.addEventListener('load', () => {
+      if (loadingMessage) loadingMessage.hidden = true;
+      if (loadingTimer) window.clearTimeout(loadingTimer);
+    });
+
+    schedulerFrame.addEventListener('error', () => {
+      if (loadingMessage) loadingMessage.textContent = 'The embedded scheduler could not load. Please use the new-tab link below.';
+    });
+
+    frameWrap.appendChild(schedulerFrame);
+    loadingTimer = window.setTimeout(() => {
+      if (loadingMessage && !loadingMessage.hidden) {
+        loadingMessage.textContent = 'Still loading? You can open the secure scheduler in a new tab below.';
+      }
+    }, 12000);
+    return schedulerFrame;
+  };
+
+  const openScheduler = (trigger = launcher) => {
+    lastSchedulerTrigger = trigger;
+
+    if (typeof schedulerDialog.showModal !== 'function') {
+      window.open(tebraSchedulerUrl, '_blank', 'noopener');
+      return;
+    }
+
+    ensureSchedulerFrame();
+    if (!schedulerDialog.open) schedulerDialog.showModal();
+    launcher.setAttribute('aria-expanded', 'true');
+    document.body.classList.add('scheduler-open');
+    window.requestAnimationFrame(() => closeButton?.focus({ preventScroll: true }));
+  };
+
+  const closeScheduler = () => {
+    if (schedulerDialog.open) schedulerDialog.close();
+  };
+
+  launcher.addEventListener('click', () => openScheduler(launcher));
+  closeButton?.addEventListener('click', closeScheduler);
+
+  schedulerDialog.addEventListener('close', () => {
+    launcher.setAttribute('aria-expanded', 'false');
+    document.body.classList.remove('scheduler-open');
+    if (lastSchedulerTrigger instanceof HTMLElement) lastSchedulerTrigger.focus({ preventScroll: true });
+  });
+
+  schedulerDialog.addEventListener('click', (event) => {
+    const rect = schedulerDialog.getBoundingClientRect();
+    const outsideDialog = event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom;
+    if (outsideDialog) closeScheduler();
+  });
+
+  document.querySelectorAll(`a[href*="${schedulingHost}"]`).forEach((link) => {
+    link.addEventListener('click', (event) => {
+      if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      event.preventDefault();
+      openScheduler(link);
+    });
+  });
+
+  if (siteFooter && 'IntersectionObserver' in window) {
+    const footerObserver = new IntersectionObserver(([entry]) => {
+      launcher.classList.toggle('is-near-footer', entry.isIntersecting);
+    }, { threshold: 0.02 });
+    footerObserver.observe(siteFooter);
+  }
+}
+
 // Give the homepage a practical patient-journey entry point without turning it
 // into another long information page.
 if (pageFile === 'index.html' && !document.querySelector('[data-patient-resources]')) {
