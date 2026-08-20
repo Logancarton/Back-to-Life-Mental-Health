@@ -16,6 +16,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="manifest" href="site.webmanifest">
+  <link rel="preload" as="image" href="assets/images/provider-introduction-poster.jpg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
@@ -86,7 +87,9 @@
           </div>
         </div>
         <div class="hero-visual reveal">
-          <div class="hero-photo" role="img" aria-label="Logan Carton, PMHNP-BC, psychiatric provider at Back to Life Mental Health"></div>
+          <div class="hero-photo-frame">
+            <img class="hero-photo-image" src="assets/images/provider-introduction-poster.jpg" alt="Logan Carton, PMHNP-BC, psychiatric provider at Back to Life Mental Health" width="1280" height="720" fetchpriority="high" decoding="async">
+          </div>
           <div class="floating-card"><span class="floating-label">A different pace of care</span><strong>Time to talk. Time to understand.</strong><p>Treatment decisions made together.</p></div>
         </div>
       </div>
@@ -117,6 +120,25 @@
             <div class="care-points"><span>Comprehensive evaluation</span><span>Medication management</span><span>Collaborative treatment planning</span><span>In-person + telehealth</span></div>
           </div>
         </div>
+      </div>
+    </section>
+
+    <section class="section brand-path-section" aria-labelledby="care-path-heading">
+      <div class="container">
+        <div class="brand-path-heading reveal">
+          <div>
+            <span class="eyebrow">The path forward</span>
+            <h2 id="care-path-heading">Understand the person. Then build the plan.</h2>
+          </div>
+          <p>Good psychiatric care is more than choosing a medication. The process starts with listening, understanding the pattern, reviewing reasonable options, and following what changes over time.</p>
+        </div>
+        <div class="care-path" aria-label="Back to Life care approach">
+          <article class="care-path-step reveal"><span class="care-path-number">01</span><div><span class="care-path-label">Hear</span><h3>Start with your story</h3><p>What you are experiencing, what has changed, and what matters most to you.</p></div></article>
+          <article class="care-path-step reveal"><span class="care-path-number">02</span><div><span class="care-path-label">Understand</span><h3>Build the whole picture</h3><p>Symptoms are considered alongside history, sleep, health, previous treatment, and daily functioning.</p></div></article>
+          <article class="care-path-step reveal"><span class="care-path-number">03</span><div><span class="care-path-label">Plan</span><h3>Review your options</h3><p>Discuss the reasoning, possible benefits, tradeoffs, alternatives, and what the next step could look like.</p></div></article>
+          <article class="care-path-step reveal"><span class="care-path-number">04</span><div><span class="care-path-label">Follow</span><h3>Adjust with intention</h3><p>Follow-up focuses on response, side effects, functioning, new information, and whether the plan still fits.</p></div></article>
+        </div>
+        <div class="brand-path-signoff reveal"><span aria-hidden="true"></span><p>Thoughtful care, clear explanations, and decisions made together.</p><a class="text-link" href="new-patients.html">See what starting care looks like <span aria-hidden="true">→</span></a></div>
       </div>
     </section>
 
