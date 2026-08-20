@@ -19,6 +19,7 @@ The current site includes:
 - Privacy page
 - Existing appointment-booking integration
 - Official Back to Life Mental Health logo stored locally in the repository
+- Owned local provider imagery for the homepage and About page
 - Commercial insurance messaging
 - Anthem + Arizona telehealth positioning
 - Mobile navigation and lightweight scroll animations
@@ -39,8 +40,10 @@ The website is organized around the questions a patient is likely to ask rather 
 3. Will my insurance work and what should I verify?
 4. Can I use telehealth?
 5. What happens during medication management?
-6. Where can I learn more about the condition I am dealing with?
+6. What can a condition feel like, what does evaluation consider, and what happens next?
 7. How do I schedule or contact the practice?
+
+The condition pages now share the same patient-centered sequence used elsewhere on the site: symptoms and lived experience → evaluation → treatment options → what happens next → FAQs → scheduling.
 
 ## Deployment
 
@@ -50,13 +53,13 @@ The production Odoo domain should remain unchanged until the replacement site ha
 
 ## Next build priorities
 
-1. Replace the remaining Odoo-hosted homepage hero image with an owned local asset.
-2. Add selected provider/office photography and refine image presentation.
-3. Continue visual QA across desktop and mobile breakpoints.
+1. Continue visual QA across desktop and mobile breakpoints, especially the homepage hero crop and the updated condition pages.
+2. Add selected office photography if useful and refine image presentation without introducing generic stock-style mental-health graphics.
+3. Continue migrating older shared markup directly into HTML where that reduces reliance on JavaScript enhancement without creating regressions.
 4. Review final insurance, payment, privacy, and practice-policy wording before production cutover.
 5. Connect the production domain only after review.
 6. Add custom practice functionality as separate modules rather than coupling it to the marketing site.
 
 ## Important
 
-The official practice logo is now local to the repository. The homepage hero still uses one image from the existing Back to Life Mental Health Odoo site as a temporary visual reference. Before retiring Odoo, that image should also be copied into the repository or replaced with another owned asset so the replacement website has no runtime dependency on the old site.
+Core public-facing imagery used by the custom homepage is now stored in the repository rather than loaded from Odoo. The Odoo site should still remain live until final visual, content, route, and production-domain checks are complete.
