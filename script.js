@@ -54,6 +54,7 @@ const pageAliases = {
 };
 const pageFile = pageAliases[pathToken] || pathToken;
 const canonicalUrl = document.querySelector('link[rel="canonical"]')?.href || window.location.href;
+const siteOrigin = 'https://www.back-to-life-mental-health.com';
 
 const description = document.querySelector('meta[name="description"]')?.content || '';
 const ensureMeta = (attribute, key, value) => {
@@ -69,7 +70,88 @@ ensureMeta('property', 'og:title', document.title);
 if (description) ensureMeta('property', 'og:description', description);
 ensureMeta('property', 'og:url', canonicalUrl);
 ensureMeta('property', 'og:type', 'website');
+ensureMeta('property', 'og:site_name', 'Back to Life Mental Health');
+
+const defaultSocialImage = `${siteOrigin}/assets/images/homepage-hero.jpg`;
+const socialImage = document.querySelector('meta[property="og:image"]')?.content || defaultSocialImage;
+const socialImageAlt = document.querySelector('meta[property="og:image:alt"]')?.content || 'Back to Life Mental Health psychiatric care in Anthem, Arizona';
+ensureMeta('property', 'og:image', socialImage);
+ensureMeta('property', 'og:image:alt', socialImageAlt);
 ensureMeta('name', 'twitter:card', 'summary_large_image');
+ensureMeta('name', 'twitter:title', document.title);
+if (description) ensureMeta('name', 'twitter:description', description);
+ensureMeta('name', 'twitter:image', socialImage);
+ensureMeta('name', 'twitter:image:alt', socialImageAlt);
+
+// Tell search engines the preferred site name explicitly. Google recommends
+// WebSite structured data on the domain-level home page for this purpose.
+if (pageFile === 'index.html' && !document.querySelector('script[data-website-schema]')) {
+  const websiteSchema = document.createElement('script');
+  websiteSchema.type = 'application/ld+json';
+  websiteSchema.setAttribute('data-website-schema', '');
+  websiteSchema.textContent = JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'Back to Life Mental Health',
+    alternateName: 'BTLMH',
+    url: `${siteOrigin}/`
+  });
+  document.head.appendChild(websiteSchema);
+}
+
+// Add breadcrumb structured data for the public information hierarchy. This
+// does not change visible navigation; it simply describes relationships that
+// are already represented by the site's navigation and page structure.
+const breadcrumbTrails = {
+  'services.html': ['Home', 'Psychiatric Services'],
+  'medication-management.html': ['Home', 'Psychiatric Services', 'Medication Management'],
+  'new-patients.html': ['Home', 'New Patients'],
+  'insurance-payment.html': ['Home', 'New Patients', 'Insurance & Payment'],
+  'telehealth.html': ['Home', 'New Patients', 'Telehealth'],
+  'faq.html': ['Home', 'New Patients', 'FAQs'],
+  'about.html': ['Home', 'About Back to Life Mental Health'],
+  'contact.html': ['Home', 'Contact Back to Life Mental Health'],
+  'anxiety.html': ['Home', 'Psychiatric Services', 'Anxiety Treatment'],
+  'depression.html': ['Home', 'Psychiatric Services', 'Depression Treatment'],
+  'adhd.html': ['Home', 'Psychiatric Services', 'ADHD Treatment'],
+  'ptsd.html': ['Home', 'Psychiatric Services', 'PTSD & Trauma-Related Symptoms'],
+  'ocd.html': ['Home', 'Psychiatric Services', 'OCD Treatment'],
+  'bipolar.html': ['Home', 'Psychiatric Services', 'Bipolar Disorder Treatment'],
+  'grief-loss.html': ['Home', 'Psychiatric Services', 'Grief & Loss'],
+  'life-transitions.html': ['Home', 'Psychiatric Services', 'Life Transitions & Adjustment'],
+  'privacy.html': ['Home', 'Privacy Policy']
+};
+
+const breadcrumbParentUrls = {
+  'Home': `${siteOrigin}/`,
+  'Psychiatric Services': `${siteOrigin}/services-overview`,
+  'New Patients': `${siteOrigin}/new-patients`
+};
+
+const breadcrumbTrail = breadcrumbTrails[pageFile];
+if (breadcrumbTrail && !document.querySelector('script[data-breadcrumb-schema]')) {
+  const breadcrumbSchema = document.createElement('script');
+  breadcrumbSchema.type = 'application/ld+json';
+  breadcrumbSchema.setAttribute('data-breadcrumb-schema', '');
+  breadcrumbSchema.textContent = JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: breadcrumbTrail.map((name, index) => {
+      const item = {
+        '@type': 'ListItem',
+        position: index + 1,
+        name
+      };
+      if (index < breadcrumbTrail.length - 1) {
+        item.item = breadcrumbParentUrls[name] || `${siteOrigin}/`;
+      } else {
+        item.item = canonicalUrl;
+      }
+      return item;
+    })
+  });
+  document.head.appendChild(breadcrumbSchema);
+}
 
 const header = document.querySelector('[data-header]');
 const menuToggle = document.querySelector('[data-menu-toggle]');
