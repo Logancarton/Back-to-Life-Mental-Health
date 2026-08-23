@@ -15,48 +15,60 @@ if [[ "$MODE" != "production" && "$MODE" != "preview" ]]; then
   exit 2
 fi
 
-routes=(
+canonical_routes=(
   "/"
-  "/services-overview"
+  "/services"
   "/medication-management"
   "/new-patients"
   "/current-patients"
   "/insurance-payment"
   "/telehealth"
   "/faq"
-  "/about-us"
-  "/contactus"
+  "/about"
+  "/contact"
   "/anxiety"
   "/depression"
-  "/attention-deficit-hyperactive-disorder"
-  "/post-traumatic-stress-disorder"
-  "/obsessive-compulsive-disorder"
+  "/adhd"
+  "/ptsd"
+  "/ocd"
   "/bipolar"
-  "/loss-bereavement"
-  "/life-changes"
+  "/grief-loss"
+  "/life-transitions"
   "/privacy"
 )
 
-html_routes=(
-  "/index.html"
-  "/services.html"
-  "/medication-management.html"
-  "/new-patients.html"
-  "/current-patients.html"
-  "/insurance-payment.html"
-  "/telehealth.html"
-  "/faq.html"
-  "/about.html"
-  "/contact.html"
-  "/anxiety.html"
-  "/depression.html"
-  "/adhd.html"
-  "/ptsd.html"
-  "/ocd.html"
-  "/bipolar.html"
-  "/grief-loss.html"
-  "/life-transitions.html"
-  "/privacy.html"
+legacy_redirects=(
+  "/services-overview|/services"
+  "/pricing|/insurance-payment"
+  "/about-us|/about"
+  "/contactus|/contact"
+  "/attention-deficit-hyperactive-disorder|/adhd"
+  "/post-traumatic-stress-disorder|/ptsd"
+  "/obsessive-compulsive-disorder|/ocd"
+  "/loss-bereavement|/grief-loss"
+  "/life-changes|/life-transitions"
+)
+
+html_redirects=(
+  "/index.html|/"
+  "/services.html|/services"
+  "/medication-management.html|/medication-management"
+  "/new-patients.html|/new-patients"
+  "/current-patients.html|/current-patients"
+  "/insurance-payment.html|/insurance-payment"
+  "/telehealth.html|/telehealth"
+  "/faq.html|/faq"
+  "/about.html|/about"
+  "/contact.html|/contact"
+  "/anxiety.html|/anxiety"
+  "/depression.html|/depression"
+  "/adhd.html|/adhd"
+  "/ptsd.html|/ptsd"
+  "/ocd.html|/ocd"
+  "/bipolar.html|/bipolar"
+  "/grief-loss.html|/grief-loss"
+  "/life-transitions.html|/life-transitions"
+  "/privacy.html|/privacy"
 )
 
 failures=0
@@ -65,7 +77,7 @@ check_status() {
   local url="$1"
   local expected="$2"
   local actual
-  actual="$(curl -sS -o /dev/null -w '%{http_code}' "$url")"
+  actual="$(curl -sS --max-time 20 -o /dev/null -w '%{http_code}' "$url")"
   if [[ "$actual" != "$expected" ]]; then
     echo "FAIL $url -> $actual (expected $expected)"
     failures=$((failures + 1))
@@ -74,43 +86,94 @@ check_status() {
   fi
 }
 
+check_redirect() {
+  local source="$1"
+  local destination="$2"
+  local expected_code="$3"
+  local result actual location expected_url
+  result="$(curl -sS --max-time 20 -o /dev/null -w '%{http_code} %{redirect_url}' "${BASE_URL}${source}")"
+  actual="${result%% *}"
+  location="${result#* }"
+  expected_url="${BASE_URL}${destination}"
+
+  if [[ "$actual" != "$expected_code" || "$location" != "$expected_url" ]]; then
+    echo "FAIL ${BASE_URL}${source} -> $actual $location (expected $expected_code $expected_url)"
+    failures=$((failures + 1))
+  else
+    echo "OK   ${BASE_URL}${source} -> $actual $location"
+  fi
+}
+
+check_cloudflare_html_redirect() {
+  local source="$1"
+  local destination="$2"
+  local result actual location expected_url
+  result="$(curl -sS --max-time 20 -o /dev/null -w '%{http_code} %{redirect_url}' "${BASE_URL}${source}")"
+  actual="${result%% *}"
+  location="${result#* }"
+  expected_url="${BASE_URL}${destination}"
+
+  if [[ ( "$actual" != "301" && "$actual" != "308" ) || "$location" != "$expected_url" ]]; then
+    echo "FAIL ${BASE_URL}${source} -> $actual $location (expected permanent redirect to $expected_url)"
+    failures=$((failures + 1))
+  else
+    echo "OK   ${BASE_URL}${source} -> $actual $location"
+  fi
+}
+
 echo "Checking canonical routes..."
-for route in "${routes[@]}"; do
+for route in "${canonical_routes[@]}"; do
   check_status "${BASE_URL}${route}" "200"
 done
 
 echo
-echo "Checking direct .html normalization..."
-for route in "${html_routes[@]}"; do
-  check_status "${BASE_URL}${route}" "301"
+echo "Checking legacy Odoo redirects..."
+for pair in "${legacy_redirects[@]}"; do
+  source="${pair%%|*}"
+  destination="${pair#*|}"
+  check_redirect "$source" "$destination" "301"
+  check_redirect "${source}/" "$destination" "301"
+done
+
+echo
+echo "Checking canonical trailing-slash normalization..."
+for route in "${canonical_routes[@]}"; do
+  [[ "$route" == "/" ]] && continue
+  check_redirect "${route}/" "$route" "301"
+done
+
+echo
+echo "Checking Cloudflare .html normalization..."
+for pair in "${html_redirects[@]}"; do
+  source="${pair%%|*}"
+  destination="${pair#*|}"
+  check_cloudflare_html_redirect "$source" "$destination"
 done
 
 echo
 echo "Checking required public files..."
 check_status "${BASE_URL}/robots.txt" "200"
 check_status "${BASE_URL}/sitemap.xml" "200"
-check_status "${BASE_URL}/healthz" "200"
 
 echo
 echo "Checking unknown-route behavior..."
 check_status "${BASE_URL}/this-page-should-not-exist" "404"
 
 echo
-echo "Checking indexing header for $MODE mode..."
-headers="$(curl -sS -I "${BASE_URL}/")"
-if [[ "$MODE" == "preview" ]]; then
-  if grep -qi '^X-Robots-Tag:.*noindex' <<<"$headers"; then
-    echo "OK   preview host is noindex"
-  else
-    echo "FAIL preview host is missing X-Robots-Tag: noindex"
-    failures=$((failures + 1))
-  fi
-else
+echo "Checking indexing response header for $MODE mode..."
+headers="$(curl -sS --max-time 20 -I "${BASE_URL}/")"
+if [[ "$MODE" == "production" ]]; then
   if grep -qi '^X-Robots-Tag:.*noindex' <<<"$headers"; then
     echo "FAIL production host is sending X-Robots-Tag: noindex"
     failures=$((failures + 1))
   else
-    echo "OK   production host is indexable at the response-header level"
+    echo "OK   production host is not sending an X-Robots-Tag noindex header"
+  fi
+else
+  if grep -qi '^X-Robots-Tag:.*noindex' <<<"$headers"; then
+    echo "OK   preview host is noindex at the response-header level"
+  else
+    echo "WARN preview host is not sending X-Robots-Tag: noindex; resolve duplicate-host indexing before final launch"
   fi
 fi
 
@@ -121,4 +184,4 @@ if (( failures > 0 )); then
 fi
 
 echo
-echo "All route checks passed."
+echo "All required route checks passed."

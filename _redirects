@@ -1,0 +1,48 @@
+# Back to Life Mental Health — Cloudflare Pages redirects
+#
+# The canonical public URLs match the repository's top-level HTML filenames
+# without the .html extension. Cloudflare Pages serves those extensionless
+# routes natively and redirects direct .html requests automatically.
+#
+# Keep legacy Odoo redirects direct to the final canonical destination so
+# search engines and visitors do not pass through redirect chains.
+
+# Legacy Odoo routes
+/services-overview /services 301
+/services-overview/ /services 301
+/pricing /insurance-payment 301
+/pricing/ /insurance-payment 301
+/about-us /about 301
+/about-us/ /about 301
+/contactus /contact 301
+/contactus/ /contact 301
+/attention-deficit-hyperactive-disorder /adhd 301
+/attention-deficit-hyperactive-disorder/ /adhd 301
+/post-traumatic-stress-disorder /ptsd 301
+/post-traumatic-stress-disorder/ /ptsd 301
+/obsessive-compulsive-disorder /ocd 301
+/obsessive-compulsive-disorder/ /ocd 301
+/loss-bereavement /grief-loss 301
+/loss-bereavement/ /grief-loss 301
+/life-changes /life-transitions 301
+/life-changes/ /life-transitions 301
+
+# Canonical trailing-slash normalization
+/services/ /services 301
+/medication-management/ /medication-management 301
+/new-patients/ /new-patients 301
+/current-patients/ /current-patients 301
+/insurance-payment/ /insurance-payment 301
+/telehealth/ /telehealth 301
+/faq/ /faq 301
+/about/ /about 301
+/contact/ /contact 301
+/anxiety/ /anxiety 301
+/depression/ /depression 301
+/adhd/ /adhd 301
+/ptsd/ /ptsd 301
+/ocd/ /ocd 301
+/bipolar/ /bipolar 301
+/grief-loss/ /grief-loss 301
+/life-transitions/ /life-transitions 301
+/privacy/ /privacy 301

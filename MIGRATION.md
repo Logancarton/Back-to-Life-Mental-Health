@@ -1,115 +1,167 @@
 # Website Migration Plan
 
-This file tracks the move from the current Odoo website to the custom Back to Life Mental Health website.
+This file tracks the move from the current Odoo website to the custom Back to Life Mental Health website on Cloudflare Pages.
 
 ## Migration principle
 
-Do not point the production domain away from Odoo until the custom site has been visually reviewed, all required owned assets have been copied into the repository, and the production URL behavior has been verified.
+Do not point the production domain away from Odoo until the Cloudflare staging site has passed route, desktop/mobile, integration, content, and 404 QA. Keep Odoo active through the initial production-stability period.
 
-## Legacy URL preservation
+Primary/canonical hostname remains:
 
-The current Odoo site already has public URLs that may be indexed, bookmarked, or linked externally. GitHub Pages cannot issue configurable server-side 301 redirects, so this repository preserves the legacy route names with compatibility pages that forward visitors to the new static files.
+`https://www.back-to-life-mental-health.com/`
 
-| Existing public route | New page |
+Cloudflare staging/underlying hosting:
+
+`https://back-to-life-mental-health.pages.dev/`
+
+The `pages.dev` hostname is not the intended public practice URL.
+
+## Selected production architecture
+
+The public site remains static HTML/CSS/vanilla JavaScript with local images and video. Cloudflare Pages is the selected production-serving layer.
+
+Pushes to `main` deploy through `.github/workflows/deploy-pages.yml`.
+
+The build creates `public-dist`, runs `scripts/prepare-cloudflare-site.py`, generates the browser-compatible provider MP4, and deploys the static result to Cloudflare Pages.
+
+Historical GitHub Pages compatibility directories and Cloud Run/Nginx files are not part of the Cloudflare deployment output.
+
+## Cloudflare-native routing
+
+Cloudflare Pages serves a top-level HTML file at the matching extensionless route. For example:
+
+- `services.html` → `/services`
+- `about.html` → `/about`
+- `adhd.html` → `/adhd`
+
+Cloudflare also normalizes direct `.html` requests to the extensionless version.
+
+The deployment preparation script removes the old JavaScript redirect-shell directories before upload so they cannot shadow these native routes. It also rewrites internal page links and canonical tags in the deployed HTML to point directly at extensionless canonical routes.
+
+The repository `_redirects` file is reserved for real HTTP redirects: old Odoo paths and explicit trailing-slash normalization.
+
+## Canonical route map
+
+| Page | Canonical route |
 | --- | --- |
-| `/services-overview` | `services.html` |
-| `/medication-management` | `medication-management.html` |
-| `/pricing` | `insurance-payment.html` |
-| `/about-us` | `about.html` |
-| `/contactus` | `contact.html` |
-| `/anxiety` | `anxiety.html` |
-| `/depression` | `depression.html` |
-| `/attention-deficit-hyperactive-disorder` | `adhd.html` |
-| `/post-traumatic-stress-disorder` | `ptsd.html` |
-| `/obsessive-compulsive-disorder` | `ocd.html` |
-| `/bipolar` | `bipolar.html` |
-| `/loss-bereavement` | `grief-loss.html` |
-| `/life-changes` | `life-transitions.html` |
-| `/privacy` | `privacy.html` |
+| Home | `/` |
+| Services | `/services` |
+| Medication Management | `/medication-management` |
+| New Patients | `/new-patients` |
+| Current Patients | `/current-patients` |
+| Insurance & Payment | `/insurance-payment` |
+| Telehealth | `/telehealth` |
+| FAQ | `/faq` |
+| About | `/about` |
+| Contact | `/contact` |
+| Anxiety | `/anxiety` |
+| Depression | `/depression` |
+| ADHD | `/adhd` |
+| PTSD | `/ptsd` |
+| OCD | `/ocd` |
+| Bipolar Disorder | `/bipolar` |
+| Grief & Loss | `/grief-loss` |
+| Life Transitions | `/life-transitions` |
+| Privacy | `/privacy` |
 
-New clean routes added by the custom site include `/new-patients`, `/current-patients`, `/insurance-payment`, `/telehealth`, and `/faq`.
+## Legacy Odoo URL preservation
 
-Canonical metadata and the sitemap use clean production URLs rather than the repository's internal `.html` filenames.
+The following older public routes redirect directly to the final canonical destination with HTTP 301 behavior through `_redirects`:
 
-## Asset migration status
+| Legacy route | Canonical destination |
+| --- | --- |
+| `/services-overview` | `/services` |
+| `/pricing` | `/insurance-payment` |
+| `/about-us` | `/about` |
+| `/contactus` | `/contact` |
+| `/attention-deficit-hyperactive-disorder` | `/adhd` |
+| `/post-traumatic-stress-disorder` | `/ptsd` |
+| `/obsessive-compulsive-disorder` | `/ocd` |
+| `/loss-bereavement` | `/grief-loss` |
+| `/life-changes` | `/life-transitions` |
 
-Completed:
+Existing Odoo routes that already equal the clean canonical route—such as `/medication-management`, `/anxiety`, `/depression`, `/bipolar`, and `/privacy`—remain canonical rather than redirecting to a different name.
 
-- The official Back to Life Mental Health logo is stored at `assets/images/btlmh-logo.png` and is used throughout the site.
-- The homepage hero now uses the owned local provider image at `assets/images/provider-introduction-poster.jpg` rather than an Odoo-hosted image.
-- The homepage social preview image also points to owned local media.
-- The About page introduction video and poster are stored under `assets/video/` and `assets/images/`.
-- The New Patients courage image is stored at `assets/images/anthem-courage-path.png`.
+Redirect rules point straight to final destinations to avoid chains.
 
-Optional future asset work:
+## Search metadata
 
-- Add selected office photography if it improves the patient experience.
-- Add branded insurance logo files later if they are preferred over the current clean text presentation.
-- Replace or supplement provider photography when a stronger dedicated hero image is available; this is a visual refinement, not an Odoo migration dependency.
+`sitemap.xml` contains only canonical production URLs on the `www` hostname. `robots.txt` references the production sitemap.
 
-Before Odoo is retired:
+During deployment, HTML canonical tags are normalized to the same route map so canonical metadata, internal navigation, and sitemap URLs agree.
 
-1. Confirm the custom site renders correctly with the Odoo site unavailable.
-2. Review all local image crops on desktop and mobile.
-3. Confirm no public page relies on an Odoo-hosted image or other builder asset.
+After production cutover:
 
-## Public-page migration status
+- verify `robots.txt` and `sitemap.xml` from the custom domain;
+- resubmit the sitemap in Google Search Console;
+- inspect indexing, redirect, duplicate-canonical, and 404 reports;
+- confirm old Odoo URLs are seen as permanent redirects rather than duplicate pages.
 
-The custom site now covers the useful public information currently represented on Odoo while reorganizing it into a more patient-centered structure:
+## Integrations that routing work must not change
 
-- Homepage
-- Services overview
-- Medication management
-- New patient guide
-- Current patient portal guide
-- Insurance and payment
-- Telehealth
-- FAQ hub
-- About
-- Contact
-- Privacy
-- Anxiety
-- Depression
-- ADHD
-- PTSD
-- OCD
-- Bipolar disorder
-- Grief and loss
-- Life transitions
+Scheduler currently used by the site:
 
-The current-patient guide routes established patients to Tebra for secure login, messaging, records, documents, and supported account functions. The public site does not collect portal credentials or protected clinical information.
+`https://d2oe0ra32qx05a.cloudfront.net/?practiceKey=k_1_108034`
 
-The condition pages now share a clearer patient sequence: what the concern can feel like, what evaluation considers, treatment options, what happens next, FAQs, and a direct scheduling path.
+Do not change the Tebra practice key without confirming the current direct scheduler URL in Tebra Practice Settings.
 
-The old Odoo pricing route is preserved, but the custom site does not hard-code the older cached self-pay amounts. Current private-pay rates should be confirmed before production if the practice wants exact prices displayed publicly.
+Tebra Patient Portal:
 
-## Production-domain cutover gate
+`https://portal.kareo.com/`
 
-Before changing DNS or adding a production `CNAME` file:
+Provider telehealth room:
 
-- Verify GitHub Pages deployment is green.
-- Review desktop and mobile layouts.
-- Verify every navigation and booking link.
-- Verify phone, email, fax, office address, and directions.
-- Verify accepted-insurance statements.
-- Verify private-pay wording and decide whether exact current rates should be displayed.
-- Verify every condition and patient-journey page.
-- Verify privacy copy and any required practice notices.
-- Confirm legacy routes resolve correctly.
-- Confirm local images, fonts, and styles load with no Odoo dependency.
-- Add the production custom domain in GitHub Pages.
-- Update DNS only after the preview is approved.
+`https://telehealth.kareo.com/lcarton`
 
-## Post-cutover checks
+The static site must not collect portal credentials or protected clinical information.
 
-After the production domain points to the new site:
+The About page must continue to prefer `assets/video/provider-introduction.mp4` with the MOV fallback, and the real Anthem office image at `assets/images/btlmh-office-main.webp` must remain intact.
 
-- Test HTTPS.
-- Test all legacy URLs directly.
-- Submit the production sitemap to the practice's search-engine tools.
-- Watch for 404s and indexing changes.
-- Keep Odoo available briefly if practical until the new site is verified in production.
+## Pre-cutover QA gate
 
-## Architecture boundary
+Before DNS changes, verify on `https://back-to-life-mental-health.pages.dev/`:
 
-The marketing site remains static HTML/CSS/JavaScript. Future patient tools, intake workflows, forms, scheduling helpers, educational systems, or practice applications should be added as separate modules/services rather than coupling sensitive workflows directly to the public static site.
+- all canonical routes return the intended page;
+- legacy routes return 301 to the correct final canonical route;
+- direct `.html` requests normalize to extensionless URLs;
+- there are no redirect loops;
+- unknown routes return a real 404 and display `404.html`;
+- homepage, Services, Medication Management, New Patients, Current Patients, Insurance & Payment, Telehealth, FAQ, About, Contact, Privacy, and all condition pages render correctly;
+- scheduler modal, Tebra Portal, direct telehealth, provider video, office image, insurance logos, phone links, email links, directions, hamburger menu, mobile bottom action bar, and footer work on desktop and mobile.
+
+Use `scripts/verify-production-routes.sh` for HTTP-level route checks, but do not claim browser QA from the script alone.
+
+## DNS cutover — do not execute before QA passes
+
+Before changing website DNS:
+
+1. Inventory every existing DNS record.
+2. Preserve Google Workspace MX, SPF, DKIM, DMARC, Google verification TXT, and every other non-web record.
+3. Identify only the web-related A/AAAA/CNAME records that need replacement.
+4. In Cloudflare Pages, add `www.back-to-life-mental-health.com` as a custom domain and ideally add the apex `back-to-life-mental-health.com` as well.
+5. Do not manually point a CNAME at `pages.dev` without first associating the custom domain with the Pages project.
+6. Rotate the Cloudflare API token before production cutover, update the GitHub secret, trigger deployment, and verify the workflow is green.
+
+Primary/canonical hostname remains `https://www.back-to-life-mental-health.com/` unless that decision is explicitly changed.
+
+## Post-DNS verification
+
+Immediately verify HTTPS, every canonical route, legacy redirects, CSS/images/video, scheduler, portal, telehealth, mobile navigation, phone/email/directions links, and email sending/receiving.
+
+Keep Odoo active briefly while stability is confirmed.
+
+## `pages.dev` after production
+
+Only after the custom domain is active and verified, configure the Cloudflare-supported redirect from:
+
+`https://back-to-life-mental-health.pages.dev/*`
+
+to:
+
+`https://www.back-to-life-mental-health.com/*`
+
+Preserve path and query string. This is a post-cutover step, not part of the pre-cutover `_redirects` file.
+
+## Final retirement
+
+Cancel Odoo only after the custom production domain, HTTPS, email, redirects, Tebra integrations, local assets, search crawling, and duplicate-host handling are all verified stable.

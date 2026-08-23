@@ -34,6 +34,9 @@ jobs:
             --exclude 'Dockerfile' \
             --exclude '*.md'
 
+      - name: Normalize Cloudflare routes and metadata
+        run: python3 scripts/prepare-cloudflare-site.py public-dist
+
       - name: Build browser-compatible provider video
         run: |
           if ! command -v ffmpeg >/dev/null 2>&1; then

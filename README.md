@@ -1,84 +1,118 @@
 # Back to Life Mental Health Website
 
-Custom website for Back to Life Mental Health LLC, replacing the public-facing Odoo site over time while keeping the practice in full control of the code and hosting.
+Custom public website for Back to Life Mental Health LLC, an independent psychiatric practice in Anthem, Arizona.
 
 ## Current build
 
-The current site includes:
+The site is intentionally framework-free: plain HTML, CSS, vanilla JavaScript, local images, and local video. It includes the homepage, services, medication management, new-patient guidance, current-patient resources, insurance/payment, telehealth, FAQ, About, Contact, Privacy, and condition pages for anxiety, depression, ADHD, PTSD, OCD, bipolar disorder, grief/loss, and life transitions.
 
-- Responsive custom homepage
-- Services overview
-- Dedicated medication-management page
-- New-patient guide
-- Current-patient hub with secure Tebra Patient Portal access and account guidance
-- Insurance and payment page
-- Arizona telehealth page
-- Frequently asked questions hub
-- About page
-- Contact page with map and direct contact links
-- Dedicated patient-education pages for anxiety, depression, ADHD, PTSD, OCD, bipolar disorder, grief/loss, and life transitions
-- Privacy page
-- Existing appointment-booking integration
-- Official Back to Life Mental Health logo stored locally in the repository
-- Owned local provider/practice imagery
-- Commercial insurance messaging
-- Anthem + Arizona telehealth positioning
-- Mobile navigation and lightweight scroll animations
-- Search-friendly page titles, canonical routes, social metadata, `robots.txt`, and `sitemap.xml`
-- Legacy-route compatibility pages for the Odoo/GitHub Pages migration
-- GitHub Pages deployment workflow for static previewing
-- Google Cloud Run/Nginx production configuration for real clean canonical routes
+Sensitive and patient-specific workflows remain with Tebra. The public site does not collect portal credentials or protected clinical information.
 
-## Architecture
+## Hosting state
 
-This version is intentionally framework-free: plain HTML, CSS, and JavaScript. That keeps deployment simple, fast, portable, and independent of Odoo. Custom practice functionality can later be added as separate modules without rebuilding the public-facing site.
+Production is still the Odoo-hosted site at:
 
-The production-serving layer is also intentionally thin. Nginx on Cloud Run maps clean public URLs to the existing static HTML rather than duplicating or rebuilding the site in a framework.
+`https://www.back-to-life-mental-health.com/`
 
-The current-patient page is intentionally an instruction-and-routing layer rather than an authentication system. Back to Life Mental Health does not collect portal credentials or clinical information on the public website; Tebra remains responsible for Patient Portal authentication, secure messaging, and protected patient information.
+Cloudflare Pages staging is:
 
-## Patient journey
+`https://back-to-life-mental-health.pages.dev/`
 
-The website is organized around the questions a patient is likely to ask rather than duplicating the structure of the old website builder:
+The intended final architecture is:
 
-1. What does the practice offer?
-2. What does starting care look like?
-3. How do current patients securely access messages, records, documents, and account help?
-4. Will my insurance work and what should I verify?
-5. Can I use telehealth?
-6. What happens during medication management?
-7. What can a condition feel like, what does evaluation consider, and what happens next?
-8. How do I schedule or contact the practice?
+`www.back-to-life-mental-health.com` → Cloudflare Pages → static Back to Life Mental Health website
 
-The condition pages share the same patient-centered sequence used elsewhere on the site: symptoms and lived experience → evaluation → treatment options → what happens next → FAQs → scheduling.
+Do not change DNS until pre-cutover QA passes.
 
-## Photography
+## Cloudflare Pages deployment
 
-The current homepage hero at `assets/images/homepage-hero.jpg` is intentionally placed and should not be replaced during routine SEO, deployment, or cleanup work.
+Pushes to `main` deploy through:
 
-`PHOTO_PLAN.md` can still guide future photography work, but it should be treated as a planning reference rather than permission to replace photographs that have since been intentionally selected and placed. New photos should be added only where they improve the actual page content.
+`.github/workflows/deploy-pages.yml`
 
-The site should prefer a small coherent library of real provider/practice photography plus restrained Arizona environment images over generic behavioral-health stock photography.
+The deployment copies the static site into `public-dist`, runs `scripts/prepare-cloudflare-site.py`, transcodes the provider introduction video into a browser-safe H.264/AAC MP4, and deploys the result with Wrangler.
 
-## Deployment
+The preparation script is deliberately narrow. It:
 
-GitHub Pages remains configured to publish from GitHub Actions and is useful as a static preview/compatibility environment.
+- removes historical GitHub Pages JavaScript compatibility-route directories from the Cloudflare build so they cannot shadow real pages;
+- rewrites internal page links to clean extensionless canonical routes;
+- aligns HTML canonical metadata with the production `www` hostname;
+- leaves Tebra links, media, styles, scripts, phone/email links, and patient workflows unchanged.
 
-For final production hosting, the repository now includes a Cloud Run path using `Dockerfile` and `cloud-run/default.conf.template`. This serves clean canonical routes such as `/anxiety`, `/new-patients`, and `/current-patients` as real HTML with HTTP 200 while redirecting `.html` URLs to the preferred clean routes.
+Cloudflare Pages natively serves a top-level file such as `about.html` at `/about` and normalizes direct `.html` requests to the extensionless route.
 
-See `GOOGLE_CLOUD_DEPLOYMENT.md` for deployment and verification steps.
+## Canonical public routes
 
-The production Odoo domain should remain unchanged until the replacement Cloud Run preview has passed visual, content, route, and policy review.
+- `/`
+- `/services`
+- `/medication-management`
+- `/new-patients`
+- `/current-patients`
+- `/insurance-payment`
+- `/telehealth`
+- `/faq`
+- `/about`
+- `/contact`
+- `/anxiety`
+- `/depression`
+- `/adhd`
+- `/ptsd`
+- `/ocd`
+- `/bipolar`
+- `/grief-loss`
+- `/life-transitions`
+- `/privacy`
 
-## Next build priorities
+The `_redirects` file preserves old Odoo URLs with direct HTTP 301 redirects to the final canonical destination and normalizes trailing slashes. Examples include `/services-overview` → `/services`, `/about-us` → `/about`, `/contactus` → `/contact`, and the older long-form ADHD/PTSD/OCD routes → `/adhd`, `/ptsd`, and `/ocd`.
 
-1. Deploy a Google Cloud Run preview and run `bash scripts/verify-production-routes.sh <run.app-url> preview`.
-2. Complete desktop/mobile visual QA on the Cloud Run build, preserving the current homepage hero and intentionally placed photography.
-3. Review final insurance, payment, privacy, and practice-policy wording before production cutover.
-4. Attach the production domain only after the preview and route checks pass.
-5. Run the production route verification and then complete Search Console submission/indexing checks.
-6. Add custom practice functionality as separate modules rather than coupling it to the marketing site.
+`robots.txt`, `sitemap.xml`, and HTML canonical metadata use `https://www.back-to-life-mental-health.com/` as the primary production hostname.
 
-## Important
+## Tebra boundaries
 
-Core public-facing imagery is stored in the repository rather than loaded from Odoo. Keep the Odoo site live until final visual, content, route, production-domain, and rollback checks are complete.
+Current scheduler URL used by the site:
+
+`https://d2oe0ra32qx05a.cloudfront.net/?practiceKey=k_1_108034`
+
+Do not replace the practice key unless current Tebra Practice Settings confirms a different direct scheduling URL.
+
+Patient Portal:
+
+`https://portal.kareo.com/`
+
+Provider telehealth room:
+
+`https://telehealth.kareo.com/lcarton`
+
+Never build a custom Back to Life Mental Health portal login on the static site.
+
+## Provider video
+
+The original introduction video remains:
+
+`assets/video/introduction.mov`
+
+During deployment, ffmpeg creates a genuine browser-compatible:
+
+`assets/video/provider-introduction.mp4`
+
+using H.264 video, AAC audio, `yuv420p`, and `faststart`. `about.html` prefers the MP4 and retains the MOV as fallback. Do not revert this to a renamed MOV.
+
+## Historical deployment files
+
+`Dockerfile`, `cloud-run/`, `GOOGLE_CLOUD_DEPLOYMENT.md`, and the old compatibility-route directories remain as historical migration artifacts for now. They are not copied into the Cloudflare deployment. Cloudflare Pages is the selected production-hosting path.
+
+## Verification
+
+Use:
+
+`bash scripts/verify-production-routes.sh https://back-to-life-mental-health.pages.dev preview`
+
+before DNS cutover, and after cutover:
+
+`bash scripts/verify-production-routes.sh https://www.back-to-life-mental-health.com production`
+
+Route checks do not replace browser QA. Desktop/mobile review should still cover navigation, scheduler modal, Tebra Portal and telehealth links, provider video, office photo, insurance presentation, phone/email/directions links, mobile navigation, footer, and 404 behavior.
+
+## Cutover rule
+
+Do not move DNS or cancel Odoo until Cloudflare staging has passed routing, visual, functional, and content QA. Preserve all Google Workspace and other non-web DNS records during the eventual cutover. Rotate the Cloudflare API token before production because the current token was previously visible during setup.
