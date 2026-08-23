@@ -30,11 +30,11 @@ Pushes to `main` deploy through:
 
 `.github/workflows/deploy-pages.yml`
 
-The deployment copies the static site into `public-dist`, runs `scripts/prepare-cloudflare-site.py`, transcodes the provider introduction video into a browser-safe H.264/AAC MP4, and deploys the result with Wrangler.
+The deployment copies the static site into `public-dist`, runs `scripts/prepare-cloudflare-site.py`, transcodes the provider introduction video into a browser-safe H.264/AAC MP4, deploys the result with Wrangler, and then runs the HTTP route verification script against the `pages.dev` staging host.
 
 The preparation script is deliberately narrow. It:
 
-- removes historical GitHub Pages JavaScript compatibility-route directories from the Cloudflare build so they cannot shadow real pages;
+- defensively removes any obsolete GitHub Pages JavaScript compatibility-route directories if one is reintroduced, so it cannot shadow a real page;
 - rewrites internal page links to clean extensionless canonical routes;
 - aligns HTML canonical metadata with the production `www` hostname;
 - leaves Tebra links, media, styles, scripts, phone/email links, and patient workflows unchanged.
@@ -99,15 +99,15 @@ using H.264 video, AAC audio, `yuv420p`, and `faststart`. `about.html` prefers t
 
 ## Historical deployment files
 
-`Dockerfile`, `cloud-run/`, `GOOGLE_CLOUD_DEPLOYMENT.md`, and the old compatibility-route directories remain as historical migration artifacts for now. They are not copied into the Cloudflare deployment. Cloudflare Pages is the selected production-hosting path.
+The obsolete GitHub Pages JavaScript compatibility-route directories have been removed from `main`. `Dockerfile`, `cloud-run/`, and `GOOGLE_CLOUD_DEPLOYMENT.md` remain as historical migration artifacts for now and are not copied into the Cloudflare deployment. Cloudflare Pages is the selected production-hosting path.
 
 ## Verification
 
-Use:
+Every push deployment now runs:
 
 `bash scripts/verify-production-routes.sh https://back-to-life-mental-health.pages.dev preview`
 
-before DNS cutover, and after cutover:
+after the Cloudflare upload. You can also run the same command manually before DNS cutover. After cutover, use:
 
 `bash scripts/verify-production-routes.sh https://www.back-to-life-mental-health.com production`
 

@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Prepare the static Back to Life Mental Health site for Cloudflare Pages.
 
-The repository still contains historical GitHub Pages compatibility directories.
-They are intentionally kept out of the Cloudflare deployment. The deployed HTML
-is also normalized so internal navigation and canonical metadata use the clean,
-extensionless production routes.
+Historical GitHub Pages compatibility directories must not be present in the
+Cloudflare deployment. The cleanup below is kept as a defensive guard in case
+one is accidentally reintroduced. Deployed HTML is also normalized so internal
+navigation and canonical metadata use clean, extensionless production routes.
 """
 
 from __future__ import annotations
@@ -38,8 +38,9 @@ PUBLIC_PAGES = {
     "privacy.html": "/privacy",
 }
 
-# These directories are old JavaScript redirect shells created for GitHub Pages.
-# If deployed to Cloudflare they can shadow the real extensionless HTML routes.
+# Defensive list of obsolete GitHub Pages JavaScript redirect-shell directories.
+# If any return in a future change, they are removed from the Cloudflare output
+# so they cannot shadow the real extensionless HTML routes.
 COMPATIBILITY_DIRECTORIES = {
     "about-us",
     "anxiety",
