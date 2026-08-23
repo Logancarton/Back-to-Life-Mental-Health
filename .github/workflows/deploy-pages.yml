@@ -1,4 +1,4 @@
-name: Deploy website to GitHub Pages
+name: Deploy website to Cloudflare Pages
 
 on:
   push:
@@ -8,31 +8,35 @@ on:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
-  group: pages
+  group: cloudflare-pages-production
   cancel-in-progress: true
 
 jobs:
   deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Configure GitHub Pages
-        uses: actions/configure-pages@v5
+      - name: Prepare static site
+        run: |
+          mkdir -p public-dist
+          rsync -a ./ public-dist/ \
+            --exclude 'public-dist' \
+            --exclude '.git' \
+            --exclude '.github' \
+            --exclude '.dockerignore' \
+            --exclude '.nojekyll' \
+            --exclude 'cloud-run' \
+            --exclude 'scripts' \
+            --exclude 'Dockerfile' \
+            --exclude '*.md'
 
-      - name: Upload static website
-        uses: actions/upload-pages-artifact@v4
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
         with:
-          path: .
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy public-dist --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT_NAME }} --branch=main
