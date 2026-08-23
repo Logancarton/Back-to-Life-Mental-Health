@@ -43,17 +43,26 @@ jobs:
         env:
           CLOUDFLARE_PAGES_PROJECT_NAME: ${{ vars.CLOUDFLARE_PAGES_PROJECT_NAME }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_ACCOUNT_ID_RAW: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
           test -n "$CLOUDFLARE_PAGES_PROJECT_NAME" || { echo "Missing repository variable: CLOUDFLARE_PAGES_PROJECT_NAME"; exit 1; }
           test -n "$CLOUDFLARE_API_TOKEN" || { echo "Missing repository secret: CLOUDFLARE_API_TOKEN"; exit 1; }
-          test -n "$CLOUDFLARE_ACCOUNT_ID" || { echo "Missing repository secret: CLOUDFLARE_ACCOUNT_ID"; exit 1; }
+          test -n "$CLOUDFLARE_ACCOUNT_ID_RAW" || { echo "Missing repository secret: CLOUDFLARE_ACCOUNT_ID"; exit 1; }
+
+          CLOUDFLARE_ACCOUNT_ID_CLEAN="$(printf '%s' "$CLOUDFLARE_ACCOUNT_ID_RAW" | tr -d '[:space:]')"
+          case "$CLOUDFLARE_ACCOUNT_ID_CLEAN" in
+            ''|*[!A-Za-z0-9_-]*)
+              echo "CLOUDFLARE_ACCOUNT_ID contains invalid characters after whitespace normalization."
+              exit 1
+              ;;
+          esac
+
+          echo "CLOUDFLARE_ACCOUNT_ID=$CLOUDFLARE_ACCOUNT_ID_CLEAN" >> "$GITHUB_ENV"
           echo "Cloudflare Pages project: $CLOUDFLARE_PAGES_PROJECT_NAME"
 
       - name: Deploy to Cloudflare Pages
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_PAGES_PROJECT_NAME: ${{ vars.CLOUDFLARE_PAGES_PROJECT_NAME }}
         run: |
           npx --yes wrangler@latest pages deploy public-dist \
