@@ -28,34 +28,98 @@ if (!document.querySelector('meta[name="theme-color"]')) {
   document.head.appendChild(theme);
 }
 
-// Static HTML owns canonical URLs. This mapping is used only so shared
-// behavior still identifies a page correctly when it is reached through a
-// clean public route rather than its .html filename.
-const pathToken = window.location.pathname.split('/').filter(Boolean).pop() || 'index.html';
-const pageAliases = {
-  'services-overview': 'services.html',
-  'medication-management': 'medication-management.html',
-  'new-patients': 'new-patients.html',
-  'current-patients': 'current-patients.html',
-  'insurance-payment': 'insurance-payment.html',
-  'telehealth': 'telehealth.html',
-  'faq': 'faq.html',
-  'about-us': 'about.html',
-  'contactus': 'contact.html',
-  'anxiety': 'anxiety.html',
-  'depression': 'depression.html',
-  'attention-deficit-hyperactive-disorder': 'adhd.html',
-  'post-traumatic-stress-disorder': 'ptsd.html',
-  'obsessive-compulsive-disorder': 'ocd.html',
-  'bipolar': 'bipolar.html',
-  'loss-bereavement': 'grief-loss.html',
-  'life-transitions': 'life-transitions.html',
-  'life-changes': 'life-transitions.html',
-  'privacy': 'privacy.html'
-};
-const pageFile = pageAliases[pathToken] || pathToken;
-const canonicalUrl = document.querySelector('link[rel="canonical"]')?.href || window.location.href;
+// Cloudflare Pages owns the public URL shape. Normalize both repository .html
+// paths and historical Odoo slugs to the same clean routes so shared behavior
+// works identically in local/source files and on the deployed pages.dev host.
 const siteOrigin = 'https://www.back-to-life-mental-health.com';
+const publicPageRoutes = {
+  'index.html': '/',
+  'services.html': '/services',
+  'medication-management.html': '/medication-management',
+  'new-patients.html': '/new-patients',
+  'current-patients.html': '/current-patients',
+  'insurance-payment.html': '/insurance-payment',
+  'telehealth.html': '/telehealth',
+  'faq.html': '/faq',
+  'about.html': '/about',
+  'contact.html': '/contact',
+  'anxiety.html': '/anxiety',
+  'depression.html': '/depression',
+  'adhd.html': '/adhd',
+  'ptsd.html': '/ptsd',
+  'ocd.html': '/ocd',
+  'bipolar.html': '/bipolar',
+  'grief-loss.html': '/grief-loss',
+  'life-transitions.html': '/life-transitions',
+  'privacy.html': '/privacy'
+};
+const routeAliases = {
+  '/': '/',
+  '/index.html': '/',
+  '/services': '/services',
+  '/services.html': '/services',
+  '/services-overview': '/services',
+  '/medication-management': '/medication-management',
+  '/medication-management.html': '/medication-management',
+  '/new-patients': '/new-patients',
+  '/new-patients.html': '/new-patients',
+  '/current-patients': '/current-patients',
+  '/current-patients.html': '/current-patients',
+  '/insurance-payment': '/insurance-payment',
+  '/insurance-payment.html': '/insurance-payment',
+  '/pricing': '/insurance-payment',
+  '/telehealth': '/telehealth',
+  '/telehealth.html': '/telehealth',
+  '/faq': '/faq',
+  '/faq.html': '/faq',
+  '/about': '/about',
+  '/about.html': '/about',
+  '/about-us': '/about',
+  '/contact': '/contact',
+  '/contact.html': '/contact',
+  '/contactus': '/contact',
+  '/anxiety': '/anxiety',
+  '/anxiety.html': '/anxiety',
+  '/depression': '/depression',
+  '/depression.html': '/depression',
+  '/adhd': '/adhd',
+  '/adhd.html': '/adhd',
+  '/attention-deficit-hyperactive-disorder': '/adhd',
+  '/ptsd': '/ptsd',
+  '/ptsd.html': '/ptsd',
+  '/post-traumatic-stress-disorder': '/ptsd',
+  '/ocd': '/ocd',
+  '/ocd.html': '/ocd',
+  '/obsessive-compulsive-disorder': '/ocd',
+  '/bipolar': '/bipolar',
+  '/bipolar.html': '/bipolar',
+  '/grief-loss': '/grief-loss',
+  '/grief-loss.html': '/grief-loss',
+  '/loss-bereavement': '/grief-loss',
+  '/life-transitions': '/life-transitions',
+  '/life-transitions.html': '/life-transitions',
+  '/life-changes': '/life-transitions',
+  '/privacy': '/privacy',
+  '/privacy.html': '/privacy'
+};
+const publicRoutes = new Set(Object.values(publicPageRoutes));
+const normalizeRoute = (href = '/') => {
+  const raw = String(href).trim();
+  if (!raw) return '/';
+  if (/^(?:[a-z][a-z0-9+.-]*:)?\/\//i.test(raw) || raw.startsWith('mailto:') || raw.startsWith('tel:')) return raw;
+
+  const pathOnly = raw.split('#')[0].split('?')[0];
+  if (!pathOnly) return window.location.pathname || '/';
+  const withLeadingSlash = pathOnly.startsWith('/') ? pathOnly : `/${pathOnly}`;
+  const normalizedPath = withLeadingSlash === '/' ? '/' : withLeadingSlash.replace(/\/+$/, '');
+  return routeAliases[normalizedPath] || normalizedPath;
+};
+const currentRoute = normalizeRoute(window.location.pathname || '/');
+const declaredCanonical = document.querySelector('link[rel="canonical"]')?.href;
+const canonicalUrl = publicRoutes.has(currentRoute)
+  ? `${siteOrigin}${currentRoute === '/' ? '/' : currentRoute}`
+  : (declaredCanonical || window.location.href);
+const hasRouteLink = (container, route) => Boolean(container && [...container.querySelectorAll('a[href]')].some((link) => normalizeRoute(link.getAttribute('href')) === route));
 
 const description = document.querySelector('meta[name="description"]')?.content || '';
 const ensureMeta = (attribute, key, value) => {
@@ -86,7 +150,7 @@ ensureMeta('name', 'twitter:image:alt', socialImageAlt);
 
 // Tell search engines the preferred site name explicitly. Google recommends
 // WebSite structured data on the domain-level home page for this purpose.
-if (pageFile === 'index.html' && !document.querySelector('script[data-website-schema]')) {
+if (currentRoute === '/' && !document.querySelector('script[data-website-schema]')) {
   const websiteSchema = document.createElement('script');
   websiteSchema.type = 'application/ld+json';
   websiteSchema.setAttribute('data-website-schema', '');
@@ -104,33 +168,33 @@ if (pageFile === 'index.html' && !document.querySelector('script[data-website-sc
 // does not change visible navigation; it simply describes relationships that
 // are already represented by the site's navigation and page structure.
 const breadcrumbTrails = {
-  'services.html': ['Home', 'Psychiatric Services'],
-  'medication-management.html': ['Home', 'Psychiatric Services', 'Medication Management'],
-  'new-patients.html': ['Home', 'New Patients'],
-  'current-patients.html': ['Home', 'Current Patients'],
-  'insurance-payment.html': ['Home', 'New Patients', 'Insurance & Payment'],
-  'telehealth.html': ['Home', 'New Patients', 'Telehealth'],
-  'faq.html': ['Home', 'New Patients', 'FAQs'],
-  'about.html': ['Home', 'About Back to Life Mental Health'],
-  'contact.html': ['Home', 'Contact Back to Life Mental Health'],
-  'anxiety.html': ['Home', 'Psychiatric Services', 'Anxiety Treatment'],
-  'depression.html': ['Home', 'Psychiatric Services', 'Depression Treatment'],
-  'adhd.html': ['Home', 'Psychiatric Services', 'ADHD Treatment'],
-  'ptsd.html': ['Home', 'Psychiatric Services', 'PTSD & Trauma-Related Symptoms'],
-  'ocd.html': ['Home', 'Psychiatric Services', 'OCD Treatment'],
-  'bipolar.html': ['Home', 'Psychiatric Services', 'Bipolar Disorder Treatment'],
-  'grief-loss.html': ['Home', 'Psychiatric Services', 'Grief & Loss'],
-  'life-transitions.html': ['Home', 'Psychiatric Services', 'Life Transitions & Adjustment'],
-  'privacy.html': ['Home', 'Privacy Policy']
+  '/services': ['Home', 'Psychiatric Services'],
+  '/medication-management': ['Home', 'Psychiatric Services', 'Medication Management'],
+  '/new-patients': ['Home', 'New Patients'],
+  '/current-patients': ['Home', 'Current Patients'],
+  '/insurance-payment': ['Home', 'New Patients', 'Insurance & Payment'],
+  '/telehealth': ['Home', 'New Patients', 'Telehealth'],
+  '/faq': ['Home', 'New Patients', 'FAQs'],
+  '/about': ['Home', 'About Back to Life Mental Health'],
+  '/contact': ['Home', 'Contact Back to Life Mental Health'],
+  '/anxiety': ['Home', 'Psychiatric Services', 'Anxiety Treatment'],
+  '/depression': ['Home', 'Psychiatric Services', 'Depression Treatment'],
+  '/adhd': ['Home', 'Psychiatric Services', 'ADHD Treatment'],
+  '/ptsd': ['Home', 'Psychiatric Services', 'PTSD & Trauma-Related Symptoms'],
+  '/ocd': ['Home', 'Psychiatric Services', 'OCD Treatment'],
+  '/bipolar': ['Home', 'Psychiatric Services', 'Bipolar Disorder Treatment'],
+  '/grief-loss': ['Home', 'Psychiatric Services', 'Grief & Loss'],
+  '/life-transitions': ['Home', 'Psychiatric Services', 'Life Transitions & Adjustment'],
+  '/privacy': ['Home', 'Privacy Policy']
 };
 
 const breadcrumbParentUrls = {
   'Home': `${siteOrigin}/`,
-  'Psychiatric Services': `${siteOrigin}/services-overview`,
+  'Psychiatric Services': `${siteOrigin}/services`,
   'New Patients': `${siteOrigin}/new-patients`
 };
 
-const breadcrumbTrail = breadcrumbTrails[pageFile];
+const breadcrumbTrail = breadcrumbTrails[currentRoute];
 if (breadcrumbTrail && !document.querySelector('script[data-breadcrumb-schema]')) {
   const breadcrumbSchema = document.createElement('script');
   breadcrumbSchema.type = 'application/ld+json';
@@ -161,9 +225,9 @@ const nav = document.querySelector('[data-nav]');
 
 // Give established patients a consistent, quiet portal entry point on every
 // full public page without duplicating another navigation system in the HTML.
-if (nav && !nav.querySelector('a[href="current-patients.html"]')) {
+if (nav && !hasRouteLink(nav, '/current-patients')) {
   const patientPortalLink = document.createElement('a');
-  patientPortalLink.href = 'current-patients.html';
+  patientPortalLink.href = '/current-patients';
   patientPortalLink.textContent = 'Patient Portal';
   patientPortalLink.setAttribute('data-patient-portal-link', '');
   const bookingLink = nav.querySelector('a[href*="practiceKey="]');
@@ -214,11 +278,11 @@ document.querySelectorAll('.site-footer .footer-grid').forEach((footerGrid) => {
   if (!contactColumn) return;
 
   const exploreColumn = [...footerGrid.children].find((column) => column.querySelector('h3')?.textContent?.trim() === 'Explore');
-  if (exploreColumn && !exploreColumn.querySelector('a[href="current-patients.html"]')) {
+  if (exploreColumn && !hasRouteLink(exploreColumn, '/current-patients')) {
     const currentPatientsLink = document.createElement('a');
-    currentPatientsLink.href = 'current-patients.html';
+    currentPatientsLink.href = '/current-patients';
     currentPatientsLink.textContent = 'Current Patients';
-    const newPatientsLink = exploreColumn.querySelector('a[href="new-patients.html"]');
+    const newPatientsLink = [...exploreColumn.querySelectorAll('a[href]')].find((link) => normalizeRoute(link.getAttribute('href')) === '/new-patients');
     if (newPatientsLink) newPatientsLink.insertAdjacentElement('afterend', currentPatientsLink);
     else exploreColumn.appendChild(currentPatientsLink);
   }
@@ -244,36 +308,36 @@ document.querySelectorAll('.site-footer .footer-grid').forEach((footerGrid) => {
   }
 });
 
-document.querySelectorAll('a[href="services.html#medication-management"], a[href="#medication-management"]').forEach((link) => {
-  if (link.textContent.toLowerCase().includes('medication')) link.setAttribute('href', 'medication-management.html');
+document.querySelectorAll('a[href="services.html#medication-management"], a[href="/services#medication-management"], a[href="#medication-management"]').forEach((link) => {
+  if (link.textContent.toLowerCase().includes('medication')) link.setAttribute('href', '/medication-management');
 });
 
 const conditionRoutes = {
-  'Anxiety': 'anxiety.html',
-  'Anxiety disorders': 'anxiety.html',
-  'Depression': 'depression.html',
-  'ADHD': 'adhd.html',
-  'PTSD': 'ptsd.html',
-  'PTSD and trauma-related symptoms': 'ptsd.html',
-  'OCD': 'ocd.html',
-  'Obsessive-compulsive disorder': 'ocd.html',
-  'Bipolar Disorder': 'bipolar.html',
-  'Bipolar disorder': 'bipolar.html',
-  'Grief & Loss': 'grief-loss.html',
-  'Grief and loss': 'grief-loss.html',
-  'Life Transitions': 'life-transitions.html',
-  'Life transitions and adjustment concerns': 'life-transitions.html'
+  'Anxiety': '/anxiety',
+  'Anxiety disorders': '/anxiety',
+  'Depression': '/depression',
+  'ADHD': '/adhd',
+  'PTSD': '/ptsd',
+  'PTSD and trauma-related symptoms': '/ptsd',
+  'OCD': '/ocd',
+  'Obsessive-compulsive disorder': '/ocd',
+  'Bipolar Disorder': '/bipolar',
+  'Bipolar disorder': '/bipolar',
+  'Grief & Loss': '/grief-loss',
+  'Grief and loss': '/grief-loss',
+  'Life Transitions': '/life-transitions',
+  'Life transitions and adjustment concerns': '/life-transitions'
 };
 
-const conditionPageFiles = new Set([
-  'anxiety.html',
-  'depression.html',
-  'adhd.html',
-  'ptsd.html',
-  'ocd.html',
-  'bipolar.html',
-  'grief-loss.html',
-  'life-transitions.html'
+const conditionPageRoutes = new Set([
+  '/anxiety',
+  '/depression',
+  '/adhd',
+  '/ptsd',
+  '/ocd',
+  '/bipolar',
+  '/grief-loss',
+  '/life-transitions'
 ]);
 
 document.querySelectorAll('.condition-card').forEach((card) => {
@@ -297,18 +361,18 @@ document.querySelectorAll('.simple-list').forEach((list) => {
 
 // Keep the patient-resource subnavigation consistent across the journey pages.
 document.querySelectorAll('.journey-nav-inner').forEach((journeyNav) => {
-  if (!journeyNav.querySelector('a[href="current-patients.html"]')) {
+  if (!hasRouteLink(journeyNav, '/current-patients')) {
     const currentPatientsLink = document.createElement('a');
-    currentPatientsLink.href = 'current-patients.html';
+    currentPatientsLink.href = '/current-patients';
     currentPatientsLink.textContent = 'Current Patients';
-    const newPatientsLink = journeyNav.querySelector('a[href="new-patients.html"]');
+    const newPatientsLink = [...journeyNav.querySelectorAll('a[href]')].find((link) => normalizeRoute(link.getAttribute('href')) === '/new-patients');
     if (newPatientsLink) newPatientsLink.insertAdjacentElement('afterend', currentPatientsLink);
     else journeyNav.prepend(currentPatientsLink);
   }
 
   journeyNav.querySelectorAll('a').forEach((link) => {
     link.removeAttribute('aria-current');
-    if ((link.getAttribute('href') || '').split('#')[0] === pageFile) link.setAttribute('aria-current', 'page');
+    if (normalizeRoute(link.getAttribute('href')) === currentRoute) link.setAttribute('aria-current', 'page');
   });
 });
 
@@ -470,7 +534,7 @@ if (canShowSchedulingWidget && !document.querySelector('[data-scheduler-launcher
 
 // Give the homepage a practical patient-journey entry point without turning it
 // into another long information page.
-if (pageFile === 'index.html' && !document.querySelector('[data-patient-resources]')) {
+if (currentRoute === '/' && !document.querySelector('[data-patient-resources]')) {
   const insuranceSection = document.querySelector('.insurance-section');
   if (insuranceSection) {
     const resources = document.createElement('section');
@@ -484,10 +548,10 @@ if (pageFile === 'index.html' && !document.querySelector('[data-patient-resource
           <p>What happens first, how current patients stay connected, how insurance works, and the questions people usually ask.</p>
         </div>
         <div class="condition-grid">
-          <a class="condition-card reveal" href="new-patients.html"><span>Start here</span><strong>New Patients</strong><p>From scheduling through your first treatment plan.</p></a>
-          <a class="condition-card reveal" href="current-patients.html"><span>Already established?</span><strong>Current Patients</strong><p>Portal access, secure messages, records, and account help.</p></a>
-          <a class="condition-card reveal" href="insurance-payment.html"><span>Coverage</span><strong>Insurance & Payment</strong><p>Current plans, private pay, and benefit questions.</p></a>
-          <a class="condition-card reveal" href="faq.html"><span>Quick answers</span><strong>FAQs</strong><p>Appointments, medication, insurance, and follow-up.</p></a>
+          <a class="condition-card reveal" href="/new-patients"><span>Start here</span><strong>New Patients</strong><p>From scheduling through your first treatment plan.</p></a>
+          <a class="condition-card reveal" href="/current-patients"><span>Already established?</span><strong>Current Patients</strong><p>Portal access, secure messages, records, and account help.</p></a>
+          <a class="condition-card reveal" href="/insurance-payment"><span>Coverage</span><strong>Insurance & Payment</strong><p>Current plans, private pay, and benefit questions.</p></a>
+          <a class="condition-card reveal" href="/faq"><span>Quick answers</span><strong>FAQs</strong><p>Appointments, medication, insurance, and follow-up.</p></a>
         </div>
       </div>`;
     insuranceSection.insertAdjacentElement('afterend', resources);
@@ -495,7 +559,7 @@ if (pageFile === 'index.html' && !document.querySelector('[data-patient-resource
 }
 
 // Condition pages share a practical bridge between education and FAQs.
-if (conditionPageFiles.has(pageFile)) {
+if (conditionPageRoutes.has(currentRoute)) {
   const articleMain = document.querySelector('.article-main');
   const faqSection = [...document.querySelectorAll('.article-main > .article-section')].find((section) =>
     section.querySelector('.eyebrow')?.textContent?.trim().toLowerCase().includes('frequently asked')
@@ -514,20 +578,20 @@ if (conditionPageFiles.has(pageFile)) {
         <div class="next-step-card"><span>02 / Decide</span><strong>Review the options</strong><p>Recommendations include the reasoning, likely benefits, tradeoffs, alternatives, and what would change the plan.</p></div>
         <div class="next-step-card"><span>03 / Follow</span><strong>See what changes</strong><p>Follow-up focuses on response, side effects, functioning, new information, and whether treatment still fits.</p></div>
       </div>
-      <div class="condition-next-links"><a href="new-patients.html">What starting care looks like →</a><a href="medication-management.html">How medication management works →</a></div>`;
+      <div class="condition-next-links"><a href="/new-patients">What starting care looks like →</a><a href="/medication-management">How medication management works →</a></div>`;
     faqSection.insertAdjacentElement('beforebegin', nextStep);
   }
 }
 
 if (nav) {
-  const contentPages = new Set([...conditionPageFiles, 'medication-management.html']);
-  const patientPages = new Set(['new-patients.html', 'insurance-payment.html', 'telehealth.html', 'faq.html']);
+  const contentPageRoutes = new Set([...conditionPageRoutes, '/medication-management']);
+  const patientPages = new Set(['/new-patients', '/insurance-payment', '/telehealth', '/faq']);
   nav.querySelectorAll('a').forEach((link) => {
     link.removeAttribute('aria-current');
-    const href = (link.getAttribute('href') || '').split('#')[0];
-    const isCurrent = href === pageFile ||
-      (contentPages.has(pageFile) && href === 'services.html') ||
-      (patientPages.has(pageFile) && href === 'new-patients.html');
+    const hrefRoute = normalizeRoute(link.getAttribute('href'));
+    const isCurrent = hrefRoute === currentRoute ||
+      (contentPageRoutes.has(currentRoute) && hrefRoute === '/services') ||
+      (patientPages.has(currentRoute) && hrefRoute === '/new-patients');
     if (isCurrent) link.setAttribute('aria-current', 'page');
   });
 }
