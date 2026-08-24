@@ -57,14 +57,23 @@ async function noOverflow(page, label) {
 }
 
 async function localImagesLoad(page, label) {
-  const results = await page.locator('img[src]').evaluateAll((images) => images.map((image) => ({
-    src: image.src,
-    complete: image.complete,
-    naturalWidth: image.naturalWidth
-  })));
-  for (const image of results) {
-    if (!image.src.startsWith(baseUrl)) continue;
-    assert(image.complete && image.naturalWidth > 0, `${label}: image did not render: ${image.src}`);
+  const images = page.locator('img[src]');
+  const count = await images.count();
+  for (let index = 0; index < count; index += 1) {
+    const image = images.nth(index);
+    const src = await image.getAttribute('src');
+    if (!src) continue;
+    const absolute = new URL(src, baseUrl).href;
+    if (!absolute.startsWith(baseUrl)) continue;
+
+    await image.scrollIntoViewIfNeeded();
+    const handle = await image.elementHandle();
+    if (!handle) throw new Error(`${label}: image handle missing: ${absolute}`);
+    await page.waitForFunction(
+      (node) => node.complete && node.naturalWidth > 0,
+      handle,
+      { timeout: 10000 }
+    );
   }
 }
 
@@ -139,6 +148,8 @@ try {
   assert(!(await desktop.locator('body').innerText()).includes('275518'), 'Homepage still contains removed license number');
   assert(!(await desktop.locator('[data-menu-toggle]').isVisible()), 'Desktop hamburger should be hidden');
   await localImagesLoad(desktop, 'desktop home');
+  await desktop.evaluate(() => window.scrollTo(0, 0));
+  await desktop.waitForTimeout(200);
   await noOverflow(desktop, 'desktop home');
   await schedulerLifecycle(desktop, 'desktop scheduler');
   await publish('success', 'Desktop homepage and scheduler passed', 'task2-desktop-home');
