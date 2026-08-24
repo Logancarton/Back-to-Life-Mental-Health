@@ -19,7 +19,7 @@ function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
 
-async function publish(state, description) {
+async function publish(state, description, context = 'task2-browser-qa') {
   if (!ghToken || !ghRepo || !ghSha) return;
   await fetch(`https://api.github.com/repos/${ghRepo}/statuses/${ghSha}`, {
     method: 'POST',
@@ -31,7 +31,7 @@ async function publish(state, description) {
     },
     body: JSON.stringify({
       state,
-      context: 'task2-browser-qa',
+      context,
       description: String(description).slice(0, 140)
     })
   });
@@ -89,17 +89,17 @@ async function schedulerLifecycle(page, label, mobile = false) {
     const hit = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2);
     return hit === node || node.contains(hit);
   });
-  assert(hitTestable, `${label}: scheduler launcher is visually covered or not clickable`);
+  assert(hitTestable, `${label}: launcher covered or not clickable`);
 
   await launcher.evaluate((node) => node.click());
   await page.waitForFunction(() => document.querySelector('[data-scheduler-dialog]')?.open === true);
 
   const dialog = page.locator('[data-scheduler-dialog]');
   assert(await dialog.getAttribute('aria-labelledby') === 'scheduler-dialog-title', `${label}: dialog accessibility label missing`);
-  assert(await launcher.getAttribute('aria-expanded') === 'true', `${label}: launcher aria-expanded did not open`);
-  assert(await page.locator('[data-scheduler-dialog] iframe').count() === 1, `${label}: scheduler iframe missing`);
+  assert(await launcher.getAttribute('aria-expanded') === 'true', `${label}: aria-expanded did not open`);
+  assert(await page.locator('[data-scheduler-dialog] iframe').count() === 1, `${label}: iframe missing`);
   assert(await page.locator('[data-scheduler-dialog] iframe').getAttribute('src') === schedulerUrl, `${label}: scheduler destination changed`);
-  assert(await page.locator(`[data-scheduler-fallback][href="${schedulerUrl}"]`).count() === 1, `${label}: scheduler fallback missing`);
+  assert(await page.locator(`[data-scheduler-fallback][href="${schedulerUrl}"]`).count() === 1, `${label}: fallback missing`);
 
   if (mobile) {
     const metrics = await dialog.evaluate((node) => ({
@@ -107,8 +107,8 @@ async function schedulerLifecycle(page, label, mobile = false) {
       viewport: window.innerWidth,
       radius: getComputedStyle(node).borderRadius
     }));
-    assert(Math.abs(metrics.width - metrics.viewport) <= 2, `${label}: mobile dialog is not edge-to-edge`);
-    assert(metrics.radius === '0px', `${label}: mobile dialog radius should be 0`);
+    assert(Math.abs(metrics.width - metrics.viewport) <= 2, `${label}: dialog is not edge-to-edge`);
+    assert(metrics.radius === '0px', `${label}: dialog radius should be 0`);
     await page.waitForFunction(() => {
       const bar = document.querySelector('[data-mobile-contact-bar]');
       return bar && getComputedStyle(bar).opacity === '0' && getComputedStyle(bar).pointerEvents === 'none';
@@ -117,8 +117,8 @@ async function schedulerLifecycle(page, label, mobile = false) {
 
   await page.locator('[data-scheduler-close]').evaluate((node) => node.click());
   await page.waitForFunction(() => document.querySelector('[data-scheduler-dialog]')?.open === false);
-  assert(await launcher.getAttribute('aria-expanded') === 'false', `${label}: launcher aria-expanded did not reset`);
-  assert(await page.evaluate(() => document.activeElement === document.querySelector('[data-scheduler-launcher]')), `${label}: focus did not return to launcher`);
+  assert(await launcher.getAttribute('aria-expanded') === 'false', `${label}: aria-expanded did not reset`);
+  assert(await page.evaluate(() => document.activeElement === document.querySelector('[data-scheduler-launcher]')), `${label}: focus did not return`);
 
   await launcher.evaluate((node) => node.click());
   await page.waitForFunction(() => document.querySelector('[data-scheduler-dialog]')?.open === true);
@@ -141,35 +141,38 @@ try {
   await localImagesLoad(desktop, 'desktop home');
   await noOverflow(desktop, 'desktop home');
   await schedulerLifecycle(desktop, 'desktop scheduler');
+  await publish('success', 'Desktop homepage and scheduler passed', 'task2-desktop-home');
 
   await goto(desktop, '/current-patients');
   const currentPatientTopLinks = await desktop.locator('[data-nav] a').evaluateAll((links) => links.filter((link) => {
     const path = new URL(link.href, window.location.href).pathname.replace(/\/+$/, '');
     return path === '/current-patients';
   }).length);
-  assert(currentPatientTopLinks === 1, `Current Patients: expected one top-nav route, found ${currentPatientTopLinks}`);
-  assert(JSON.stringify(await activeNav(desktop)) === JSON.stringify(['/current-patients']), 'Current Patients active navigation is incorrect');
+  assert(currentPatientTopLinks === 1, `Current Patients expected one top-nav route found ${currentPatientTopLinks}`);
+  assert(JSON.stringify(await activeNav(desktop)) === JSON.stringify(['/current-patients']), 'Current Patients active navigation incorrect');
   await exactLink(desktop, portalUrl, 'Patient Portal');
   await exactLink(desktop, telehealthUrl, 'Direct telehealth');
   await noOverflow(desktop, 'desktop current patients');
+  await publish('success', 'Current Patients links/navigation passed', 'task2-current-patients');
 
   await goto(desktop, '/medication-management');
-  assert(JSON.stringify(await activeNav(desktop)) === JSON.stringify(['/medication-management']), 'Medication Management must be the only current top-nav item');
-
+  assert(JSON.stringify(await activeNav(desktop)) === JSON.stringify(['/medication-management']), 'Medication Management not sole current nav item');
   await goto(desktop, '/adhd');
-  assert(JSON.stringify(await activeNav(desktop)) === JSON.stringify(['/services']), 'Condition pages should keep Services current');
+  assert(JSON.stringify(await activeNav(desktop)) === JSON.stringify(['/services']), 'Condition page did not keep Services current');
+  await publish('success', 'Active navigation passed', 'task2-navigation');
 
   await goto(desktop, '/about');
   const video = desktop.locator('.provider-intro-video');
   assert(await video.count() === 1, 'About video element missing');
   const videoSources = await video.locator('source').evaluateAll((sources) => sources.map((source) => ({ src: source.src, type: source.type })));
-  assert(videoSources[0]?.type === 'video/mp4', 'About MP4 must be first source');
+  assert(videoSources[0]?.type === 'video/mp4', 'About MP4 not first source');
   assert(videoSources[1]?.type === 'video/quicktime', 'About MOV fallback missing');
-  assert(await desktop.evaluate(() => document.querySelector('.provider-intro-video')?.canPlayType('video/mp4') !== ''), 'Browser reports MP4 video unsupported');
+  assert(await desktop.evaluate(() => document.querySelector('.provider-intro-video')?.canPlayType('video/mp4') !== ''), 'Browser reports MP4 unsupported');
   const mp4Response = await desktop.context().request.get(videoSources[0].src, { timeout: 30000 });
   assert(mp4Response.ok(), `About MP4 returned ${mp4Response.status()}`);
   await localImagesLoad(desktop, 'desktop about');
   await noOverflow(desktop, 'desktop about');
+  await publish('success', 'About media/layout passed', 'task2-about');
 
   await goto(desktop, '/insurance-payment');
   await localImagesLoad(desktop, 'desktop insurance');
@@ -184,6 +187,7 @@ try {
 
   await goto(desktop, '/task-2-real-404-check', 404);
   assert((await desktop.locator('body').innerText()).toLowerCase().includes('page not found'), 'Rendered 404 content missing');
+  await publish('success', 'Desktop links/images/404 passed', 'task2-desktop-rest');
   await desktopContext.close();
 
   const mobileContext = await browser.newContext({ viewport: { width: 390, height: 844 } });
@@ -192,7 +196,7 @@ try {
 
   const toggle = mobile.locator('[data-menu-toggle]');
   const nav = mobile.locator('[data-nav]');
-  assert(await toggle.isVisible(), 'Mobile hamburger is not visible');
+  assert(await toggle.isVisible(), 'Mobile hamburger not visible');
   await toggle.click();
   assert(await toggle.getAttribute('aria-expanded') === 'true', 'Mobile hamburger did not open');
   assert(await nav.evaluate((node) => node.classList.contains('open')), 'Mobile nav open class missing');
@@ -203,9 +207,9 @@ try {
   await toggle.click();
   assert(await toggle.getAttribute('aria-expanded') === 'false', 'Mobile hamburger did not close');
   assert(!(await nav.evaluate((node) => node.classList.contains('open'))), 'Mobile nav stayed open');
-
   await noOverflow(mobile, 'mobile home');
   await schedulerLifecycle(mobile, 'mobile scheduler', true);
+  await publish('success', 'Mobile hamburger/scheduler passed', 'task2-mobile-home');
 
   for (const path of ['/about', '/current-patients', '/insurance-payment', '/contact', '/medication-management']) {
     await goto(mobile, path);
@@ -213,7 +217,7 @@ try {
   }
 
   await goto(mobile, '/current-patients');
-  assert(JSON.stringify(await activeNav(mobile)) === JSON.stringify(['/current-patients']), 'Mobile Current Patients active navigation is incorrect');
+  assert(JSON.stringify(await activeNav(mobile)) === JSON.stringify(['/current-patients']), 'Mobile Current Patients active navigation incorrect');
   await exactLink(mobile, schedulerUrl, 'Mobile scheduler destination');
   await mobileContext.close();
 
@@ -221,6 +225,8 @@ try {
   console.log('Task 2 rendered staging QA passed.');
 } catch (error) {
   const message = error instanceof Error ? error.message : String(error);
+  const slug = message.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 72) || 'unknown';
+  await publish('failure', message, `task2-fail-${slug}`).catch(() => {});
   await publish('failure', message).catch(() => {});
   console.error(`Task 2 rendered staging QA failed: ${message}`);
   process.exitCode = 1;
