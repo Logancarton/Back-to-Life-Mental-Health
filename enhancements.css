@@ -135,7 +135,7 @@ a.condition-card:is([href="ptsd.html"], [href="/ptsd"])::before {
 
 a.condition-card:is([href="grief-loss.html"], [href="/grief-loss"])::before {
   background-image: linear-gradient(180deg, rgba(23,50,58,.02), rgba(23,50,58,.16)), url("assets/images/Grief_&_Loss.png");
-  background-position: center 44%;
+  background-position: center 30%;
 }
 
 a.condition-card:is([href="adhd.html"], [href="/adhd"]) > span,
