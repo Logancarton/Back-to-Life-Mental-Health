@@ -29,7 +29,7 @@ html:has(link[rel="canonical"][href$="/post-traumatic-stress-disorder"], link[re
 html:has(link[rel="canonical"][href$="/loss-bereavement"], link[rel="canonical"][href$="/grief-loss"]) .condition-hero {
   background:
     linear-gradient(90deg, rgba(12,31,37,.95) 0%, rgba(12,31,37,.84) 36%, rgba(12,31,37,.48) 62%, rgba(12,31,37,.16) 100%),
-    url("assets/images/grief-loss-hero.webp") center 46% / cover no-repeat;
+    url("assets/images/Grief_&_Loss.png") center 46% / cover no-repeat;
 }
 
 html:has(link[rel="canonical"][href$="/attention-deficit-hyperactive-disorder"], link[rel="canonical"][href$="/adhd"]) .condition-hero {
@@ -93,17 +93,19 @@ html:has(link[rel="canonical"][href$="/post-traumatic-stress-disorder"], link[re
   color: var(--ink);
 }
 
-/* Grief & Loss previously reused the Depression park photo. The new grief
+/* Grief & Loss previously reused the Depression park photo. The uploaded grief
    image now owns the hero, so suppress the mismatched article image. */
 html:has(link[rel="canonical"][href$="/loss-bereavement"], link[rel="canonical"][href$="/grief-loss"]) .article-photo:has(img[src$="Sunset walking at the park.png"]) {
   display: none;
 }
 
-/* The newly assigned ADHD and PTSD photography also belongs on the homepage
-   condition chooser. Keep the same photo-header treatment used by Depression,
-   Bipolar Disorder, and Life Transitions rather than placing copy over images. */
+/* The newly assigned ADHD, PTSD, and Grief & Loss photography also belongs on
+   the homepage condition chooser. Keep the same photo-header treatment used by
+   Depression, Bipolar Disorder, and Life Transitions rather than placing copy
+   over images. */
 a.condition-card:is([href="adhd.html"], [href="/adhd"]),
-a.condition-card:is([href="ptsd.html"], [href="/ptsd"]) {
+a.condition-card:is([href="ptsd.html"], [href="/ptsd"]),
+a.condition-card:is([href="grief-loss.html"], [href="/grief-loss"]) {
   position: relative;
   overflow: hidden;
   padding-top: 124px;
@@ -111,7 +113,8 @@ a.condition-card:is([href="ptsd.html"], [href="/ptsd"]) {
 }
 
 a.condition-card:is([href="adhd.html"], [href="/adhd"])::before,
-a.condition-card:is([href="ptsd.html"], [href="/ptsd"])::before {
+a.condition-card:is([href="ptsd.html"], [href="/ptsd"])::before,
+a.condition-card:is([href="grief-loss.html"], [href="/grief-loss"])::before {
   content: "";
   position: absolute;
   inset: 0 0 auto;
@@ -130,8 +133,14 @@ a.condition-card:is([href="ptsd.html"], [href="/ptsd"])::before {
   background-position: center 48%;
 }
 
+a.condition-card:is([href="grief-loss.html"], [href="/grief-loss"])::before {
+  background-image: linear-gradient(180deg, rgba(23,50,58,.02), rgba(23,50,58,.16)), url("assets/images/Grief_&_Loss.png");
+  background-position: center 44%;
+}
+
 a.condition-card:is([href="adhd.html"], [href="/adhd"]) > span,
-a.condition-card:is([href="ptsd.html"], [href="/ptsd"]) > span {
+a.condition-card:is([href="ptsd.html"], [href="/ptsd"]) > span,
+a.condition-card:is([href="grief-loss.html"], [href="/grief-loss"]) > span {
   position: absolute;
   z-index: 2;
   top: 14px;
@@ -156,7 +165,7 @@ a.condition-card:is([href="ptsd.html"], [href="/ptsd"]) > span {
   html:has(link[rel="canonical"][href$="/loss-bereavement"], link[rel="canonical"][href$="/grief-loss"]) .condition-hero {
     background:
       linear-gradient(90deg, rgba(12,31,37,.92), rgba(12,31,37,.62)),
-      url("assets/images/grief-loss-hero.webp") 54% 48% / cover no-repeat;
+      url("assets/images/Grief_&_Loss.png") 54% 48% / cover no-repeat;
   }
 
   html:has(link[rel="canonical"][href$="/attention-deficit-hyperactive-disorder"], link[rel="canonical"][href$="/adhd"]) .condition-hero {
