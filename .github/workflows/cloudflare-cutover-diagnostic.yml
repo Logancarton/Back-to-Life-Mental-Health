@@ -1,0 +1,106 @@
+name: Diagnose Cloudflare cutover access
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  statuses: write
+
+jobs:
+  diagnose:
+    if: contains(github.event.head_commit.message, 'Diagnose Cloudflare cutover')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GITHUB_REPOSITORY: ${{ github.repository }}
+      GITHUB_SHA: ${{ github.sha }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID_RAW: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      CLOUDFLARE_PAGES_PROJECT_NAME_RAW: ${{ vars.CLOUDFLARE_PAGES_PROJECT_NAME }}
+    steps:
+      - name: Diagnose access without changing anything
+        run: |
+          python3 - <<'PY'
+          import json, os, urllib.error, urllib.parse, urllib.request
+
+          cf_token = os.environ.get('CLOUDFLARE_API_TOKEN', '').strip()
+          account_id = os.environ.get('CLOUDFLARE_ACCOUNT_ID_RAW', '').strip()
+          project = os.environ.get('CLOUDFLARE_PAGES_PROJECT_NAME_RAW', '').strip()
+          gh_token = os.environ['GH_TOKEN']
+          repo = os.environ['GITHUB_REPOSITORY']
+          sha = os.environ['GITHUB_SHA']
+          zone_name = 'back-to-life-mental-health.com'
+          host = 'www.back-to-life-mental-health.com'
+
+          def publish(state, context, description):
+              data = json.dumps({'state': state, 'context': context, 'description': description[:140]}).encode()
+              req = urllib.request.Request(
+                  f'https://api.github.com/repos/{repo}/statuses/{sha}',
+                  data=data,
+                  method='POST',
+                  headers={
+                      'Accept': 'application/vnd.github+json',
+                      'Authorization': f'Bearer {gh_token}',
+                      'X-GitHub-Api-Version': '2022-11-28',
+                      'Content-Type': 'application/json',
+                  },
+              )
+              with urllib.request.urlopen(req, timeout=20):
+                  pass
+
+          def request(path):
+              req = urllib.request.Request(
+                  f'https://api.cloudflare.com/client/v4{path}',
+                  headers={'Authorization': f'Bearer {cf_token}', 'Content-Type': 'application/json'},
+              )
+              try:
+                  with urllib.request.urlopen(req, timeout=30) as response:
+                      body = json.load(response)
+                  if not body.get('success'):
+                      return None, f'api-errors-{body.get("errors")}'
+                  return body.get('result'), None
+              except urllib.error.HTTPError as exc:
+                  raw = exc.read().decode('utf-8', 'replace')
+                  return None, f'http-{exc.code}-{raw[:300]}'
+              except Exception as exc:
+                  return None, f'{type(exc).__name__}-{exc}'
+
+          if not cf_token or not account_id or not project:
+              publish('failure', 'cutover-diag-config-missing', 'Cloudflare secret/account/project configuration missing')
+              raise SystemExit(1)
+
+          query = urllib.parse.urlencode({'name': zone_name, 'status': 'active', 'per_page': 50})
+          zones, error = request(f'/zones?{query}')
+          if error:
+              publish('failure', 'cutover-diag-zone-api-error', error)
+              raise SystemExit(1)
+          exact = [z for z in (zones or []) if z.get('name', '').lower() == zone_name]
+          if not exact:
+              publish('failure', 'cutover-diag-zone-not-found', 'Primary DNS zone is not active/accesssible to this token/account')
+          elif len(exact) > 1:
+              publish('failure', 'cutover-diag-zone-ambiguous', f'Found {len(exact)} exact active zones')
+          else:
+              publish('success', 'cutover-diag-zone-found', 'Primary DNS zone is accessible in Cloudflare')
+              zone_id = exact[0]['id']
+              dns_query = urllib.parse.urlencode({'name': host, 'per_page': 100})
+              records, dns_error = request(f'/zones/{zone_id}/dns_records?{dns_query}')
+              if dns_error:
+                  publish('failure', 'cutover-diag-dns-read-error', dns_error)
+              else:
+                  route = [r for r in (records or []) if r.get('type') in {'A','AAAA','CNAME'}]
+                  kinds = ','.join(sorted({r.get('type','?') for r in route})) or 'none'
+                  publish('success', 'cutover-diag-dns-readable', f'www DNS readable; route record types: {kinds}')
+
+          pages_path = f'/accounts/{account_id}/pages/projects/{urllib.parse.quote(project, safe="")}'
+          pages, pages_error = request(pages_path)
+          if pages_error:
+              publish('failure', 'cutover-diag-pages-api-error', pages_error)
+          elif pages:
+              publish('success', 'cutover-diag-pages-found', 'Cloudflare Pages project is accessible')
+          else:
+              publish('failure', 'cutover-diag-pages-not-found', 'Cloudflare Pages project was not returned')
+          PY
