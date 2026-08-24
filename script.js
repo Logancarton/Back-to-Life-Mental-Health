@@ -114,6 +114,23 @@ const normalizeRoute = (href = '/') => {
   const normalizedPath = withLeadingSlash === '/' ? '/' : withLeadingSlash.replace(/\/+$/, '');
   return routeAliases[normalizedPath] || normalizedPath;
 };
+
+// Rewrite internal navigation to the clean public route before visitors click
+// it. The source files stay easy to open locally, while the rendered site links
+// directly to the same extensionless URLs used by canonicals and the sitemap.
+document.querySelectorAll('a[href]').forEach((link) => {
+  const raw = link.getAttribute('href')?.trim();
+  if (!raw || raw.startsWith('#') || /^(?:[a-z][a-z0-9+.-]*:)?\/\//i.test(raw) || raw.startsWith('mailto:') || raw.startsWith('tel:')) return;
+
+  const match = raw.match(/^([^?#]*)(\?[^#]*)?(#.*)?$/);
+  if (!match) return;
+  const route = normalizeRoute(match[1] || '/');
+  if (!publicRoutes.has(route)) return;
+
+  const cleanHref = `${route}${match[2] || ''}${match[3] || ''}`;
+  if (raw !== cleanHref) link.setAttribute('href', cleanHref);
+});
+
 const currentRoute = normalizeRoute(window.location.pathname || '/');
 const declaredCanonical = document.querySelector('link[rel="canonical"]')?.href;
 const canonicalUrl = publicRoutes.has(currentRoute)
