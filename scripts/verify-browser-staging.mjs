@@ -42,7 +42,10 @@ async function goto(page, path, expectedStatus = 200) {
 }
 
 async function noOverflow(page, label) {
-  const result = await page.evaluate(() => ({ viewport: window.innerWidth, scrollWidth: document.documentElement.scrollWidth }));
+  const result = await page.evaluate(() => ({
+    viewport: window.innerWidth,
+    scrollWidth: document.documentElement.scrollWidth
+  }));
   assert(result.scrollWidth <= result.viewport + 2, `${label}: horizontal overflow ${result.scrollWidth} > ${result.viewport}`);
 }
 
@@ -53,14 +56,9 @@ async function localImagesLoad(page, label) {
     const image = images.nth(index);
     const src = await image.getAttribute('src');
     if (!src) continue;
-    const absolute = new URL(src, baseUrl).href;
+    const absolute = new URL(src, `${baseUrl}/`).href;
     if (!absolute.startsWith(baseUrl)) continue;
 
-    // Some images remain in the HTML for semantics/fallback while the current
-    // design intentionally hides their containing section and reuses the same
-    // asset as a CSS background. Playwright cannot scroll a display:none image,
-    // so verify the asset directly instead of treating intentional hiding as a
-    // rendered-page failure.
     if (!(await image.isVisible())) {
       const response = await page.context().request.get(absolute, { timeout: 10000 });
       assert(response.ok(), `${label}: hidden image returned ${response.status()}: ${absolute}`);
@@ -72,6 +70,24 @@ async function localImagesLoad(page, label) {
     if (!handle) throw new Error(`${label}: image handle missing: ${absolute}`);
     await page.waitForFunction((node) => node.complete && node.naturalWidth > 0, handle, { timeout: 10000 });
   }
+}
+
+async function localAssetLoads(page, assetPath, label) {
+  const absolute = new URL(assetPath, `${baseUrl}/`).href;
+  const response = await page.context().request.get(absolute, { timeout: 15000 });
+  assert(response.ok(), `${label}: asset returned ${response.status()}: ${absolute}`);
+}
+
+async function heroUsesAsset(page, assetPath, label) {
+  const hero = page.locator('.condition-hero');
+  assert(await hero.count() === 1, `${label}: condition hero missing`);
+  assert(await hero.isVisible(), `${label}: condition hero not visible`);
+  const urls = await hero.evaluate((node) => {
+    const background = getComputedStyle(node).backgroundImage;
+    return [...background.matchAll(/url\(["']?(.*?)["']?\)/g)].map((match) => decodeURI(match[1]));
+  });
+  assert(urls.some((url) => url.endsWith(assetPath)), `${label}: expected hero asset ${assetPath}; got ${urls.join(', ') || 'none'}`);
+  await localAssetLoads(page, assetPath, label);
 }
 
 async function activeNav(page) {
@@ -106,7 +122,11 @@ async function schedulerLifecycle(page, label, mobile = false) {
   assert(await page.locator(`[data-scheduler-fallback][href="${schedulerUrl}"]`).count() === 1, `${label}: fallback missing`);
 
   if (mobile) {
-    const metrics = await dialog.evaluate((node) => ({ width: node.getBoundingClientRect().width, viewport: window.innerWidth, radius: getComputedStyle(node).borderRadius }));
+    const metrics = await dialog.evaluate((node) => ({
+      width: node.getBoundingClientRect().width,
+      viewport: window.innerWidth,
+      radius: getComputedStyle(node).borderRadius
+    }));
     assert(Math.abs(metrics.width - metrics.viewport) <= 2, `${label}: dialog is not edge-to-edge`);
     assert(metrics.radius === '0px', `${label}: dialog radius should be 0`);
     await page.waitForFunction(() => {
@@ -127,9 +147,18 @@ async function schedulerLifecycle(page, label, mobile = false) {
   await page.waitForFunction(() => document.querySelector('[data-scheduler-dialog]')?.open === false);
 }
 
+const conditionPhotography = [
+  ['/anxiety', 'assets/images/Anxiety.png'],
+  ['/adhd', 'assets/images/organized desk.png'],
+  ['/ptsd', 'assets/images/PTSD safe.png'],
+  ['/ocd', 'assets/images/OCD_organizing.png'],
+  ['/grief-loss', 'assets/images/Grief_&_Loss.png'],
+  ['/medication-management', 'assets/images/Script Pad.png']
+];
+
 let browser;
 try {
-  await publish('pending', 'Task 2 rendered staging QA is running');
+  await publish('pending', 'Rendered staging QA is running');
   browser = await chromium.launch({ headless: true });
   const desktopContext = await browser.newContext({ viewport: { width: 1365, height: 900 } });
   const desktop = await desktopContext.newPage();
@@ -160,17 +189,22 @@ try {
   await publish('success', 'Active navigation passed', 'task2-navigation');
 
   await goto(desktop, '/about');
-  const video = desktop.locator('.provider-intro-video');
-  assert(await video.count() === 1, 'About video element missing');
-  const videoSources = await video.locator('source').evaluateAll((sources) => sources.map((source) => ({ src: source.src, type: source.type })));
-  assert(videoSources[0]?.type === 'video/mp4', 'About MP4 not first source');
-  assert(videoSources[1]?.type === 'video/quicktime', 'About MOV fallback missing');
-  assert(await desktop.evaluate(() => document.querySelector('.provider-intro-video')?.canPlayType('video/mp4') !== ''), 'Browser reports MP4 unsupported');
-  const mp4Response = await desktop.context().request.get(videoSources[0].src, { timeout: 30000 });
-  assert(mp4Response.ok(), `About MP4 returned ${mp4Response.status()}`);
+  const providerPhoto = desktop.locator('img[src$="Me.jpeg"]');
+  const managerPhoto = desktop.locator('img[src$="Stacey.PNG"]');
+  const officePhoto = desktop.locator('img[src$="Lobby.png"]');
+  assert(await providerPhoto.count() === 1 && await providerPhoto.isVisible(), 'About provider photo missing or hidden');
+  assert(await managerPhoto.count() === 1 && await managerPhoto.isVisible(), 'About office-manager photo missing or hidden');
+  assert(await officePhoto.count() === 1 && await officePhoto.isVisible(), 'About office photo missing or hidden');
   await localImagesLoad(desktop, 'desktop about');
   await noOverflow(desktop, 'desktop about');
-  await publish('success', 'About media/layout passed', 'task2-about');
+  await publish('success', 'About photography/layout passed', 'task2-about');
+
+  for (const [path, assetPath] of conditionPhotography) {
+    await goto(desktop, path);
+    await heroUsesAsset(desktop, assetPath, `desktop ${path}`);
+    await noOverflow(desktop, `desktop ${path}`);
+  }
+  await publish('success', 'Condition photography passed', 'task3-condition-photography');
 
   await goto(desktop, '/insurance-payment');
   await localImagesLoad(desktop, 'desktop insurance');
@@ -208,7 +242,7 @@ try {
   await schedulerLifecycle(mobile, 'mobile scheduler', true);
   await publish('success', 'Mobile hamburger/scheduler passed', 'task2-mobile-home');
 
-  for (const path of ['/about', '/current-patients', '/insurance-payment', '/contact', '/medication-management']) {
+  for (const path of ['/about', '/current-patients', '/insurance-payment', '/contact', '/medication-management', '/anxiety', '/adhd', '/ptsd', '/ocd', '/grief-loss']) {
     await goto(mobile, path);
     await noOverflow(mobile, `mobile ${path}`);
   }
@@ -218,14 +252,14 @@ try {
   await exactLink(mobile, schedulerUrl, 'Mobile scheduler destination');
   await mobileContext.close();
 
-  await publish('success', 'Task 2 desktop/mobile rendered staging QA passed');
-  console.log('Task 2 rendered staging QA passed.');
+  await publish('success', 'Desktop/mobile rendered staging QA passed');
+  console.log('Rendered staging QA passed.');
 } catch (error) {
   const message = error instanceof Error ? error.message : String(error);
   const slug = message.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 72) || 'unknown';
   await publish('failure', message, `task2-fail-${slug}`).catch(() => {});
   await publish('failure', message).catch(() => {});
-  console.error(`Task 2 rendered staging QA failed: ${message}`);
+  console.error(`Rendered staging QA failed: ${message}`);
   process.exitCode = 1;
 } finally {
   if (browser) await browser.close();
