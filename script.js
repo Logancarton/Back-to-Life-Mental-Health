@@ -35,6 +35,8 @@ const siteOrigin = 'https://www.back-to-life-mental-health.com';
 const publicPageRoutes = {
   'index.html': '/',
   'services.html': '/services',
+  'psychiatric-evaluation.html': '/psychiatric-evaluation',
+  'north-phoenix-psychiatric-care.html': '/north-phoenix-psychiatric-care',
   'medication-management.html': '/medication-management',
   'new-patients.html': '/new-patients',
   'current-patients.html': '/current-patients',
@@ -59,6 +61,10 @@ const routeAliases = {
   '/services': '/services',
   '/services.html': '/services',
   '/services-overview': '/services',
+  '/psychiatric-evaluation': '/psychiatric-evaluation',
+  '/psychiatric-evaluation.html': '/psychiatric-evaluation',
+  '/north-phoenix-psychiatric-care': '/north-phoenix-psychiatric-care',
+  '/north-phoenix-psychiatric-care.html': '/north-phoenix-psychiatric-care',
   '/medication-management': '/medication-management',
   '/medication-management.html': '/medication-management',
   '/new-patients': '/new-patients',
@@ -156,7 +162,7 @@ ensureMeta('property', 'og:site_name', 'Back to Life Mental Health');
 
 const defaultSocialImage = `${siteOrigin}/assets/images/homepage-hero.jpg`;
 const socialImage = document.querySelector('meta[property="og:image"]')?.content || defaultSocialImage;
-const socialImageAlt = document.querySelector('meta[property="og:image:alt"]')?.content || 'Back to Life Mental Health psychiatric care in Anthem, Arizona';
+const socialImageAlt = document.querySelector('meta[property="og:image:alt"]')?.content || 'Back to Life Mental Health psychiatric care for Anthem, North Phoenix, and the North Valley';
 ensureMeta('property', 'og:image', socialImage);
 ensureMeta('property', 'og:image:alt', socialImageAlt);
 ensureMeta('name', 'twitter:card', 'summary_large_image');
@@ -186,6 +192,8 @@ if (currentRoute === '/' && !document.querySelector('script[data-website-schema]
 // are already represented by the site's navigation and page structure.
 const breadcrumbTrails = {
   '/services': ['Home', 'Psychiatric Services'],
+  '/psychiatric-evaluation': ['Home', 'Psychiatric Services', 'Psychiatric Evaluation'],
+  '/north-phoenix-psychiatric-care': ['Home', 'Psychiatric Services', 'North Phoenix & North Valley Psychiatric Care'],
   '/medication-management': ['Home', 'Psychiatric Services', 'Medication Management'],
   '/new-patients': ['Home', 'New Patients'],
   '/current-patients': ['Home', 'Current Patients'],
@@ -286,15 +294,29 @@ document.querySelectorAll('[data-year]').forEach((node) => {
   node.textContent = new Date().getFullYear();
 });
 
-// Keep social proof, current-patient access, and social-media links available
-// from the shared footer without duplicating markup across every static page.
+// Keep social proof, regional access, current-patient access, and social-media
+// links available from the shared footer without duplicating markup everywhere.
 const googleReviewsUrl = 'https://www.google.com/maps/search/?api=1&query=Back%20to%20Life%20Mental%20Health%2C%20Anthem%20AZ&query_place_id=ChIJa6pXTtlxK4cRDzcak9fsa_s';
 const facebookUrl = 'https://www.facebook.com/profile.php?id=61552499436523';
 document.querySelectorAll('.site-footer .footer-grid').forEach((footerGrid) => {
   const contactColumn = footerGrid.querySelector('a[href^="mailto:"]')?.closest('div');
   if (!contactColumn) return;
 
+  const footerBrandCopy = footerGrid.querySelector('.footer-brand p');
+  if (footerBrandCopy) {
+    footerBrandCopy.textContent = 'Independent psychiatric care for Anthem, North Phoenix, and the North Valley, with telehealth throughout Arizona.';
+  }
+
   const exploreColumn = [...footerGrid.children].find((column) => column.querySelector('h3')?.textContent?.trim() === 'Explore');
+  if (exploreColumn && !hasRouteLink(exploreColumn, '/north-phoenix-psychiatric-care')) {
+    const localCareLink = document.createElement('a');
+    localCareLink.href = '/north-phoenix-psychiatric-care';
+    localCareLink.textContent = 'North Phoenix & North Valley';
+    const servicesLink = [...exploreColumn.querySelectorAll('a[href]')].find((link) => normalizeRoute(link.getAttribute('href')) === '/services');
+    if (servicesLink) servicesLink.insertAdjacentElement('afterend', localCareLink);
+    else exploreColumn.prepend(localCareLink);
+  }
+
   if (exploreColumn && !hasRouteLink(exploreColumn, '/current-patients')) {
     const currentPatientsLink = document.createElement('a');
     currentPatientsLink.href = '/current-patients';
@@ -601,7 +623,12 @@ if (conditionPageRoutes.has(currentRoute)) {
 }
 
 if (nav) {
-  const contentPageRoutes = new Set([...conditionPageRoutes, '/medication-management']);
+  const contentPageRoutes = new Set([
+    ...conditionPageRoutes,
+    '/psychiatric-evaluation',
+    '/north-phoenix-psychiatric-care',
+    '/medication-management'
+  ]);
   const patientPages = new Set(['/new-patients', '/insurance-payment', '/telehealth', '/faq']);
   const navLinks = [...nav.querySelectorAll('a')];
   const hasExactCurrentLink = navLinks.some((link) => normalizeRoute(link.getAttribute('href')) === currentRoute);

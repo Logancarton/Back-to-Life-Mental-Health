@@ -4,7 +4,8 @@
 Historical GitHub Pages compatibility directories must not be present in the
 Cloudflare deployment. The cleanup below is kept as a defensive guard in case
 one is accidentally reintroduced. Deployed HTML is also normalized so internal
-navigation and canonical metadata use clean, extensionless production routes.
+navigation, canonical metadata, and shared geographic positioning use the same
+clean production architecture.
 """
 
 from __future__ import annotations
@@ -20,6 +21,7 @@ PUBLIC_PAGES = {
     "index.html": "/",
     "services.html": "/services",
     "psychiatric-evaluation.html": "/psychiatric-evaluation",
+    "north-phoenix-psychiatric-care.html": "/north-phoenix-psychiatric-care",
     "medication-management.html": "/medication-management",
     "new-patients.html": "/new-patients",
     "current-patients.html": "/current-patients",
@@ -37,6 +39,15 @@ PUBLIC_PAGES = {
     "grief-loss.html": "/grief-loss",
     "life-transitions.html": "/life-transitions",
     "privacy.html": "/privacy",
+}
+
+SITEWIDE_COPY_REPLACEMENTS = {
+    "Independent psychiatric care in Anthem with telehealth available throughout Arizona.":
+        "Independent psychiatric care for Anthem, North Phoenix, and the North Valley, with telehealth throughout Arizona.",
+    "In-person in Anthem + telehealth across Arizona":
+        "Anthem office serving North Phoenix & the North Valley + telehealth across Arizona",
+    "Anthem office + Arizona telehealth":
+        "Anthem office serving North Phoenix & the North Valley + Arizona telehealth",
 }
 
 # Defensive list of obsolete GitHub Pages JavaScript redirect-shell directories.
@@ -75,6 +86,22 @@ def normalize_html(path: Path) -> None:
     # Make every internal page link point directly at its canonical route.
     for filename, route in PUBLIC_PAGES.items():
         text = text.replace(f'href="{filename}', f'href="{route}')
+
+    # Keep geographic positioning consistent across shared footer and care-card
+    # copy even on older condition/patient pages that intentionally retain their
+    # page-specific Anthem titles.
+    for old, new in SITEWIDE_COPY_REPLACEMENTS.items():
+        text = text.replace(old, new)
+
+    # Make the regional landing page discoverable from the shared Explore footer
+    # on every full page without requiring duplicated manual edits in 20 files.
+    if '/north-phoenix-psychiatric-care' not in text:
+        services_footer_link = '<a href="/services">Services Overview</a>'
+        regional_footer_link = (
+            services_footer_link
+            + '<a href="/north-phoenix-psychiatric-care">North Phoenix &amp; North Valley</a>'
+        )
+        text = text.replace(services_footer_link, regional_footer_link, 1)
 
     route = PUBLIC_PAGES.get(path.name)
     if route:

@@ -166,6 +166,8 @@ try {
   await goto(desktop, '/');
   assert(!(await desktop.locator('body').innerText()).includes('275518'), 'Homepage still contains removed license number');
   assert(!(await desktop.locator('[data-menu-toggle]').isVisible()), 'Desktop hamburger should be hidden');
+  assert((await desktop.locator('body').innerText()).includes('North Phoenix'), 'Homepage missing North Phoenix geographic positioning');
+  await exactLink(desktop, '/north-phoenix-psychiatric-care', 'Homepage regional care link');
   await localImagesLoad(desktop, 'desktop home');
   await desktop.evaluate(() => window.scrollTo(0, 0));
   await desktop.waitForTimeout(200);
@@ -184,9 +186,17 @@ try {
 
   await goto(desktop, '/medication-management');
   assert(JSON.stringify(await activeNav(desktop)) === JSON.stringify(['/medication-management']), 'Medication Management not sole current nav item');
+  await goto(desktop, '/psychiatric-evaluation');
+  assert(JSON.stringify(await activeNav(desktop)) === JSON.stringify(['/services']), 'Psychiatric Evaluation did not keep Services current');
+  await goto(desktop, '/north-phoenix-psychiatric-care');
+  assert(JSON.stringify(await activeNav(desktop)) === JSON.stringify(['/services']), 'North Phoenix regional page did not keep Services current');
+  assert((await desktop.locator('body').innerText()).includes('Norterra'), 'North Phoenix regional page missing surrounding-area content');
+  await exactLink(desktop, '/contact', 'North Phoenix regional Contact link');
+  await localImagesLoad(desktop, 'desktop north phoenix');
+  await noOverflow(desktop, 'desktop north phoenix');
   await goto(desktop, '/adhd');
   assert(JSON.stringify(await activeNav(desktop)) === JSON.stringify(['/services']), 'Condition page did not keep Services current');
-  await publish('success', 'Active navigation passed', 'task2-navigation');
+  await publish('success', 'Active navigation and regional page passed', 'task2-navigation');
 
   await goto(desktop, '/about');
   const providerPhoto = desktop.locator('img[src$="Me.jpeg"]');
@@ -213,6 +223,7 @@ try {
   await goto(desktop, '/contact');
   await exactLink(desktop, 'tel:+14803138583', 'Phone');
   await exactLink(desktop, 'mailto:Admin@BTLMH.com', 'Email');
+  await exactLink(desktop, '/north-phoenix-psychiatric-care', 'Contact regional care link');
   assert(await desktop.locator('a[href^="https://www.google.com/maps/search/"]').count() > 0, 'Directions link missing');
   await localImagesLoad(desktop, 'desktop contact');
   await noOverflow(desktop, 'desktop contact');
@@ -242,7 +253,7 @@ try {
   await schedulerLifecycle(mobile, 'mobile scheduler', true);
   await publish('success', 'Mobile hamburger/scheduler passed', 'task2-mobile-home');
 
-  for (const path of ['/about', '/current-patients', '/insurance-payment', '/contact', '/medication-management', '/anxiety', '/adhd', '/ptsd', '/ocd', '/grief-loss']) {
+  for (const path of ['/about', '/current-patients', '/insurance-payment', '/contact', '/psychiatric-evaluation', '/north-phoenix-psychiatric-care', '/medication-management', '/anxiety', '/adhd', '/ptsd', '/ocd', '/grief-loss']) {
     await goto(mobile, path);
     await noOverflow(mobile, `mobile ${path}`);
   }
