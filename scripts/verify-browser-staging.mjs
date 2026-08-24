@@ -29,19 +29,12 @@ async function publish(state, description, context = 'task2-browser-qa') {
       'X-GitHub-Api-Version': '2022-11-28',
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({
-      state,
-      context,
-      description: String(description).slice(0, 140)
-    })
+    body: JSON.stringify({ state, context, description: String(description).slice(0, 140) })
   });
 }
 
 async function goto(page, path, expectedStatus = 200) {
-  const response = await page.goto(`${baseUrl}${path}`, {
-    waitUntil: 'domcontentloaded',
-    timeout: 30000
-  });
+  const response = await page.goto(`${baseUrl}${path}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
   assert(response, `${path}: no navigation response`);
   assert(response.status() === expectedStatus, `${path}: expected ${expectedStatus}, got ${response.status()}`);
   await page.waitForLoadState('load', { timeout: 15000 }).catch(() => {});
@@ -49,10 +42,7 @@ async function goto(page, path, expectedStatus = 200) {
 }
 
 async function noOverflow(page, label) {
-  const result = await page.evaluate(() => ({
-    viewport: window.innerWidth,
-    scrollWidth: document.documentElement.scrollWidth
-  }));
+  const result = await page.evaluate(() => ({ viewport: window.innerWidth, scrollWidth: document.documentElement.scrollWidth }));
   assert(result.scrollWidth <= result.viewport + 2, `${label}: horizontal overflow ${result.scrollWidth} > ${result.viewport}`);
 }
 
@@ -65,15 +55,10 @@ async function localImagesLoad(page, label) {
     if (!src) continue;
     const absolute = new URL(src, baseUrl).href;
     if (!absolute.startsWith(baseUrl)) continue;
-
     await image.scrollIntoViewIfNeeded();
     const handle = await image.elementHandle();
     if (!handle) throw new Error(`${label}: image handle missing: ${absolute}`);
-    await page.waitForFunction(
-      (node) => node.complete && node.naturalWidth > 0,
-      handle,
-      { timeout: 10000 }
-    );
+    await page.waitForFunction((node) => node.complete && node.naturalWidth > 0, handle, { timeout: 10000 });
   }
 }
 
@@ -91,7 +76,6 @@ async function exactLink(page, href, label) {
 async function schedulerLifecycle(page, label, mobile = false) {
   const launcher = page.locator('[data-scheduler-launcher]');
   await launcher.waitFor({ state: 'visible', timeout: 10000 });
-
   const hitTestable = await launcher.evaluate((node) => {
     const rect = node.getBoundingClientRect();
     if (!rect.width || !rect.height) return false;
@@ -102,7 +86,6 @@ async function schedulerLifecycle(page, label, mobile = false) {
 
   await launcher.evaluate((node) => node.click());
   await page.waitForFunction(() => document.querySelector('[data-scheduler-dialog]')?.open === true);
-
   const dialog = page.locator('[data-scheduler-dialog]');
   assert(await dialog.getAttribute('aria-labelledby') === 'scheduler-dialog-title', `${label}: dialog accessibility label missing`);
   assert(await launcher.getAttribute('aria-expanded') === 'true', `${label}: aria-expanded did not open`);
@@ -111,11 +94,7 @@ async function schedulerLifecycle(page, label, mobile = false) {
   assert(await page.locator(`[data-scheduler-fallback][href="${schedulerUrl}"]`).count() === 1, `${label}: fallback missing`);
 
   if (mobile) {
-    const metrics = await dialog.evaluate((node) => ({
-      width: node.getBoundingClientRect().width,
-      viewport: window.innerWidth,
-      radius: getComputedStyle(node).borderRadius
-    }));
+    const metrics = await dialog.evaluate((node) => ({ width: node.getBoundingClientRect().width, viewport: window.innerWidth, radius: getComputedStyle(node).borderRadius }));
     assert(Math.abs(metrics.width - metrics.viewport) <= 2, `${label}: dialog is not edge-to-edge`);
     assert(metrics.radius === '0px', `${label}: dialog radius should be 0`);
     await page.waitForFunction(() => {
@@ -126,8 +105,8 @@ async function schedulerLifecycle(page, label, mobile = false) {
 
   await page.locator('[data-scheduler-close]').evaluate((node) => node.click());
   await page.waitForFunction(() => document.querySelector('[data-scheduler-dialog]')?.open === false);
-  assert(await launcher.getAttribute('aria-expanded') === 'false', `${label}: aria-expanded did not reset`);
-  assert(await page.evaluate(() => document.activeElement === document.querySelector('[data-scheduler-launcher]')), `${label}: focus did not return`);
+  await page.waitForFunction(() => document.querySelector('[data-scheduler-launcher]')?.getAttribute('aria-expanded') === 'false');
+  await page.waitForFunction(() => document.activeElement === document.querySelector('[data-scheduler-launcher]'));
 
   await launcher.evaluate((node) => node.click());
   await page.waitForFunction(() => document.querySelector('[data-scheduler-dialog]')?.open === true);
@@ -140,7 +119,6 @@ let browser;
 try {
   await publish('pending', 'Task 2 rendered staging QA is running');
   browser = await chromium.launch({ headless: true });
-
   const desktopContext = await browser.newContext({ viewport: { width: 1365, height: 900 } });
   const desktop = await desktopContext.newPage();
 
@@ -155,10 +133,7 @@ try {
   await publish('success', 'Desktop homepage and scheduler passed', 'task2-desktop-home');
 
   await goto(desktop, '/current-patients');
-  const currentPatientTopLinks = await desktop.locator('[data-nav] a').evaluateAll((links) => links.filter((link) => {
-    const path = new URL(link.href, window.location.href).pathname.replace(/\/+$/, '');
-    return path === '/current-patients';
-  }).length);
+  const currentPatientTopLinks = await desktop.locator('[data-nav] a').evaluateAll((links) => links.filter((link) => new URL(link.href, window.location.href).pathname.replace(/\/+$/, '') === '/current-patients').length);
   assert(currentPatientTopLinks === 1, `Current Patients expected one top-nav route found ${currentPatientTopLinks}`);
   assert(JSON.stringify(await activeNav(desktop)) === JSON.stringify(['/current-patients']), 'Current Patients active navigation incorrect');
   await exactLink(desktop, portalUrl, 'Patient Portal');
@@ -204,7 +179,6 @@ try {
   const mobileContext = await browser.newContext({ viewport: { width: 390, height: 844 } });
   const mobile = await mobileContext.newPage();
   await goto(mobile, '/');
-
   const toggle = mobile.locator('[data-menu-toggle]');
   const nav = mobile.locator('[data-nav]');
   assert(await toggle.isVisible(), 'Mobile hamburger not visible');
