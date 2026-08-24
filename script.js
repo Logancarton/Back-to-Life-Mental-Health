@@ -586,12 +586,15 @@ if (conditionPageRoutes.has(currentRoute)) {
 if (nav) {
   const contentPageRoutes = new Set([...conditionPageRoutes, '/medication-management']);
   const patientPages = new Set(['/new-patients', '/insurance-payment', '/telehealth', '/faq']);
-  nav.querySelectorAll('a').forEach((link) => {
+  const navLinks = [...nav.querySelectorAll('a')];
+  const hasExactCurrentLink = navLinks.some((link) => normalizeRoute(link.getAttribute('href')) === currentRoute);
+
+  navLinks.forEach((link) => {
     link.removeAttribute('aria-current');
     const hrefRoute = normalizeRoute(link.getAttribute('href'));
     const isCurrent = hrefRoute === currentRoute ||
-      (contentPageRoutes.has(currentRoute) && hrefRoute === '/services') ||
-      (patientPages.has(currentRoute) && hrefRoute === '/new-patients');
+      (!hasExactCurrentLink && contentPageRoutes.has(currentRoute) && hrefRoute === '/services') ||
+      (!hasExactCurrentLink && patientPages.has(currentRoute) && hrefRoute === '/new-patients');
     if (isCurrent) link.setAttribute('aria-current', 'page');
   });
 }
