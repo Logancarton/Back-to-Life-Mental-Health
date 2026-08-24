@@ -55,6 +55,18 @@ async function localImagesLoad(page, label) {
     if (!src) continue;
     const absolute = new URL(src, baseUrl).href;
     if (!absolute.startsWith(baseUrl)) continue;
+
+    // Some images remain in the HTML for semantics/fallback while the current
+    // design intentionally hides their containing section and reuses the same
+    // asset as a CSS background. Playwright cannot scroll a display:none image,
+    // so verify the asset directly instead of treating intentional hiding as a
+    // rendered-page failure.
+    if (!(await image.isVisible())) {
+      const response = await page.context().request.get(absolute, { timeout: 10000 });
+      assert(response.ok(), `${label}: hidden image returned ${response.status()}: ${absolute}`);
+      continue;
+    }
+
     await image.scrollIntoViewIfNeeded();
     const handle = await image.elementHandle();
     if (!handle) throw new Error(`${label}: image handle missing: ${absolute}`);
