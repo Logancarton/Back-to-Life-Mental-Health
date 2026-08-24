@@ -11,10 +11,30 @@ if (!baseUrl) {
 const schedulerUrl = 'https://d2oe0ra32qx05a.cloudfront.net/?practiceKey=k_1_108034';
 const portalUrl = 'https://portal.kareo.com/';
 const telehealthUrl = 'https://telehealth.kareo.com/lcarton';
+const githubToken = process.env.GH_TOKEN || '';
+const githubRepository = process.env.GITHUB_REPOSITORY || '';
+const githubSha = process.env.GITHUB_SHA || '';
 
 const assert = (condition, message) => {
   if (!condition) throw new Error(message);
 };
+
+async function markPassed(context, description) {
+  if (!githubToken || !githubRepository || !githubSha) return;
+  const response = await fetch(`https://api.github.com/repos/${githubRepository}/statuses/${githubSha}`, {
+    method: 'POST',
+    headers: {
+      Accept: 'application/vnd.github+json',
+      Authorization: `Bearer ${githubToken}`,
+      'X-GitHub-Api-Version': '2022-11-28',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ state: 'success', context, description })
+  });
+  if (!response.ok) {
+    console.warn(`Could not publish ${context} status: HTTP ${response.status()}`);
+  }
+}
 
 async function gotoPath(page, path, expectedStatus = 200) {
   const response = await page.goto(`${baseUrl}${path}`, {
@@ -89,6 +109,10 @@ async function testSchedulerLifecycle(page, label, expectMobileDialog = false) {
     assert(Math.abs(metrics.width - metrics.viewport) <= 2, `${label}: scheduler is not full-width on small mobile viewport`);
     assert(metrics.radius === '0px', `${label}: mobile scheduler should be edge-to-edge`);
 
+    await page.waitForFunction(() => {
+      const node = document.querySelector('[data-mobile-contact-bar]');
+      return node && getComputedStyle(node).opacity === '0';
+    });
     const mobileBar = page.locator('[data-mobile-contact-bar]');
     const mobileBarState = await mobileBar.evaluate((node) => {
       const style = getComputedStyle(node);
@@ -123,6 +147,7 @@ try {
   await assertLocalImagesRespond(desktop, 'desktop home');
   await testSchedulerLifecycle(desktop, 'desktop scheduler');
   console.log('PASS desktop homepage + scheduler');
+  await markPassed('browser-desktop-home-qa', 'Desktop homepage and scheduler passed');
 
   await gotoPath(desktop, '/current-patients');
   const portalLinks = await desktop.locator('[data-nav] a').evaluateAll((links) =>
@@ -134,6 +159,7 @@ try {
   assert(JSON.stringify(await currentNavPaths(desktop)) === JSON.stringify(['/current-patients']), 'Current Patients top-nav active state is incorrect');
   await assertNoHorizontalOverflow(desktop, 'desktop current patients');
   console.log('PASS Current Patients + portal/telehealth links');
+  await markPassed('browser-current-patients-qa', 'Current Patients navigation and links passed');
 
   await gotoPath(desktop, '/medication-management');
   const medicationNav = await currentNavPaths(desktop);
@@ -142,10 +168,12 @@ try {
     `Medication Management: expected one active nav item, got ${JSON.stringify(medicationNav)}`
   );
   console.log('PASS Medication Management active navigation');
+  await markPassed('browser-medication-nav-qa', 'Medication Management active navigation passed');
 
   await gotoPath(desktop, '/adhd');
   assert(JSON.stringify(await currentNavPaths(desktop)) === JSON.stringify(['/services']), 'ADHD should keep Services active in top navigation');
   console.log('PASS condition-page parent navigation');
+  await markPassed('browser-condition-nav-qa', 'Condition-page parent navigation passed');
 
   await gotoPath(desktop, '/about');
   const videoSources = await desktop.locator('.provider-intro-video source').evaluateAll((sources) =>
@@ -159,11 +187,13 @@ try {
   await assertLocalImagesRespond(desktop, 'desktop about');
   await assertNoHorizontalOverflow(desktop, 'desktop about');
   console.log('PASS About video source + images');
+  await markPassed('browser-about-media-qa', 'About video source and images passed');
 
   await gotoPath(desktop, '/insurance-payment');
   await assertLocalImagesRespond(desktop, 'desktop insurance');
   await assertNoHorizontalOverflow(desktop, 'desktop insurance');
   console.log('PASS insurance images/layout');
+  await markPassed('browser-insurance-qa', 'Insurance images and layout passed');
 
   await gotoPath(desktop, '/contact');
   await assertLinkExists(desktop, 'tel:+14803138583', 'Contact phone');
@@ -173,10 +203,12 @@ try {
   await assertLocalImagesRespond(desktop, 'desktop contact');
   await assertNoHorizontalOverflow(desktop, 'desktop contact');
   console.log('PASS contact links + images/layout');
+  await markPassed('browser-contact-qa', 'Contact links, images and layout passed');
 
   await gotoPath(desktop, '/this-page-should-not-exist', 404);
   assert((await desktop.locator('body').innerText()).toLowerCase().includes('page not found'), '404 page content did not render');
   console.log('PASS rendered 404');
+  await markPassed('browser-404-qa', 'Rendered 404 passed');
 
   await desktopContext.close();
 
@@ -190,6 +222,10 @@ try {
   assert(await toggle.getAttribute('aria-expanded') === 'true', 'Mobile hamburger did not set aria-expanded=true');
   assert(await nav.evaluate((node) => node.classList.contains('open')), 'Mobile navigation did not open');
 
+  await mobile.waitForFunction(() => {
+    const node = document.querySelector('[data-mobile-contact-bar]');
+    return node && getComputedStyle(node).opacity === '0';
+  });
   const barWhileMenuOpen = await mobile.locator('[data-mobile-contact-bar]').evaluate((node) => {
     const style = getComputedStyle(node);
     return { opacity: style.opacity, pointerEvents: style.pointerEvents };
@@ -203,12 +239,14 @@ try {
   await assertNoHorizontalOverflow(mobile, 'mobile home');
   await testSchedulerLifecycle(mobile, 'mobile scheduler', true);
   console.log('PASS mobile hamburger + scheduler');
+  await markPassed('browser-mobile-menu-qa', 'Mobile hamburger and scheduler passed');
 
   for (const path of ['/about', '/current-patients', '/insurance-payment', '/contact', '/medication-management']) {
     await gotoPath(mobile, path);
     await assertNoHorizontalOverflow(mobile, `mobile ${path}`);
   }
   console.log('PASS representative mobile layouts');
+  await markPassed('browser-mobile-layout-qa', 'Representative mobile layouts passed');
 
   await gotoPath(mobile, '/current-patients');
   assert(JSON.stringify(await currentNavPaths(mobile)) === JSON.stringify(['/current-patients']), 'Mobile Current Patients nav state is incorrect');
@@ -216,6 +254,7 @@ try {
   const schedulerLinks = await mobile.locator(`a[href="${schedulerUrl}"]`).count();
   assert(schedulerLinks > 0, 'Scheduler URL is missing from rendered site');
   console.log('PASS scheduler destination preserved');
+  await markPassed('browser-mobile-links-qa', 'Mobile Current Patients and scheduler links passed');
 
   await mobileContext.close();
   console.log('All rendered staging browser checks passed.');
