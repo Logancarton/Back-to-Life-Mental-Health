@@ -7,6 +7,13 @@
 # Keep legacy Odoo redirects direct to the final canonical destination so
 # search engines and visitors do not pass through redirect chains.
 
+# Image asset recovery
+# Two temporary JPG copies created during image placement were malformed.
+# Keep the page markup stable while routing those requests to the original,
+# full-resolution PNG image data.
+/assets/images/condition-bipolar.jpg /assets/images/condition-bipolar.png 301
+/assets/images/condition-depression.jpg /assets/images/condition-depression.png 301
+
 # Legacy Odoo routes
 /services-overview /services 301
 /services-overview/ /services 301
