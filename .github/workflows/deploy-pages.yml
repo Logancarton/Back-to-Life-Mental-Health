@@ -162,6 +162,17 @@ jobs:
           npm install --no-save --no-package-lock playwright
           npx playwright install --with-deps chromium
 
+      - name: Mark browser dependencies passed
+        run: |
+          node --check scripts/verify-browser-staging.mjs
+          curl --fail --silent --show-error \
+            -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${GITHUB_SHA}" \
+            -d '{"state":"success","context":"cloudflare-browser-deps-qa","description":"Playwright Chromium and QA script are ready"}'
+
       - name: Verify rendered Cloudflare staging
         run: |
           node scripts/verify-browser-staging.mjs \
