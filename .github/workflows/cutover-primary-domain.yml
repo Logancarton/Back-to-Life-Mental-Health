@@ -1,0 +1,285 @@
+name: Cut over primary domain to Cloudflare Pages
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  statuses: write
+
+jobs:
+  cutover:
+    if: contains(github.event.head_commit.message, 'Cut over primary domain')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GITHUB_REPOSITORY: ${{ github.repository }}
+      GITHUB_SHA: ${{ github.sha }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID_RAW: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      CLOUDFLARE_PAGES_PROJECT_NAME_RAW: ${{ vars.CLOUDFLARE_PAGES_PROJECT_NAME }}
+      PRIMARY_ZONE: back-to-life-mental-health.com
+      PRIMARY_HOST: www.back-to-life-mental-health.com
+
+    steps:
+      - name: Wait for same-commit staging acceptance
+        run: |
+          python3 - <<'PY'
+          import json, os, sys, time, urllib.request
+
+          token = os.environ['GH_TOKEN']
+          repo = os.environ['GITHUB_REPOSITORY']
+          sha = os.environ['GITHUB_SHA']
+          url = f'https://api.github.com/repos/{repo}/commits/{sha}/status'
+          headers = {
+              'Accept': 'application/vnd.github+json',
+              'Authorization': f'Bearer {token}',
+              'X-GitHub-Api-Version': '2022-11-28',
+          }
+
+          def status_contexts():
+              req = urllib.request.Request(url, headers=headers)
+              with urllib.request.urlopen(req, timeout=20) as response:
+                  payload = json.load(response)
+              return {item['context']: item['state'] for item in payload.get('statuses', [])}
+
+          for _ in range(90):
+              contexts = status_contexts()
+              state = contexts.get('task2-browser-qa')
+              print(f'task2-browser-qa={state or "not-yet-published"}', flush=True)
+              if state == 'success':
+                  sys.exit(0)
+              if state in {'failure', 'error'}:
+                  print('Current commit failed staging acceptance; DNS cutover is blocked.', file=sys.stderr)
+                  sys.exit(1)
+              time.sleep(10)
+
+          print('Timed out waiting for current-commit staging acceptance; DNS was not touched.', file=sys.stderr)
+          sys.exit(1)
+          PY
+
+      - name: Cut over www with automatic rollback
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          import sys
+          import time
+          import urllib.error
+          import urllib.parse
+          import urllib.request
+
+          cf_token = os.environ.get('CLOUDFLARE_API_TOKEN', '').strip()
+          account_id = os.environ.get('CLOUDFLARE_ACCOUNT_ID_RAW', '').strip()
+          project = os.environ.get('CLOUDFLARE_PAGES_PROJECT_NAME_RAW', '').strip()
+          zone_name = os.environ['PRIMARY_ZONE'].strip().lower()
+          hostname = os.environ['PRIMARY_HOST'].strip().lower()
+          gh_token = os.environ['GH_TOKEN']
+          gh_repo = os.environ['GITHUB_REPOSITORY']
+          gh_sha = os.environ['GITHUB_SHA']
+          pages_target = f'{project}.pages.dev'
+
+          if not cf_token or not account_id or not project:
+              raise SystemExit('Missing required Cloudflare repository configuration; DNS was not touched.')
+
+          cf_base = 'https://api.cloudflare.com/client/v4'
+
+          def publish(state, context, description):
+              url = f'https://api.github.com/repos/{gh_repo}/statuses/{gh_sha}'
+              data = json.dumps({
+                  'state': state,
+                  'context': context,
+                  'description': description[:140],
+              }).encode()
+              req = urllib.request.Request(
+                  url,
+                  data=data,
+                  method='POST',
+                  headers={
+                      'Accept': 'application/vnd.github+json',
+                      'Authorization': f'Bearer {gh_token}',
+                      'X-GitHub-Api-Version': '2022-11-28',
+                      'Content-Type': 'application/json',
+                  },
+              )
+              try:
+                  with urllib.request.urlopen(req, timeout=20):
+                      pass
+              except Exception as exc:
+                  print(f'Warning: could not publish GitHub status {context}: {exc}', flush=True)
+
+          def cf(method, path, payload=None):
+              data = None if payload is None else json.dumps(payload).encode()
+              req = urllib.request.Request(
+                  f'{cf_base}{path}',
+                  data=data,
+                  method=method,
+                  headers={
+                      'Authorization': f'Bearer {cf_token}',
+                      'Content-Type': 'application/json',
+                  },
+              )
+              try:
+                  with urllib.request.urlopen(req, timeout=30) as response:
+                      body = json.load(response)
+              except urllib.error.HTTPError as exc:
+                  raw = exc.read().decode('utf-8', 'replace')
+                  raise RuntimeError(f'Cloudflare {method} {path} returned HTTP {exc.code}: {raw[:800]}') from exc
+              if not body.get('success'):
+                  raise RuntimeError(f'Cloudflare {method} {path} failed: {body.get("errors")}')
+              return body.get('result')
+
+          def list_route_records(zone_id):
+              query = urllib.parse.urlencode({'name': hostname, 'per_page': 100})
+              records = cf('GET', f'/zones/{zone_id}/dns_records?{query}') or []
+              return [r for r in records if r.get('type') in {'A', 'AAAA', 'CNAME'} and r.get('name', '').lower() == hostname]
+
+          def remove_route_records(zone_id):
+              for record in list_route_records(zone_id):
+                  print(f'Deleting route record {record["type"]} {record["name"]} -> {record.get("content")}', flush=True)
+                  cf('DELETE', f'/zones/{zone_id}/dns_records/{record["id"]}')
+
+          def recreate_record(zone_id, record):
+              payload = {
+                  'type': record['type'],
+                  'name': record['name'],
+                  'content': record['content'],
+                  'ttl': record.get('ttl', 1),
+              }
+              if 'proxied' in record:
+                  payload['proxied'] = bool(record.get('proxied'))
+              if record.get('priority') is not None:
+                  payload['priority'] = record['priority']
+              cf('POST', f'/zones/{zone_id}/dns_records', payload)
+
+          publish('pending', 'cutover-primary-domain-active', 'Preparing rollback-safe primary domain cutover')
+
+          zone_query = urllib.parse.urlencode({'name': zone_name, 'status': 'active', 'per_page': 50})
+          try:
+              zones = cf('GET', f'/zones?{zone_query}') or []
+          except Exception as exc:
+              publish('failure', 'cutover-primary-domain-active', 'Cloudflare zone access unavailable; no DNS change made')
+              print(exc, file=sys.stderr)
+              raise SystemExit(1)
+
+          exact_zones = [z for z in zones if z.get('name', '').lower() == zone_name]
+          if len(exact_zones) != 1:
+              publish('failure', 'cutover-primary-domain-active', 'Primary zone not uniquely accessible; no DNS change made')
+              raise SystemExit(f'Expected one active Cloudflare zone for {zone_name}; found {len(exact_zones)}. DNS was not touched.')
+
+          zone_id = exact_zones[0]['id']
+          try:
+              original_records = list_route_records(zone_id)
+          except Exception as exc:
+              publish('failure', 'cutover-primary-domain-active', 'Cannot read primary DNS record; no DNS change made')
+              print(exc, file=sys.stderr)
+              raise SystemExit(1)
+
+          print('Original www route records:', json.dumps([
+              {k: r.get(k) for k in ('id', 'type', 'name', 'content', 'ttl', 'proxied')}
+              for r in original_records
+          ], indent=2), flush=True)
+
+          domain_path = f'/accounts/{account_id}/pages/projects/{urllib.parse.quote(project, safe="")}/domains/{urllib.parse.quote(hostname, safe="")}'
+          domains_path = f'/accounts/{account_id}/pages/projects/{urllib.parse.quote(project, safe="")}/domains'
+          domain_added = False
+          dns_changed = False
+
+          def rollback(reason):
+              nonlocal_dns_error = None
+              print(f'ROLLBACK: {reason}', file=sys.stderr, flush=True)
+              try:
+                  remove_route_records(zone_id)
+                  for record in original_records:
+                      recreate_record(zone_id, record)
+                  print('Original www DNS route record(s) restored.', flush=True)
+              except Exception as exc:
+                  nonlocal_dns_error = exc
+                  print(f'CRITICAL: DNS rollback encountered an error: {exc}', file=sys.stderr, flush=True)
+
+              if domain_added:
+                  try:
+                      cf('DELETE', domain_path)
+                      print('New Pages custom-domain association removed.', flush=True)
+                  except Exception as exc:
+                      print(f'Warning: could not remove Pages custom-domain association: {exc}', file=sys.stderr, flush=True)
+
+              if nonlocal_dns_error:
+                  publish('failure', 'cutover-primary-domain-active', 'Cutover failed and DNS rollback needs manual review')
+              else:
+                  publish('failure', 'cutover-primary-domain-active', 'Cutover failed; original DNS restored')
+
+          try:
+              existing_domain = None
+              try:
+                  existing_domain = cf('GET', domain_path)
+                  print(f'Existing Pages domain status: {existing_domain.get("status") if isinstance(existing_domain, dict) else existing_domain}', flush=True)
+              except RuntimeError as exc:
+                  if 'HTTP 404' not in str(exc):
+                      raise
+
+              if not existing_domain:
+                  result = cf('POST', domains_path, {'name': hostname})
+                  domain_added = True
+                  print(f'Added Pages custom domain: {hostname}; status={result.get("status") if isinstance(result, dict) else result}', flush=True)
+
+              current_records = list_route_records(zone_id)
+              already_target = (
+                  len(current_records) == 1
+                  and current_records[0].get('type') == 'CNAME'
+                  and current_records[0].get('content', '').rstrip('.').lower() == pages_target.lower()
+              )
+
+              if not already_target:
+                  remove_route_records(zone_id)
+                  cf('POST', f'/zones/{zone_id}/dns_records', {
+                      'type': 'CNAME',
+                      'name': hostname,
+                      'content': pages_target,
+                      'ttl': 1,
+                      'proxied': True,
+                      'comment': 'Back to Life Mental Health production Cloudflare Pages cutover',
+                  })
+                  dns_changed = True
+                  print(f'Created proxied CNAME {hostname} -> {pages_target}', flush=True)
+              else:
+                  print(f'{hostname} already points to {pages_target}; no DNS mutation needed.', flush=True)
+
+              active = False
+              last_status = None
+              for _ in range(60):
+                  domain = cf('GET', domain_path)
+                  last_status = domain.get('status') if isinstance(domain, dict) else None
+                  print(f'Pages custom domain status: {last_status}', flush=True)
+                  if last_status == 'active':
+                      active = True
+                      break
+                  time.sleep(10)
+
+              if not active:
+                  rollback(f'Pages custom domain did not become active; last status={last_status!r}')
+                  raise SystemExit(1)
+
+              final_records = list_route_records(zone_id)
+              target_records = [r for r in final_records if r.get('type') == 'CNAME' and r.get('content', '').rstrip('.').lower() == pages_target.lower()]
+              if len(target_records) != 1:
+                  rollback('Final DNS verification did not find exactly one Pages CNAME')
+                  raise SystemExit(1)
+
+              publish('success', 'cutover-primary-dns-cloudflare', f'{hostname} points to Cloudflare Pages')
+              publish('success', 'cutover-primary-domain-active', f'{hostname} is active on Cloudflare Pages')
+              print(f'CUTOVER COMPLETE: https://{hostname} is active on Cloudflare Pages.', flush=True)
+
+          except SystemExit:
+              raise
+          except Exception as exc:
+              if domain_added or dns_changed:
+                  rollback(str(exc))
+              else:
+                  publish('failure', 'cutover-primary-domain-active', 'Cutover blocked before DNS mutation')
+              print(exc, file=sys.stderr)
+              raise SystemExit(1)
+          PY
