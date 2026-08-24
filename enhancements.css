@@ -343,6 +343,128 @@
 .error-card p { color: var(--ink-soft); font-size: 18px; }
 .error-actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 14px; margin-top: 28px; }
 
+/* Photography should explain the page, not interrupt it. The three condition
+   images become part of their hero treatments; the original article figures
+   remain in the HTML for semantics/fallback but are not repeated visually. */
+body:has(.article-photo img[src$="condition-bipolar.jpg"]) .article-photo,
+body:has(.article-photo img[src$="condition-depression.jpg"]) .article-photo,
+body:has(.article-photo img[src$="condition-life-transitions.png"]) .article-photo {
+  display: none;
+}
+
+body:has(.article-photo img[src$="condition-bipolar.jpg"]) .condition-hero {
+  min-height: 520px;
+  display: flex;
+  align-items: center;
+  color: white;
+  background:
+    linear-gradient(90deg, rgba(12,31,37,.94) 0%, rgba(12,31,37,.82) 34%, rgba(12,31,37,.44) 58%, rgba(12,31,37,.08) 100%),
+    url("assets/images/condition-bipolar.png") center center / cover no-repeat;
+}
+body:has(.article-photo img[src$="condition-bipolar.jpg"]) .condition-hero::after { display: none; }
+body:has(.article-photo img[src$="condition-bipolar.jpg"]) .condition-hero .page-hero-inner { max-width: 1180px; }
+body:has(.article-photo img[src$="condition-bipolar.jpg"]) .condition-hero h1,
+body:has(.article-photo img[src$="condition-bipolar.jpg"]) .condition-hero p { max-width: 620px; color: white; text-shadow: 0 2px 18px rgba(0,0,0,.18); }
+body:has(.article-photo img[src$="condition-bipolar.jpg"]) .condition-hero .eyebrow { color: #efd8c8; }
+body:has(.article-photo img[src$="condition-bipolar.jpg"]) .condition-hero .text-link { color: white; }
+body:has(.article-photo img[src$="condition-bipolar.jpg"]) .condition-hero .button { border-color: white; background: white; color: var(--ink); }
+
+/* Depression and life transitions work better as a split hero: copy stays
+   clean on the left while the people/plant remain fully readable on the right. */
+body:has(.article-photo img[src$="condition-depression.jpg"]) .condition-hero,
+body:has(.article-photo img[src$="condition-life-transitions.png"]) .condition-hero {
+  min-height: 500px;
+  display: flex;
+  align-items: center;
+  background: linear-gradient(90deg, #f8f5ef 0%, #f8f5ef 48%, #eef3ef 48%, #eef3ef 100%);
+}
+body:has(.article-photo img[src$="condition-depression.jpg"]) .condition-hero::after,
+body:has(.article-photo img[src$="condition-life-transitions.png"]) .condition-hero::after { display: none; }
+body:has(.article-photo img[src$="condition-depression.jpg"]) .condition-hero::before,
+body:has(.article-photo img[src$="condition-life-transitions.png"]) .condition-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 0 50%;
+  box-shadow: inset 40px 0 54px -48px rgba(23,50,58,.26);
+}
+body:has(.article-photo img[src$="condition-depression.jpg"]) .condition-hero::before {
+  background: url("assets/images/condition-depression.png") center center / cover no-repeat;
+}
+body:has(.article-photo img[src$="condition-life-transitions.png"]) .condition-hero::before {
+  background: url("assets/images/condition-life-transitions.png") center center / cover no-repeat;
+}
+body:has(.article-photo img[src$="condition-depression.jpg"]) .condition-hero .page-hero-inner,
+body:has(.article-photo img[src$="condition-life-transitions.png"]) .condition-hero .page-hero-inner { max-width: 1180px; }
+body:has(.article-photo img[src$="condition-depression.jpg"]) .condition-hero h1,
+body:has(.article-photo img[src$="condition-depression.jpg"]) .condition-hero p,
+body:has(.article-photo img[src$="condition-life-transitions.png"]) .condition-hero h1,
+body:has(.article-photo img[src$="condition-life-transitions.png"]) .condition-hero p { max-width: 520px; }
+
+/* The wide hand-in-hand image is naturally a banner, so make it the About
+   page's opening image and remove the duplicate standalone banner lower down. */
+body:has(img[src$="about-collaboration.png"]) .page-hero {
+  min-height: 430px;
+  display: flex;
+  align-items: center;
+  color: white;
+  background:
+    linear-gradient(90deg, rgba(15,36,43,.91) 0%, rgba(15,36,43,.75) 42%, rgba(15,36,43,.28) 70%, rgba(15,36,43,.08) 100%),
+    url("assets/images/about-collaboration.png") center center / cover no-repeat;
+}
+body:has(img[src$="about-collaboration.png"]) .page-hero .page-hero-inner { max-width: 1180px; }
+body:has(img[src$="about-collaboration.png"]) .page-hero h1,
+body:has(img[src$="about-collaboration.png"]) .page-hero p { max-width: 650px; color: white; text-shadow: 0 2px 18px rgba(0,0,0,.18); }
+body:has(img[src$="about-collaboration.png"]) .page-hero .eyebrow { color: #efd8c8; }
+body:has(img[src$="about-collaboration.png"]) section:has(img[src$="about-collaboration.png"]) { display: none; }
+
+/* Carry the same visual language back to the homepage where visitors choose a
+   condition. These are image headers, not full-card backgrounds, so the copy
+   remains as readable as the original cards. */
+a.condition-card:is([href="depression.html"], [href="/depression"]),
+a.condition-card:is([href="bipolar.html"], [href="/bipolar"]),
+a.condition-card:is([href="life-transitions.html"], [href="/life-transitions"]) {
+  position: relative;
+  overflow: hidden;
+  padding-top: 124px;
+  background: white;
+}
+a.condition-card:is([href="depression.html"], [href="/depression"])::before,
+a.condition-card:is([href="bipolar.html"], [href="/bipolar"])::before,
+a.condition-card:is([href="life-transitions.html"], [href="/life-transitions"])::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 102px;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+a.condition-card:is([href="depression.html"], [href="/depression"])::before {
+  background-image: linear-gradient(180deg, rgba(23,50,58,.02), rgba(23,50,58,.16)), url("assets/images/condition-depression.png");
+  background-position: center 52%;
+}
+a.condition-card:is([href="bipolar.html"], [href="/bipolar"])::before {
+  background-image: linear-gradient(180deg, rgba(23,50,58,.02), rgba(23,50,58,.16)), url("assets/images/condition-bipolar.png");
+  background-position: 72% center;
+}
+a.condition-card:is([href="life-transitions.html"], [href="/life-transitions"])::before {
+  background-image: linear-gradient(180deg, rgba(23,50,58,.02), rgba(23,50,58,.16)), url("assets/images/condition-life-transitions.png");
+  background-position: center 48%;
+}
+a.condition-card:is([href="depression.html"], [href="/depression"]) > span,
+a.condition-card:is([href="bipolar.html"], [href="/bipolar"]) > span,
+a.condition-card:is([href="life-transitions.html"], [href="/life-transitions"]) > span {
+  position: absolute;
+  z-index: 2;
+  top: 14px;
+  left: 14px;
+  margin: 0;
+  padding: 6px 9px;
+  border-radius: 999px;
+  color: white;
+  background: rgba(16,39,46,.78);
+  backdrop-filter: blur(8px);
+}
+
 @media (max-width: 1080px) {
   .brand-logo-image { width: 205px; }
   .care-path { grid-template-columns: 1fr 1fr; row-gap: 34px; }
@@ -389,6 +511,37 @@
   .mobile-contact-bar-call { color: white; border: 1px solid rgba(255,255,255,.2); }
   .mobile-contact-bar-book { color: var(--ink); background: white; }
   body.menu-open .mobile-contact-bar { opacity: 0; transform: translateY(12px); pointer-events: none; }
+}
+@media (max-width: 680px) {
+  body:has(.article-photo img[src$="condition-bipolar.jpg"]) .condition-hero {
+    min-height: 560px;
+    background:
+      linear-gradient(180deg, rgba(12,31,37,.86) 0%, rgba(12,31,37,.75) 58%, rgba(12,31,37,.42) 100%),
+      url("assets/images/condition-bipolar.png") 72% center / cover no-repeat;
+  }
+  body:has(.article-photo img[src$="condition-depression.jpg"]) .condition-hero,
+  body:has(.article-photo img[src$="condition-life-transitions.png"]) .condition-hero {
+    min-height: 0;
+    display: block;
+    padding-bottom: 286px;
+    background: #f8f5ef;
+  }
+  body:has(.article-photo img[src$="condition-depression.jpg"]) .condition-hero::before,
+  body:has(.article-photo img[src$="condition-life-transitions.png"]) .condition-hero::before {
+    inset: auto 0 0;
+    height: 240px;
+    box-shadow: inset 0 24px 40px -38px rgba(23,50,58,.3);
+  }
+  body:has(.article-photo img[src$="condition-depression.jpg"]) .condition-hero h1,
+  body:has(.article-photo img[src$="condition-depression.jpg"]) .condition-hero p,
+  body:has(.article-photo img[src$="condition-life-transitions.png"]) .condition-hero h1,
+  body:has(.article-photo img[src$="condition-life-transitions.png"]) .condition-hero p { max-width: none; }
+  body:has(img[src$="about-collaboration.png"]) .page-hero {
+    min-height: 470px;
+    background:
+      linear-gradient(90deg, rgba(15,36,43,.88), rgba(15,36,43,.54)),
+      url("assets/images/about-collaboration.png") center center / cover no-repeat;
+  }
 }
 @media (max-width: 560px) {
   .brand-logo-image { width: 170px; max-height: 48px; }
