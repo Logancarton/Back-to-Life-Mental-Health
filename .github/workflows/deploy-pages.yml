@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: read
+  statuses: write
 
 concurrency:
   group: cloudflare-pages-production
@@ -53,6 +54,17 @@ jobs:
             -b:a 128k \
             -movflags +faststart \
             public-dist/assets/video/provider-introduction.mp4
+
+      - name: Verify provider video streams
+        run: |
+          VIDEO_STREAM="$(ffprobe -v error -select_streams v:0 -show_entries stream=codec_name,pix_fmt -of csv=p=0 public-dist/assets/video/provider-introduction.mp4)"
+          AUDIO_STREAM="$(ffprobe -v error -select_streams a:0 -show_entries stream=codec_name,channels -of csv=p=0 public-dist/assets/video/provider-introduction.mp4)"
+          test "$VIDEO_STREAM" = "h264,yuv420p" || { echo "Unexpected provider video stream: $VIDEO_STREAM"; exit 1; }
+          case "$AUDIO_STREAM" in
+            aac,[1-9]*) ;;
+            *) echo "Expected AAC audio stream with at least one channel; got: $AUDIO_STREAM"; exit 1 ;;
+          esac
+          echo "Provider video verified: $VIDEO_STREAM / $AUDIO_STREAM"
 
       - name: Set up Node
         uses: actions/setup-node@v4
@@ -102,3 +114,53 @@ jobs:
           bash scripts/verify-production-routes.sh \
             "https://${CLOUDFLARE_PAGES_PROJECT_NAME}.pages.dev" \
             preview
+
+      - name: Install rendered-browser QA dependencies
+        run: |
+          npm install --no-save --no-package-lock playwright
+          npx playwright install --with-deps chromium
+
+      - name: Verify rendered Cloudflare staging
+        run: |
+          node scripts/verify-browser-staging.mjs \
+            "https://${CLOUDFLARE_PAGES_PROJECT_NAME}.pages.dev"
+
+      - name: Publish staging QA commit status
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          JOB_STATUS: ${{ job.status }}
+        run: |
+          case "$JOB_STATUS" in
+            success)
+              STATE="success"
+              DESCRIPTION="Cloudflare route and rendered-browser QA passed"
+              ;;
+            cancelled)
+              STATE="error"
+              DESCRIPTION="Cloudflare staging QA was cancelled"
+              ;;
+            *)
+              STATE="failure"
+              DESCRIPTION="Cloudflare route or rendered-browser QA failed"
+              ;;
+          esac
+
+          python3 - "$STATE" "$DESCRIPTION" > /tmp/cloudflare-status.json <<'PY'
+          import json
+          import sys
+
+          print(json.dumps({
+              "state": sys.argv[1],
+              "context": "cloudflare-staging-qa",
+              "description": sys.argv[2],
+          }))
+          PY
+
+          curl --fail --silent --show-error \
+            -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${GITHUB_SHA}" \
+            --data-binary @/tmp/cloudflare-status.json
