@@ -18,6 +18,7 @@ fi
 canonical_routes=(
   "/"
   "/services"
+  "/psychiatric-evaluation"
   "/medication-management"
   "/new-patients"
   "/current-patients"
@@ -52,6 +53,7 @@ legacy_redirects=(
 html_redirects=(
   "/index.html|/"
   "/services.html|/services"
+  "/psychiatric-evaluation.html|/psychiatric-evaluation"
   "/medication-management.html|/medication-management"
   "/new-patients.html|/new-patients"
   "/current-patients.html|/current-patients"

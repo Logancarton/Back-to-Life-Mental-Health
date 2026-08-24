@@ -19,6 +19,7 @@ PRODUCTION_ORIGIN = "https://www.back-to-life-mental-health.com"
 PUBLIC_PAGES = {
     "index.html": "/",
     "services.html": "/services",
+    "psychiatric-evaluation.html": "/psychiatric-evaluation",
     "medication-management.html": "/medication-management",
     "new-patients.html": "/new-patients",
     "current-patients.html": "/current-patients",
