@@ -106,7 +106,7 @@ check_redirect() {
   fi
 }
 
-check_cloudflare_html_redirect() {
+check_permanent_redirect() {
   local source="$1"
   local destination="$2"
   local result actual location expected_url
@@ -141,7 +141,7 @@ echo
 echo "Checking canonical trailing-slash normalization..."
 for route in "${canonical_routes[@]}"; do
   [[ "$route" == "/" ]] && continue
-  check_redirect "${route}/" "$route" "301"
+  check_permanent_redirect "${route}/" "$route"
 done
 
 echo
@@ -149,7 +149,7 @@ echo "Checking Cloudflare .html normalization..."
 for pair in "${html_redirects[@]}"; do
   source="${pair%%|*}"
   destination="${pair#*|}"
-  check_cloudflare_html_redirect "$source" "$destination"
+  check_permanent_redirect "$source" "$destination"
 done
 
 echo
