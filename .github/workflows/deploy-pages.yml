@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: read
+  statuses: write
 
 concurrency:
   group: cloudflare-pages-production
@@ -16,6 +17,8 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -53,6 +56,16 @@ jobs:
             -b:a 128k \
             -movflags +faststart \
             public-dist/assets/video/provider-introduction.mp4
+
+      - name: Verify provider video streams
+        run: |
+          VIDEO_STREAM="$(ffprobe -v error -select_streams v:0 -show_entries stream=codec_name,pix_fmt -of csv=p=0 public-dist/assets/video/provider-introduction.mp4)"
+          AUDIO_STREAM="$(ffprobe -v error -select_streams a:0 -show_entries stream=codec_name,channels -of csv=p=0 public-dist/assets/video/provider-introduction.mp4)"
+          test "$VIDEO_STREAM" = "h264,yuv420p" || { echo "Unexpected provider video stream: $VIDEO_STREAM"; exit 1; }
+          case "$AUDIO_STREAM" in
+            aac,[1-9]*) ;;
+            *) echo "Expected AAC audio stream with at least one channel; got: $AUDIO_STREAM"; exit 1 ;;
+          esac
 
       - name: Set up Node
         uses: actions/setup-node@v4
@@ -102,3 +115,13 @@ jobs:
           bash scripts/verify-production-routes.sh \
             "https://${CLOUDFLARE_PAGES_PROJECT_NAME}.pages.dev" \
             preview
+
+      - name: Install Chromium for Task 2 acceptance
+        run: |
+          npm install --no-save --no-package-lock playwright
+          npx playwright install --with-deps chromium
+
+      - name: Verify Task 2 rendered staging
+        run: |
+          node scripts/verify-browser-staging.mjs \
+            "https://${CLOUDFLARE_PAGES_PROJECT_NAME}.pages.dev"
