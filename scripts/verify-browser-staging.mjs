@@ -16,11 +16,6 @@ const assert = (condition, message) => {
   if (!condition) throw new Error(message);
 };
 
-const normalizePath = (value) => {
-  const path = new URL(value, baseUrl).pathname.replace(/\/+$/, '');
-  return path || '/';
-};
-
 async function gotoPath(page, path, expectedStatus = 200) {
   const response = await page.goto(`${baseUrl}${path}`, {
     waitUntil: 'domcontentloaded',
@@ -48,7 +43,7 @@ async function assertLocalImagesRespond(page, label) {
   const urls = await page.locator('img[src]').evaluateAll((images) => images.map((image) => image.src));
   for (const url of [...new Set(urls)]) {
     if (!url.startsWith(baseUrl)) continue;
-    const response = await page.request.get(url, { timeout: 20000 });
+    const response = await page.context().request.get(url, { timeout: 20000 });
     assert(response.ok(), `${label}: image failed ${url} -> ${response.status()}`);
   }
 }
@@ -117,7 +112,8 @@ async function testSchedulerLifecycle(page, label, expectMobileDialog = false) {
 const browser = await chromium.launch({ headless: true });
 
 try {
-  const desktop = await browser.newPage({ viewport: { width: 1365, height: 900 } });
+  const desktopContext = await browser.newContext({ viewport: { width: 1365, height: 900 } });
+  const desktop = await desktopContext.newPage();
 
   await gotoPath(desktop, '/');
   assert(!(await desktop.locator('body').innerText()).includes('275518'), 'Homepage still exposes removed license number');
@@ -158,7 +154,7 @@ try {
   assert(videoSources.length >= 2, 'About: expected MP4 plus MOV fallback');
   assert(videoSources[0].type === 'video/mp4', `About: first video source is ${videoSources[0]?.type || 'missing'}, expected video/mp4`);
   assert(videoSources[1].type === 'video/quicktime', `About: second video source is ${videoSources[1]?.type || 'missing'}, expected video/quicktime`);
-  const mp4Response = await desktop.request.get(videoSources[0].src, { timeout: 30000 });
+  const mp4Response = await desktop.context().request.get(videoSources[0].src, { timeout: 30000 });
   assert(mp4Response.ok(), `About: deployed MP4 returned ${mp4Response.status()}`);
   await assertLocalImagesRespond(desktop, 'desktop about');
   await assertNoHorizontalOverflow(desktop, 'desktop about');
@@ -182,7 +178,10 @@ try {
   assert((await desktop.locator('body').innerText()).toLowerCase().includes('page not found'), '404 page content did not render');
   console.log('PASS rendered 404');
 
-  const mobile = await browser.newPage({ viewport: { width: 390, height: 844 } });
+  await desktopContext.close();
+
+  const mobileContext = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const mobile = await mobileContext.newPage();
   await gotoPath(mobile, '/');
   const toggle = mobile.locator('[data-menu-toggle]');
   const nav = mobile.locator('[data-nav]');
@@ -218,6 +217,7 @@ try {
   assert(schedulerLinks > 0, 'Scheduler URL is missing from rendered site');
   console.log('PASS scheduler destination preserved');
 
+  await mobileContext.close();
   console.log('All rendered staging browser checks passed.');
 } finally {
   await browser.close();
