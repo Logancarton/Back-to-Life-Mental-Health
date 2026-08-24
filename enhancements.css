@@ -4,9 +4,11 @@
    shared page structure intact while giving each service/condition page its
    own intentional opening image. */
 
+html:has(link[rel="canonical"][href$="/anxiety"]) .condition-hero,
 html:has(link[rel="canonical"][href$="/loss-bereavement"], link[rel="canonical"][href$="/grief-loss"]) .condition-hero,
 html:has(link[rel="canonical"][href$="/attention-deficit-hyperactive-disorder"], link[rel="canonical"][href$="/adhd"]) .condition-hero,
 html:has(link[rel="canonical"][href$="/medication-management"]) .condition-hero,
+html:has(link[rel="canonical"][href$="/obsessive-compulsive-disorder"], link[rel="canonical"][href$="/ocd"]) .condition-hero,
 html:has(link[rel="canonical"][href$="/post-traumatic-stress-disorder"], link[rel="canonical"][href$="/ptsd"]) .condition-hero {
   min-height: 570px;
   display: flex;
@@ -15,15 +17,25 @@ html:has(link[rel="canonical"][href$="/post-traumatic-stress-disorder"], link[re
   color: white;
 }
 
+html:has(link[rel="canonical"][href$="/anxiety"]) .condition-hero::before,
+html:has(link[rel="canonical"][href$="/anxiety"]) .condition-hero::after,
 html:has(link[rel="canonical"][href$="/loss-bereavement"], link[rel="canonical"][href$="/grief-loss"]) .condition-hero::before,
 html:has(link[rel="canonical"][href$="/loss-bereavement"], link[rel="canonical"][href$="/grief-loss"]) .condition-hero::after,
 html:has(link[rel="canonical"][href$="/attention-deficit-hyperactive-disorder"], link[rel="canonical"][href$="/adhd"]) .condition-hero::before,
 html:has(link[rel="canonical"][href$="/attention-deficit-hyperactive-disorder"], link[rel="canonical"][href$="/adhd"]) .condition-hero::after,
 html:has(link[rel="canonical"][href$="/medication-management"]) .condition-hero::before,
 html:has(link[rel="canonical"][href$="/medication-management"]) .condition-hero::after,
+html:has(link[rel="canonical"][href$="/obsessive-compulsive-disorder"], link[rel="canonical"][href$="/ocd"]) .condition-hero::before,
+html:has(link[rel="canonical"][href$="/obsessive-compulsive-disorder"], link[rel="canonical"][href$="/ocd"]) .condition-hero::after,
 html:has(link[rel="canonical"][href$="/post-traumatic-stress-disorder"], link[rel="canonical"][href$="/ptsd"]) .condition-hero::before,
 html:has(link[rel="canonical"][href$="/post-traumatic-stress-disorder"], link[rel="canonical"][href$="/ptsd"]) .condition-hero::after {
   display: none;
+}
+
+html:has(link[rel="canonical"][href$="/anxiety"]) .condition-hero {
+  background:
+    linear-gradient(90deg, rgba(12,31,37,.96) 0%, rgba(12,31,37,.86) 34%, rgba(12,31,37,.52) 60%, rgba(12,31,37,.16) 100%),
+    url("assets/images/Anxiety.png") center 46% / cover no-repeat;
 }
 
 html:has(link[rel="canonical"][href$="/loss-bereavement"], link[rel="canonical"][href$="/grief-loss"]) .condition-hero {
@@ -44,25 +56,37 @@ html:has(link[rel="canonical"][href$="/medication-management"]) .condition-hero 
     url("assets/images/Script Pad.png") center 52% / cover no-repeat;
 }
 
+html:has(link[rel="canonical"][href$="/obsessive-compulsive-disorder"], link[rel="canonical"][href$="/ocd"]) .condition-hero {
+  background:
+    linear-gradient(90deg, rgba(12,31,37,.95) 0%, rgba(12,31,37,.82) 36%, rgba(12,31,37,.46) 62%, rgba(12,31,37,.10) 100%),
+    url("assets/images/OCD_organizing.png") center 48% / cover no-repeat;
+}
+
 html:has(link[rel="canonical"][href$="/post-traumatic-stress-disorder"], link[rel="canonical"][href$="/ptsd"]) .condition-hero {
   background:
     linear-gradient(90deg, rgba(12,31,37,.95) 0%, rgba(12,31,37,.82) 38%, rgba(12,31,37,.42) 64%, rgba(12,31,37,.10) 100%),
     url("assets/images/PTSD safe.png") center 48% / cover no-repeat;
 }
 
+html:has(link[rel="canonical"][href$="/anxiety"]) .condition-hero .page-hero-inner,
 html:has(link[rel="canonical"][href$="/loss-bereavement"], link[rel="canonical"][href$="/grief-loss"]) .condition-hero .page-hero-inner,
 html:has(link[rel="canonical"][href$="/attention-deficit-hyperactive-disorder"], link[rel="canonical"][href$="/adhd"]) .condition-hero .page-hero-inner,
 html:has(link[rel="canonical"][href$="/medication-management"]) .condition-hero .page-hero-inner,
+html:has(link[rel="canonical"][href$="/obsessive-compulsive-disorder"], link[rel="canonical"][href$="/ocd"]) .condition-hero .page-hero-inner,
 html:has(link[rel="canonical"][href$="/post-traumatic-stress-disorder"], link[rel="canonical"][href$="/ptsd"]) .condition-hero .page-hero-inner {
   max-width: 1180px;
 }
 
+html:has(link[rel="canonical"][href$="/anxiety"]) .condition-hero h1,
+html:has(link[rel="canonical"][href$="/anxiety"]) .condition-hero p,
 html:has(link[rel="canonical"][href$="/loss-bereavement"], link[rel="canonical"][href$="/grief-loss"]) .condition-hero h1,
 html:has(link[rel="canonical"][href$="/loss-bereavement"], link[rel="canonical"][href$="/grief-loss"]) .condition-hero p,
 html:has(link[rel="canonical"][href$="/attention-deficit-hyperactive-disorder"], link[rel="canonical"][href$="/adhd"]) .condition-hero h1,
 html:has(link[rel="canonical"][href$="/attention-deficit-hyperactive-disorder"], link[rel="canonical"][href$="/adhd"]) .condition-hero p,
 html:has(link[rel="canonical"][href$="/medication-management"]) .condition-hero h1,
 html:has(link[rel="canonical"][href$="/medication-management"]) .condition-hero p,
+html:has(link[rel="canonical"][href$="/obsessive-compulsive-disorder"], link[rel="canonical"][href$="/ocd"]) .condition-hero h1,
+html:has(link[rel="canonical"][href$="/obsessive-compulsive-disorder"], link[rel="canonical"][href$="/ocd"]) .condition-hero p,
 html:has(link[rel="canonical"][href$="/post-traumatic-stress-disorder"], link[rel="canonical"][href$="/ptsd"]) .condition-hero h1,
 html:has(link[rel="canonical"][href$="/post-traumatic-stress-disorder"], link[rel="canonical"][href$="/ptsd"]) .condition-hero p {
   max-width: 620px;
@@ -70,23 +94,29 @@ html:has(link[rel="canonical"][href$="/post-traumatic-stress-disorder"], link[re
   text-shadow: 0 2px 18px rgba(0,0,0,.22);
 }
 
+html:has(link[rel="canonical"][href$="/anxiety"]) .condition-hero .eyebrow,
 html:has(link[rel="canonical"][href$="/loss-bereavement"], link[rel="canonical"][href$="/grief-loss"]) .condition-hero .eyebrow,
 html:has(link[rel="canonical"][href$="/attention-deficit-hyperactive-disorder"], link[rel="canonical"][href$="/adhd"]) .condition-hero .eyebrow,
 html:has(link[rel="canonical"][href$="/medication-management"]) .condition-hero .eyebrow,
+html:has(link[rel="canonical"][href$="/obsessive-compulsive-disorder"], link[rel="canonical"][href$="/ocd"]) .condition-hero .eyebrow,
 html:has(link[rel="canonical"][href$="/post-traumatic-stress-disorder"], link[rel="canonical"][href$="/ptsd"]) .condition-hero .eyebrow {
   color: #efd8c8;
 }
 
+html:has(link[rel="canonical"][href$="/anxiety"]) .condition-hero .text-link,
 html:has(link[rel="canonical"][href$="/loss-bereavement"], link[rel="canonical"][href$="/grief-loss"]) .condition-hero .text-link,
 html:has(link[rel="canonical"][href$="/attention-deficit-hyperactive-disorder"], link[rel="canonical"][href$="/adhd"]) .condition-hero .text-link,
 html:has(link[rel="canonical"][href$="/medication-management"]) .condition-hero .text-link,
+html:has(link[rel="canonical"][href$="/obsessive-compulsive-disorder"], link[rel="canonical"][href$="/ocd"]) .condition-hero .text-link,
 html:has(link[rel="canonical"][href$="/post-traumatic-stress-disorder"], link[rel="canonical"][href$="/ptsd"]) .condition-hero .text-link {
   color: white;
 }
 
+html:has(link[rel="canonical"][href$="/anxiety"]) .condition-hero .button,
 html:has(link[rel="canonical"][href$="/loss-bereavement"], link[rel="canonical"][href$="/grief-loss"]) .condition-hero .button,
 html:has(link[rel="canonical"][href$="/attention-deficit-hyperactive-disorder"], link[rel="canonical"][href$="/adhd"]) .condition-hero .button,
 html:has(link[rel="canonical"][href$="/medication-management"]) .condition-hero .button,
+html:has(link[rel="canonical"][href$="/obsessive-compulsive-disorder"], link[rel="canonical"][href$="/ocd"]) .condition-hero .button,
 html:has(link[rel="canonical"][href$="/post-traumatic-stress-disorder"], link[rel="canonical"][href$="/ptsd"]) .condition-hero .button {
   border-color: white;
   background: white;
@@ -99,12 +129,11 @@ html:has(link[rel="canonical"][href$="/loss-bereavement"], link[rel="canonical"]
   display: none;
 }
 
-/* The newly assigned ADHD, PTSD, and Grief & Loss photography also belongs on
-   the homepage condition chooser. Keep the same photo-header treatment used by
-   Depression, Bipolar Disorder, and Life Transitions rather than placing copy
-   over images. */
+/* Carry condition photography onto the homepage chooser as image headers. */
+a.condition-card:is([href="anxiety.html"], [href="/anxiety"]),
 a.condition-card:is([href="adhd.html"], [href="/adhd"]),
 a.condition-card:is([href="ptsd.html"], [href="/ptsd"]),
+a.condition-card:is([href="ocd.html"], [href="/ocd"]),
 a.condition-card:is([href="grief-loss.html"], [href="/grief-loss"]) {
   position: relative;
   overflow: hidden;
@@ -112,8 +141,10 @@ a.condition-card:is([href="grief-loss.html"], [href="/grief-loss"]) {
   background: white;
 }
 
+a.condition-card:is([href="anxiety.html"], [href="/anxiety"])::before,
 a.condition-card:is([href="adhd.html"], [href="/adhd"])::before,
 a.condition-card:is([href="ptsd.html"], [href="/ptsd"])::before,
+a.condition-card:is([href="ocd.html"], [href="/ocd"])::before,
 a.condition-card:is([href="grief-loss.html"], [href="/grief-loss"])::before {
   content: "";
   position: absolute;
@@ -121,6 +152,11 @@ a.condition-card:is([href="grief-loss.html"], [href="/grief-loss"])::before {
   height: 102px;
   background-size: cover;
   background-repeat: no-repeat;
+}
+
+a.condition-card:is([href="anxiety.html"], [href="/anxiety"])::before {
+  background-image: linear-gradient(180deg, rgba(23,50,58,.02), rgba(23,50,58,.18)), url("assets/images/Anxiety.png");
+  background-position: center 45%;
 }
 
 a.condition-card:is([href="adhd.html"], [href="/adhd"])::before {
@@ -133,13 +169,20 @@ a.condition-card:is([href="ptsd.html"], [href="/ptsd"])::before {
   background-position: center 48%;
 }
 
+a.condition-card:is([href="ocd.html"], [href="/ocd"])::before {
+  background-image: linear-gradient(180deg, rgba(23,50,58,.02), rgba(23,50,58,.14)), url("assets/images/OCD_organizing.png");
+  background-position: center 45%;
+}
+
 a.condition-card:is([href="grief-loss.html"], [href="/grief-loss"])::before {
   background-image: linear-gradient(180deg, rgba(23,50,58,.02), rgba(23,50,58,.16)), url("assets/images/Grief_&_Loss.png");
   background-position: center 30%;
 }
 
+a.condition-card:is([href="anxiety.html"], [href="/anxiety"]) > span,
 a.condition-card:is([href="adhd.html"], [href="/adhd"]) > span,
 a.condition-card:is([href="ptsd.html"], [href="/ptsd"]) > span,
+a.condition-card:is([href="ocd.html"], [href="/ocd"]) > span,
 a.condition-card:is([href="grief-loss.html"], [href="/grief-loss"]) > span {
   position: absolute;
   z-index: 2;
@@ -154,12 +197,20 @@ a.condition-card:is([href="grief-loss.html"], [href="/grief-loss"]) > span {
 }
 
 @media (max-width: 680px) {
+  html:has(link[rel="canonical"][href$="/anxiety"]) .condition-hero,
   html:has(link[rel="canonical"][href$="/loss-bereavement"], link[rel="canonical"][href$="/grief-loss"]) .condition-hero,
   html:has(link[rel="canonical"][href$="/attention-deficit-hyperactive-disorder"], link[rel="canonical"][href$="/adhd"]) .condition-hero,
   html:has(link[rel="canonical"][href$="/medication-management"]) .condition-hero,
+  html:has(link[rel="canonical"][href$="/obsessive-compulsive-disorder"], link[rel="canonical"][href$="/ocd"]) .condition-hero,
   html:has(link[rel="canonical"][href$="/post-traumatic-stress-disorder"], link[rel="canonical"][href$="/ptsd"]) .condition-hero {
     min-height: 620px;
     padding: 46px 0 62px;
+  }
+
+  html:has(link[rel="canonical"][href$="/anxiety"]) .condition-hero {
+    background:
+      linear-gradient(90deg, rgba(12,31,37,.93), rgba(12,31,37,.66)),
+      url("assets/images/Anxiety.png") 52% center / cover no-repeat;
   }
 
   html:has(link[rel="canonical"][href$="/loss-bereavement"], link[rel="canonical"][href$="/grief-loss"]) .condition-hero {
@@ -180,18 +231,28 @@ a.condition-card:is([href="grief-loss.html"], [href="/grief-loss"]) > span {
       url("assets/images/Script Pad.png") 58% center / cover no-repeat;
   }
 
+  html:has(link[rel="canonical"][href$="/obsessive-compulsive-disorder"], link[rel="canonical"][href$="/ocd"]) .condition-hero {
+    background:
+      linear-gradient(90deg, rgba(12,31,37,.92), rgba(12,31,37,.62)),
+      url("assets/images/OCD_organizing.png") 60% center / cover no-repeat;
+  }
+
   html:has(link[rel="canonical"][href$="/post-traumatic-stress-disorder"], link[rel="canonical"][href$="/ptsd"]) .condition-hero {
     background:
       linear-gradient(90deg, rgba(12,31,37,.92), rgba(12,31,37,.62)),
       url("assets/images/PTSD safe.png") 62% center / cover no-repeat;
   }
 
+  html:has(link[rel="canonical"][href$="/anxiety"]) .condition-hero h1,
+  html:has(link[rel="canonical"][href$="/anxiety"]) .condition-hero p,
   html:has(link[rel="canonical"][href$="/loss-bereavement"], link[rel="canonical"][href$="/grief-loss"]) .condition-hero h1,
   html:has(link[rel="canonical"][href$="/loss-bereavement"], link[rel="canonical"][href$="/grief-loss"]) .condition-hero p,
   html:has(link[rel="canonical"][href$="/attention-deficit-hyperactive-disorder"], link[rel="canonical"][href$="/adhd"]) .condition-hero h1,
   html:has(link[rel="canonical"][href$="/attention-deficit-hyperactive-disorder"], link[rel="canonical"][href$="/adhd"]) .condition-hero p,
   html:has(link[rel="canonical"][href$="/medication-management"]) .condition-hero h1,
   html:has(link[rel="canonical"][href$="/medication-management"]) .condition-hero p,
+  html:has(link[rel="canonical"][href$="/obsessive-compulsive-disorder"], link[rel="canonical"][href$="/ocd"]) .condition-hero h1,
+  html:has(link[rel="canonical"][href$="/obsessive-compulsive-disorder"], link[rel="canonical"][href$="/ocd"]) .condition-hero p,
   html:has(link[rel="canonical"][href$="/post-traumatic-stress-disorder"], link[rel="canonical"][href$="/ptsd"]) .condition-hero h1,
   html:has(link[rel="canonical"][href$="/post-traumatic-stress-disorder"], link[rel="canonical"][href$="/ptsd"]) .condition-hero p {
     max-width: none;
