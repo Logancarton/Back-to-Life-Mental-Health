@@ -17,13 +17,13 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
 
       - name: Publish staging QA pending status
-        env:
-          GH_TOKEN: ${{ github.token }}
         run: |
           curl --fail --silent --show-error \
             -X POST \
@@ -79,8 +79,6 @@ jobs:
           echo "Provider video verified: $VIDEO_STREAM / $AUDIO_STREAM"
 
       - name: Mark provider video QA passed
-        env:
-          GH_TOKEN: ${{ github.token }}
         run: |
           curl --fail --silent --show-error \
             -X POST \
@@ -134,8 +132,6 @@ jobs:
             --branch main
 
       - name: Mark Cloudflare deploy passed
-        env:
-          GH_TOKEN: ${{ github.token }}
         run: |
           curl --fail --silent --show-error \
             -X POST \
@@ -152,8 +148,6 @@ jobs:
             preview
 
       - name: Mark route QA passed
-        env:
-          GH_TOKEN: ${{ github.token }}
         run: |
           curl --fail --silent --show-error \
             -X POST \
@@ -174,8 +168,6 @@ jobs:
             "https://${CLOUDFLARE_PAGES_PROJECT_NAME}.pages.dev"
 
       - name: Mark rendered-browser QA passed
-        env:
-          GH_TOKEN: ${{ github.token }}
         run: |
           curl --fail --silent --show-error \
             -X POST \
@@ -188,7 +180,6 @@ jobs:
       - name: Publish staging QA commit status
         if: always()
         env:
-          GH_TOKEN: ${{ github.token }}
           JOB_STATUS: ${{ job.status }}
         run: |
           case "$JOB_STATUS" in
