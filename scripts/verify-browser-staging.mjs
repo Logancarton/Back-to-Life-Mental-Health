@@ -19,7 +19,7 @@ const assert = (condition, message) => {
   if (!condition) throw new Error(message);
 };
 
-async function markPassed(context, description) {
+async function markStatus(context, state, description) {
   if (!githubToken || !githubRepository || !githubSha) return;
   const response = await fetch(`https://api.github.com/repos/${githubRepository}/statuses/${githubSha}`, {
     method: 'POST',
@@ -29,12 +29,12 @@ async function markPassed(context, description) {
       'X-GitHub-Api-Version': '2022-11-28',
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({ state: 'success', context, description })
+    body: JSON.stringify({ state, context, description: String(description).slice(0, 140) })
   });
-  if (!response.ok) {
-    console.warn(`Could not publish ${context} status: HTTP ${response.status()}`);
-  }
+  if (!response.ok) console.warn(`Could not publish ${context} status: HTTP ${response.status()}`);
 }
+
+const markPassed = (context, description) => markStatus(context, 'success', description);
 
 async function gotoPath(page, path, expectedStatus = 200) {
   const response = await page.goto(`${baseUrl}${path}`, {
@@ -113,8 +113,7 @@ async function testSchedulerLifecycle(page, label, expectMobileDialog = false) {
       const node = document.querySelector('[data-mobile-contact-bar]');
       return node && getComputedStyle(node).opacity === '0';
     });
-    const mobileBar = page.locator('[data-mobile-contact-bar]');
-    const mobileBarState = await mobileBar.evaluate((node) => {
+    const mobileBarState = await page.locator('[data-mobile-contact-bar]').evaluate((node) => {
       const style = getComputedStyle(node);
       return { opacity: style.opacity, pointerEvents: style.pointerEvents };
     });
@@ -133,18 +132,28 @@ async function testSchedulerLifecycle(page, label, expectMobileDialog = false) {
   await page.waitForFunction(() => document.querySelector('[data-scheduler-dialog]')?.open === false);
 }
 
-const browser = await chromium.launch({ headless: true });
+let browser = null;
 
 try {
+  browser = await chromium.launch({ headless: true });
+  await markPassed('browser-engine-qa', 'Chromium launched successfully');
+
   const desktopContext = await browser.newContext({ viewport: { width: 1365, height: 900 } });
   const desktop = await desktopContext.newPage();
+  await markPassed('browser-desktop-start-qa', 'Desktop browser context created');
 
   await gotoPath(desktop, '/');
+  await markPassed('browser-home-navigation-qa', 'Homepage rendered with HTTP 200');
+
   assert(!(await desktop.locator('body').innerText()).includes('275518'), 'Homepage still exposes removed license number');
   assert(!(await desktop.locator('[data-menu-toggle]').isVisible()), 'Desktop hamburger should be hidden');
   assert(await desktop.locator('img.hero-photo-image').evaluate((image) => image.complete && image.naturalWidth > 0), 'Homepage hero image did not render');
+  await markPassed('browser-home-basic-qa', 'Homepage license, desktop nav and hero image passed');
+
   await assertNoHorizontalOverflow(desktop, 'desktop home');
   await assertLocalImagesRespond(desktop, 'desktop home');
+  await markPassed('browser-home-layout-qa', 'Desktop homepage overflow and image requests passed');
+
   await testSchedulerLifecycle(desktop, 'desktop scheduler');
   console.log('PASS desktop homepage + scheduler');
   await markPassed('browser-desktop-home-qa', 'Desktop homepage and scheduler passed');
@@ -258,6 +267,11 @@ try {
 
   await mobileContext.close();
   console.log('All rendered staging browser checks passed.');
+} catch (error) {
+  const message = error instanceof Error ? error.message : String(error);
+  console.error(`Rendered staging QA failed: ${message}`);
+  await markStatus('browser-failure-qa', 'failure', message).catch(() => {});
+  throw error;
 } finally {
-  await browser.close();
+  if (browser) await browser.close();
 }
