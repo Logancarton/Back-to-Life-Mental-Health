@@ -1,0 +1,59 @@
+name: Verify production domain routing
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-production:
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, 'Verify production routing')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Verify canonical, legacy, HTML, slash, file, and 404 routing
+        run: |
+          bash scripts/verify-production-routes.sh \
+            "https://www.back-to-life-mental-health.com" \
+            production
+
+      - name: Verify apex and HTTP canonicalization
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          check_permanent_redirect() {
+            local source="$1"
+            local expected="$2"
+            local result code destination
+            result="$(curl -sS --max-time 20 -o /dev/null -w '%{http_code} %{redirect_url}' "$source")"
+            code="${result%% *}"
+            destination="${result#* }"
+
+            if [[ ( "$code" != "301" && "$code" != "308" ) || "$destination" != "$expected" ]]; then
+              echo "FAIL $source -> $code $destination (expected permanent redirect to $expected)"
+              exit 1
+            fi
+
+            echo "OK   $source -> $code $destination"
+          }
+
+          check_permanent_redirect \
+            "https://back-to-life-mental-health.com/" \
+            "https://www.back-to-life-mental-health.com/"
+          check_permanent_redirect \
+            "https://back-to-life-mental-health.com/services" \
+            "https://www.back-to-life-mental-health.com/services"
+          check_permanent_redirect \
+            "http://back-to-life-mental-health.com/services" \
+            "https://www.back-to-life-mental-health.com/services"
+          check_permanent_redirect \
+            "http://www.back-to-life-mental-health.com/services" \
+            "https://www.back-to-life-mental-health.com/services"
