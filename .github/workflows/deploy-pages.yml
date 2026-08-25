@@ -23,6 +23,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
+      - name: Install production image optimizer
+        run: python3 -m pip install --disable-pip-version-check Pillow==11.3.0
+
       - name: Prepare static site
         run: |
           mkdir -p public-dist
@@ -37,35 +40,8 @@ jobs:
             --exclude 'Dockerfile' \
             --exclude '*.md'
 
-      - name: Normalize Cloudflare routes and metadata
+      - name: Optimize assets, routes, and metadata
         run: python3 scripts/prepare-cloudflare-site.py public-dist
-
-      - name: Build browser-compatible provider video
-        run: |
-          if ! command -v ffmpeg >/dev/null 2>&1; then
-            sudo apt-get update
-            sudo apt-get install -y ffmpeg
-          fi
-          ffmpeg -y \
-            -i public-dist/assets/video/introduction.mov \
-            -c:v libx264 \
-            -preset medium \
-            -crf 23 \
-            -pix_fmt yuv420p \
-            -c:a aac \
-            -b:a 128k \
-            -movflags +faststart \
-            public-dist/assets/video/provider-introduction.mp4
-
-      - name: Verify provider video streams
-        run: |
-          VIDEO_STREAM="$(ffprobe -v error -select_streams v:0 -show_entries stream=codec_name,pix_fmt -of csv=p=0 public-dist/assets/video/provider-introduction.mp4)"
-          AUDIO_STREAM="$(ffprobe -v error -select_streams a:0 -show_entries stream=codec_name,channels -of csv=p=0 public-dist/assets/video/provider-introduction.mp4)"
-          test "$VIDEO_STREAM" = "h264,yuv420p" || { echo "Unexpected provider video stream: $VIDEO_STREAM"; exit 1; }
-          case "$AUDIO_STREAM" in
-            aac,[1-9]*) ;;
-            *) echo "Expected AAC audio stream with at least one channel; got: $AUDIO_STREAM"; exit 1 ;;
-          esac
 
       - name: Set up Node
         uses: actions/setup-node@v4
