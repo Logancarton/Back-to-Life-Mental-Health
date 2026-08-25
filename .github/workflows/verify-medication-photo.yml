@@ -1,0 +1,103 @@
+name: Verify medication photo layout
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/verify-medication-photo.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Install Playwright
+        run: |
+          npm install --no-save --no-package-lock playwright
+          npx playwright install --with-deps chromium
+
+      - name: Render medication photo at desktop and mobile
+        run: |
+          node <<'NODE'
+          const { chromium } = require('playwright');
+          const assert = (condition, message) => { if (!condition) throw new Error(message); };
+          const url = 'https://www.back-to-life-mental-health.com/medication-management';
+          const cases = [
+            ['desktop', { width: 1365, height: 900 }],
+            ['mobile', { width: 390, height: 844 }]
+          ];
+
+          (async () => {
+            const browser = await chromium.launch({ headless: true });
+            try {
+              for (const [label, viewport] of cases) {
+                const context = await browser.newContext({ viewport });
+                const page = await context.newPage();
+                const response = await page.goto(url, { waitUntil: 'networkidle', timeout: 45000 });
+                assert(response && response.ok(), `${label}: medication page did not load`);
+
+                const figure = page.locator('.medication-management-photo');
+                const image = figure.locator('img');
+                assert(await figure.count() === 1, `${label}: medication photo figure missing`);
+                assert(await figure.isVisible(), `${label}: medication photo figure hidden`);
+                await image.waitFor({ state: 'visible', timeout: 10000 });
+                await image.scrollIntoViewIfNeeded();
+                await page.waitForFunction(() => {
+                  const img = document.querySelector('.medication-management-photo img');
+                  return img && img.complete && img.naturalWidth > 0;
+                });
+
+                const metrics = await figure.evaluate((node) => {
+                  const img = node.querySelector('img');
+                  const rect = node.getBoundingClientRect();
+                  const imgRect = img.getBoundingClientRect();
+                  const style = getComputedStyle(img);
+                  return {
+                    figureWidth: Number(rect.width.toFixed(2)),
+                    figureHeight: Number(rect.height.toFixed(2)),
+                    figureRatio: Number((rect.width / rect.height).toFixed(4)),
+                    imageWidth: Number(imgRect.width.toFixed(2)),
+                    imageHeight: Number(imgRect.height.toFixed(2)),
+                    objectFit: style.objectFit,
+                    objectPosition: style.objectPosition,
+                    naturalWidth: img.naturalWidth,
+                    naturalHeight: img.naturalHeight,
+                    naturalRatio: Number((img.naturalWidth / img.naturalHeight).toFixed(4)),
+                    overflow: getComputedStyle(node).overflow
+                  };
+                });
+                console.log(`${label.toUpperCase()} ${JSON.stringify(metrics)}`);
+
+                assert(Math.abs(metrics.figureRatio - 1.5) < 0.03, `${label}: figure ratio ${metrics.figureRatio} is not 3:2`);
+                assert(Math.abs(metrics.imageWidth - metrics.figureWidth) < 2, `${label}: image width does not fill frame`);
+                assert(Math.abs(metrics.imageHeight - metrics.figureHeight) < 2, `${label}: image height does not fill frame`);
+                assert(metrics.objectFit === 'cover', `${label}: expected object-fit cover, got ${metrics.objectFit}`);
+                assert(metrics.overflow === 'hidden', `${label}: frame is not clipping the crop`);
+                assert(metrics.figureHeight < viewport.height * 0.8, `${label}: photo is still excessively tall (${metrics.figureHeight}px)`);
+
+                await figure.screenshot({ path: `medication-photo-${label}.png` });
+                await context.close();
+              }
+            } finally {
+              await browser.close();
+            }
+          })().catch((error) => {
+            console.error(error);
+            process.exit(1);
+          });
+          NODE
+
+      - name: Upload rendered crops
+        uses: actions/upload-artifact@v4
+        with:
+          name: medication-photo-render-check
+          path: medication-photo-*.png
+          if-no-files-found: error
+          retention-days: 3
