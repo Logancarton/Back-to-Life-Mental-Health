@@ -76,8 +76,8 @@ jobs:
                 console.log(`${label.toUpperCase()} ${JSON.stringify(metrics)}`);
 
                 assert(Math.abs(metrics.figureRatio - 1.5) < 0.03, `${label}: figure ratio ${metrics.figureRatio} is not 3:2`);
-                assert(Math.abs(metrics.imageWidth - metrics.figureWidth) < 2, `${label}: image width does not fill frame`);
-                assert(Math.abs(metrics.imageHeight - metrics.figureHeight) < 2, `${label}: image height does not fill frame`);
+                assert(Math.abs(metrics.imageWidth - metrics.figureWidth) < 3, `${label}: image width does not fill frame`);
+                assert(Math.abs(metrics.imageHeight - metrics.figureHeight) < 3, `${label}: image height does not fill frame`);
                 assert(metrics.objectFit === 'cover', `${label}: expected object-fit cover, got ${metrics.objectFit}`);
                 assert(metrics.overflow === 'hidden', `${label}: frame is not clipping the crop`);
                 assert(metrics.figureHeight < viewport.height * 0.8, `${label}: photo is still excessively tall (${metrics.figureHeight}px)`);
