@@ -15,6 +15,57 @@
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="journey-pages.css">
   <link rel="stylesheet" href="enhancements.css">
+  <style>
+    .arrival-landmarks {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+      margin-top: 30px;
+    }
+    .arrival-landmark {
+      margin: 0;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: white;
+      box-shadow: 0 12px 30px rgba(23,50,58,.06);
+    }
+    .arrival-landmark img {
+      width: 100%;
+      height: 230px;
+      object-fit: cover;
+      display: block;
+    }
+    .arrival-landmark--exterior img { object-position: center 52%; }
+    .arrival-landmark--suite img { object-position: center 48%; }
+    .arrival-landmark--inside img { object-position: center 58%; }
+    .arrival-landmark-body { padding: 22px 24px 26px; }
+    .arrival-step {
+      display: block;
+      margin-bottom: 12px;
+      color: var(--terracotta);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+    }
+    .arrival-landmark h3 {
+      margin: 0;
+      font-family: "Playfair Display", Georgia, serif;
+      font-size: 27px;
+    }
+    .arrival-landmark p {
+      margin: 10px 0 0;
+      color: var(--ink-soft);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    .arrival-help { margin-top: 22px; }
+    @media (max-width: 760px) {
+      .arrival-landmarks { grid-template-columns: 1fr; }
+      .arrival-landmark img { height: 240px; }
+    }
+  </style>
   <script defer src="script.js"></script>
 </head>
 <body>
@@ -26,7 +77,7 @@
 
     <section class="section"><div class="container contact-grid"><div><div class="contact-stack"><div class="contact-card reveal"><span>Book online</span><a href="https://d2oe0ra32qx05a.cloudfront.net/?practiceKey=k_1_108034" target="_blank" rel="noopener"><strong>Schedule an appointment →</strong></a></div><div class="contact-card reveal"><span>Phone</span><a href="tel:+14803138583"><strong>(480) 313-8583</strong></a></div><div class="contact-card reveal"><span>Email</span><a href="mailto:Admin@BTLMH.com"><strong>Admin@BTLMH.com</strong></a></div><div class="contact-card reveal"><span>Fax</span><strong>(949) 703-7732</strong></div><div class="contact-card reveal"><span>Office</span><strong>41810 N Venture Dr<br>Bldg C, Ste C122<br>Anthem, AZ 85086</strong><p>Once inside Suite C122, we are in Office 5.</p></div></div><div class="note-box reveal">Visits are by appointment only. For emergencies or immediate safety concerns, use emergency services rather than routine office contact channels.</div></div><div class="map-wrap reveal"><iframe title="Map to Back to Life Mental Health" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://www.google.com/maps?q=41810%20N%20Venture%20Dr%20Bldg%20C%20Ste%20C122%20Anthem%20AZ%2085086&output=embed"></iframe></div></div></section>
 
-    <section class="journey-section soft" aria-labelledby="arrival-heading"><div class="container"><div class="journey-heading reveal"><span class="eyebrow">Finding the office</span><h2 id="arrival-heading">Three landmarks from arrival to Office 5.</h2><p>Use these three details to make the last part of the trip easier once you reach the Anthem office.</p></div><div class="step-cards"><article class="step-card reveal" data-photo-plan="office-building-exterior.jpg"><span>01 / Building</span><h3>Start at Building C</h3><p>Arrive at 41810 N Venture Dr, Building C, in Anthem.</p></article><article class="step-card reveal" data-photo-plan="office-suite-entrance.jpg"><span>02 / Suite</span><h3>Enter Suite C122</h3><p>Once you are inside Building C, continue to Suite C122.</p></article><article class="step-card reveal" data-photo-plan="office-door.jpg"><span>03 / Office</span><h3>Look for Office 5</h3><p>Back to Life Mental Health is located in Office 5 inside Suite C122.</p></article></div><div class="page-crosslinks" style="margin-top:28px"><figure class="crosslink-card reveal" style="margin:0"><img src="assets/images/Outside_Front_Salt_Spa_Picture.jpeg" alt="Exterior at the Anthem office location" loading="lazy" decoding="async" style="width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:14px;margin-bottom:16px;"><figcaption><strong>Exterior</strong><p style="margin-bottom:0">A visual reference for the office location when you arrive.</p></figcaption></figure><figure class="crosslink-card reveal" style="margin:0"><img src="assets/images/Lobby.png" alt="Lobby area at the Anthem office location" loading="lazy" decoding="async" style="width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:14px;margin-bottom:16px;"><figcaption><strong>Inside the building</strong><p style="margin-bottom:0">One of the interior views patients may recognize on the way to Suite C122.</p></figcaption></figure><figure class="crosslink-card reveal" style="margin:0"><img src="assets/images/Lobby_2.png" alt="Additional lobby view at the Anthem office location" loading="lazy" decoding="async" style="width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:14px;margin-bottom:16px;"><figcaption><strong>Lobby view</strong><p style="margin-bottom:0">Another visual reference from the Anthem office location.</p></figcaption></figure></div><p class="small-note reveal">By appointment only. If you have trouble locating the suite after you arrive, call the office at <a href="tel:+14803138583">480-313-8583</a>.</p></div></section>
+    <section class="journey-section soft" aria-labelledby="arrival-heading"><div class="container"><div class="journey-heading reveal"><span class="eyebrow">Finding the office</span><h2 id="arrival-heading">Three landmarks from arrival to Office 5.</h2><p>These photos match the route into the office so you can recognize where you are as you arrive.</p></div><div class="arrival-landmarks"><figure class="arrival-landmark arrival-landmark--exterior reveal"><img src="assets/images/Outside_Front_Salt_Spa_Picture.jpeg" alt="Exterior of Building C at the Anthem office location" loading="lazy" decoding="async"><figcaption class="arrival-landmark-body"><span class="arrival-step">01 / Building</span><h3>Start at Building C</h3><p>Arrive at 41810 N Venture Dr and use this exterior view to identify Building C.</p></figcaption></figure><figure class="arrival-landmark arrival-landmark--suite reveal"><img src="assets/images/Lobby.png" alt="Interior view near Suite C122 at the Anthem office location" loading="lazy" decoding="async"><figcaption class="arrival-landmark-body"><span class="arrival-step">02 / Suite</span><h3>Enter Suite C122</h3><p>Once inside Building C, continue to Suite C122. This interior view is a useful visual cue along the way.</p></figcaption></figure><figure class="arrival-landmark arrival-landmark--inside reveal"><img src="assets/images/Lobby_2.png" alt="Waiting area inside Suite C122 at the Anthem office location" loading="lazy" decoding="async"><figcaption class="arrival-landmark-body"><span class="arrival-step">03 / Inside</span><h3>You’re in the right suite</h3><p>Back to Life Mental Health is in Office 5 inside Suite C122. This is the waiting area you should recognize once inside.</p></figcaption></figure></div><p class="small-note reveal arrival-help">By appointment only. If you have trouble locating the suite after you arrive, call the office at <a href="tel:+14803138583">480-313-8583</a>.</p></div></section>
 
     <section class="section section-soft"><div class="container split-grid"><div class="section-copy reveal"><span class="eyebrow">Serving the North Valley</span><h2>Anthem office access for North Phoenix and surrounding communities.</h2><p>The physical office is in Anthem and serves patients from North Phoenix and nearby North Valley communities, including Norterra, Tramonto, North Gateway, Desert Hills, New River, Cave Creek, and Carefree. Back to Life Mental Health does not claim separate offices in those communities.</p><p>Telehealth provides an option for established and new patients located elsewhere in Arizona when clinically appropriate.</p><p><a class="text-link" href="north-phoenix-psychiatric-care.html">North Phoenix &amp; North Valley psychiatric care <span aria-hidden="true">→</span></a></p><p><a class="text-link" href="telehealth.html">Learn about telehealth <span aria-hidden="true">→</span></a></p></div><div class="care-card reveal" data-photo-plan="office-treatment-room.jpg"><div class="care-card-top"><span>Direct communication matters.</span></div><div class="care-card-body"><p>Back to Life Mental Health is intentionally a small practice. That means fewer layers between you and the people helping coordinate your care.</p></div></div></div></section>
 
