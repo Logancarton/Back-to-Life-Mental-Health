@@ -14,6 +14,14 @@ const telehealthUrl = 'https://telehealth.kareo.com/lcarton';
 const ghToken = process.env.GH_TOKEN || '';
 const ghRepo = process.env.GITHUB_REPOSITORY || '';
 const ghSha = process.env.GITHUB_SHA || '';
+const crisisText = 'In a crisis? If you are having thoughts of suicide or are in emotional distress, call or text 988 to reach the 988 Suicide & Crisis Lifeline, or call 911 for a medical emergency. Back to Life Mental Health is an outpatient practice and does not provide emergency or after-hours crisis services.';
+const publicRoutes = [
+  '/', '/services', '/psychiatric-evaluation', '/north-phoenix-psychiatric-care',
+  '/medication-management', '/new-patients', '/current-patients',
+  '/insurance-payment', '/telehealth', '/faq', '/about', '/contact', '/anxiety',
+  '/depression', '/adhd', '/ptsd', '/ocd', '/bipolar', '/grief-loss',
+  '/life-transitions', '/privacy'
+];
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -147,13 +155,51 @@ async function schedulerLifecycle(page, label, mobile = false) {
   await page.waitForFunction(() => document.querySelector('[data-scheduler-dialog]')?.open === false);
 }
 
+async function verifyStaticBuild(request) {
+  for (const path of publicRoutes) {
+    const response = await request.get(`${baseUrl}${path}`, { timeout: 15000 });
+    assert(response.ok(), `${path}: static build request returned ${response.status()}`);
+    const source = await response.text();
+
+    assert(source.includes('<meta property="og:title"'), `${path}: static og:title missing`);
+    assert(source.includes('<meta property="og:description"'), `${path}: static og:description missing`);
+    assert(source.includes('<meta property="og:url"'), `${path}: static og:url missing`);
+    assert(source.includes('<meta name="twitter:card" content="summary_large_image">'), `${path}: static Twitter card missing`);
+    assert(source.includes('href="enhancements-base.css"'), `${path}: parallel enhancements-base stylesheet missing`);
+    assert(source.includes('href="enhancements.css"'), `${path}: enhancements stylesheet missing`);
+
+    const crisisBlocks = source.match(/class="container crisis-block"/g) || [];
+    assert(crisisBlocks.length === 1, `${path}: expected one static crisis block, got ${crisisBlocks.length}`);
+    const plain = source.replace(/<[^>]+>/g, ' ').replace(/&amp;/g, '&').replace(/\s+/g, ' ').trim();
+    assert(plain.includes(crisisText), `${path}: static crisis wording changed`);
+    assert(source.includes('href="tel:988"'), `${path}: 988 link missing`);
+    assert(source.includes('href="tel:911"'), `${path}: 911 link missing`);
+
+    const imgTags = source.match(/<img\b[^>]*>/gi) || [];
+    for (const tag of imgTags) {
+      assert(/\bwidth="\d+"/i.test(tag) && /\bheight="\d+"/i.test(tag), `${path}: image missing intrinsic dimensions: ${tag.slice(0, 120)}`);
+    }
+  }
+
+  const cssResponse = await request.get(`${baseUrl}/enhancements.css`, { timeout: 15000 });
+  assert(cssResponse.ok(), `enhancements.css returned ${cssResponse.status()}`);
+  const css = await cssResponse.text();
+  assert(!/@import\s+url\(["']enhancements-base\.css["']\)/i.test(css), 'enhancements.css still contains render-blocking @import');
+
+  const sitemapResponse = await request.get(`${baseUrl}/sitemap.xml`, { timeout: 15000 });
+  assert(sitemapResponse.ok(), `sitemap.xml returned ${sitemapResponse.status()}`);
+  const sitemap = await sitemapResponse.text();
+  const lastmods = sitemap.match(/<lastmod>\d{4}-\d{2}-\d{2}<\/lastmod>/g) || [];
+  assert(lastmods.length === publicRoutes.length, `sitemap expected ${publicRoutes.length} lastmod values, got ${lastmods.length}`);
+}
+
 const conditionPhotography = [
-  ['/anxiety', 'assets/images/Anxiety.png'],
-  ['/adhd', 'assets/images/organized desk.png'],
-  ['/ptsd', 'assets/images/PTSD safe.png'],
-  ['/ocd', 'assets/images/OCD_organizing.png'],
-  ['/grief-loss', 'assets/images/Grief_&_Loss.png'],
-  ['/medication-management', 'assets/images/Script Pad.png']
+  ['/anxiety', 'assets/images/Anxiety.webp'],
+  ['/adhd', 'assets/images/organized desk.webp'],
+  ['/ptsd', 'assets/images/PTSD safe.webp'],
+  ['/ocd', 'assets/images/OCD_organizing.webp'],
+  ['/grief-loss', 'assets/images/Grief_&_Loss.webp'],
+  ['/medication-management', 'assets/images/Script Pad.webp']
 ];
 
 let browser;
@@ -163,11 +209,17 @@ try {
   const desktopContext = await browser.newContext({ viewport: { width: 1365, height: 900 } });
   const desktop = await desktopContext.newPage();
 
+  await verifyStaticBuild(desktopContext.request);
+  await publish('success', 'Static metadata, WebP, sitemap, and crisis resources passed', 'task4-seo-perf');
+
   await goto(desktop, '/');
   assert(!(await desktop.locator('body').innerText()).includes('275518'), 'Homepage still contains removed license number');
   assert(!(await desktop.locator('[data-menu-toggle]').isVisible()), 'Desktop hamburger should be hidden');
   assert((await desktop.locator('body').innerText()).includes('North Phoenix'), 'Homepage missing North Phoenix geographic positioning');
+  assert((await desktop.locator('body').innerText()).includes('Logan Carton, PMHNP-BC'), 'Homepage provider credential missing');
   await exactLink(desktop, '/north-phoenix-psychiatric-care', 'Homepage regional care link');
+  await exactLink(desktop, 'tel:988', 'Homepage 988 crisis link');
+  await exactLink(desktop, 'tel:911', 'Homepage 911 emergency link');
   await localImagesLoad(desktop, 'desktop home');
   await desktop.evaluate(() => window.scrollTo(0, 0));
   await desktop.waitForTimeout(200);
@@ -199,12 +251,13 @@ try {
   await publish('success', 'Active navigation and regional page passed', 'task2-navigation');
 
   await goto(desktop, '/about');
-  const providerPhoto = desktop.locator('img[src$="Me.jpeg"]');
-  const managerPhoto = desktop.locator('img[src$="Stacey.PNG"]');
-  const officePhoto = desktop.locator('img[src$="Lobby.png"]');
+  const providerPhoto = desktop.locator('img[src$="Me.webp"]');
+  const managerPhoto = desktop.locator('img[src$="Stacey.webp"]');
+  const officePhoto = desktop.locator('img[src$="Lobby.webp"]');
   assert(await providerPhoto.count() === 1 && await providerPhoto.isVisible(), 'About provider photo missing or hidden');
   assert(await managerPhoto.count() === 1 && await managerPhoto.isVisible(), 'About office-manager photo missing or hidden');
   assert(await officePhoto.count() === 1 && await officePhoto.isVisible(), 'About office photo missing or hidden');
+  assert((await desktop.locator('body').innerText()).includes('Logan Carton, PMHNP-BC'), 'About provider credential missing');
   await localImagesLoad(desktop, 'desktop about');
   await noOverflow(desktop, 'desktop about');
   await publish('success', 'About photography/layout passed', 'task2-about');
@@ -230,6 +283,10 @@ try {
 
   await goto(desktop, '/task-2-real-404-check', 404);
   assert((await desktop.locator('body').innerText()).toLowerCase().includes('page not found'), 'Rendered 404 content missing');
+  assert((await desktop.locator('.crisis-block').innerText()).replace(/\s+/g, ' ').trim() === crisisText, '404 crisis wording changed');
+  await exactLink(desktop, 'tel:988', '404 988 crisis link');
+  await exactLink(desktop, 'tel:911', '404 911 emergency link');
+  await noOverflow(desktop, 'desktop 404');
   await publish('success', 'Desktop links/images/404 passed', 'task2-desktop-rest');
   await desktopContext.close();
 
