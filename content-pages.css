@@ -79,9 +79,24 @@
 .article-photo img {
   display: block;
   width: 100%;
+  height: auto;
   aspect-ratio: 4 / 3;
   object-fit: cover;
   object-position: center;
+}
+
+/* The medication-management conversation source is portrait-oriented. Give it
+   a deliberate landscape viewport so intrinsic image dimensions added at build
+   time cannot turn the article photo into a tall vertical slab. */
+.medication-management-photo {
+  aspect-ratio: 3 / 2;
+}
+.medication-management-photo img {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: auto;
+  object-fit: cover;
+  object-position: center 55%;
 }
 
 /* Make the evaluation feel like a distinct pause between symptoms and treatment. */
