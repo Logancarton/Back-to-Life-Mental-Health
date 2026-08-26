@@ -1,6 +1,5 @@
 /* Current-patient portal guide. Tebra remains the authentication and PHI boundary. */
 .current-patient-hero{background:radial-gradient(circle at 85% 18%,rgba(129,155,138,.18),transparent 24%),linear-gradient(135deg,var(--cream),#edf3ef 58%,#f4e9db)}
-.current-patient-hero h1{font-size:clamp(44px,6vw,66px)}
 .current-patient-hero .journey-summary-card{padding:28px 30px}
 .current-patient-hero .journey-summary-card h2{margin:6px 0 12px}
 .current-patient-hero .summary-list{margin-top:10px}
