@@ -35,37 +35,37 @@ html:has(link[rel="canonical"][href$="/post-traumatic-stress-disorder"], link[re
 html:has(link[rel="canonical"][href$="/anxiety"]) .condition-hero {
   background:
     linear-gradient(90deg, rgba(12,31,37,.96) 0%, rgba(12,31,37,.86) 34%, rgba(12,31,37,.52) 60%, rgba(12,31,37,.16) 100%),
-    url("assets/images/Anxiety.png") center 46% / cover no-repeat;
+    url("assets/images/anxiety.webp") center 46% / cover no-repeat;
 }
 
 html:has(link[rel="canonical"][href$="/loss-bereavement"], link[rel="canonical"][href$="/grief-loss"]) .condition-hero {
   background:
     linear-gradient(90deg, rgba(12,31,37,.95) 0%, rgba(12,31,37,.84) 36%, rgba(12,31,37,.48) 62%, rgba(12,31,37,.16) 100%),
-    url("assets/images/Grief_&_Loss.png") center 46% / cover no-repeat;
+    url("assets/images/grief-and-loss.webp") center 46% / cover no-repeat;
 }
 
 html:has(link[rel="canonical"][href$="/attention-deficit-hyperactive-disorder"], link[rel="canonical"][href$="/adhd"]) .condition-hero {
   background:
     linear-gradient(90deg, rgba(12,31,37,.94) 0%, rgba(12,31,37,.80) 38%, rgba(12,31,37,.42) 64%, rgba(12,31,37,.12) 100%),
-    url("assets/images/organized desk.png") center 52% / cover no-repeat;
+    url("assets/images/organized-desk.webp") center 52% / cover no-repeat;
 }
 
 html:has(link[rel="canonical"][href$="/medication-management"]) .condition-hero {
   background:
     linear-gradient(90deg, rgba(12,31,37,.95) 0%, rgba(12,31,37,.82) 38%, rgba(12,31,37,.43) 64%, rgba(12,31,37,.12) 100%),
-    url("assets/images/Script Pad.png") center 52% / cover no-repeat;
+    url("assets/images/script-pad.webp") center 52% / cover no-repeat;
 }
 
 html:has(link[rel="canonical"][href$="/obsessive-compulsive-disorder"], link[rel="canonical"][href$="/ocd"]) .condition-hero {
   background:
     linear-gradient(90deg, rgba(12,31,37,.95) 0%, rgba(12,31,37,.82) 36%, rgba(12,31,37,.46) 62%, rgba(12,31,37,.10) 100%),
-    url("assets/images/OCD_organizing.png") center 48% / cover no-repeat;
+    url("assets/images/ocd-organizing.webp") center 48% / cover no-repeat;
 }
 
 html:has(link[rel="canonical"][href$="/post-traumatic-stress-disorder"], link[rel="canonical"][href$="/ptsd"]) .condition-hero {
   background:
     linear-gradient(90deg, rgba(12,31,37,.95) 0%, rgba(12,31,37,.82) 38%, rgba(12,31,37,.42) 64%, rgba(12,31,37,.10) 100%),
-    url("assets/images/PTSD safe.png") center 48% / cover no-repeat;
+    url("assets/images/ptsd-safe.webp") center 48% / cover no-repeat;
 }
 
 html:has(link[rel="canonical"][href$="/anxiety"]) .condition-hero .page-hero-inner,
@@ -123,12 +123,6 @@ html:has(link[rel="canonical"][href$="/post-traumatic-stress-disorder"], link[re
   color: var(--ink);
 }
 
-/* Grief & Loss previously reused the Depression park photo. The uploaded grief
-   image now owns the hero, so suppress the mismatched article image. */
-html:has(link[rel="canonical"][href$="/loss-bereavement"], link[rel="canonical"][href$="/grief-loss"]) .article-photo:has(img[src$="Sunset walking at the park.png"]) {
-  display: none;
-}
-
 /* Carry condition photography onto the homepage chooser as image headers. */
 a.condition-card:is([href="anxiety.html"], [href="/anxiety"]),
 a.condition-card:is([href="adhd.html"], [href="/adhd"]),
@@ -155,27 +149,27 @@ a.condition-card:is([href="grief-loss.html"], [href="/grief-loss"])::before {
 }
 
 a.condition-card:is([href="anxiety.html"], [href="/anxiety"])::before {
-  background-image: linear-gradient(180deg, rgba(23,50,58,.02), rgba(23,50,58,.18)), url("assets/images/Anxiety.png");
+  background-image: linear-gradient(180deg, rgba(23,50,58,.02), rgba(23,50,58,.18)), url("assets/images/anxiety-card.webp");
   background-position: center 45%;
 }
 
 a.condition-card:is([href="adhd.html"], [href="/adhd"])::before {
-  background-image: linear-gradient(180deg, rgba(23,50,58,.02), rgba(23,50,58,.16)), url("assets/images/organized desk.png");
+  background-image: linear-gradient(180deg, rgba(23,50,58,.02), rgba(23,50,58,.16)), url("assets/images/organized-desk-card.webp");
   background-position: center 52%;
 }
 
 a.condition-card:is([href="ptsd.html"], [href="/ptsd"])::before {
-  background-image: linear-gradient(180deg, rgba(23,50,58,.02), rgba(23,50,58,.16)), url("assets/images/PTSD safe.png");
+  background-image: linear-gradient(180deg, rgba(23,50,58,.02), rgba(23,50,58,.16)), url("assets/images/ptsd-safe-card.webp");
   background-position: center 48%;
 }
 
 a.condition-card:is([href="ocd.html"], [href="/ocd"])::before {
-  background-image: linear-gradient(180deg, rgba(23,50,58,.02), rgba(23,50,58,.14)), url("assets/images/OCD_organizing.png");
+  background-image: linear-gradient(180deg, rgba(23,50,58,.02), rgba(23,50,58,.14)), url("assets/images/ocd-organizing-card.webp");
   background-position: center 45%;
 }
 
 a.condition-card:is([href="grief-loss.html"], [href="/grief-loss"])::before {
-  background-image: linear-gradient(180deg, rgba(23,50,58,.02), rgba(23,50,58,.16)), url("assets/images/Grief_&_Loss.png");
+  background-image: linear-gradient(180deg, rgba(23,50,58,.02), rgba(23,50,58,.16)), url("assets/images/grief-and-loss-card.webp");
   background-position: center 30%;
 }
 
@@ -210,37 +204,37 @@ a.condition-card:is([href="grief-loss.html"], [href="/grief-loss"]) > span {
   html:has(link[rel="canonical"][href$="/anxiety"]) .condition-hero {
     background:
       linear-gradient(90deg, rgba(12,31,37,.93), rgba(12,31,37,.66)),
-      url("assets/images/Anxiety.png") 52% center / cover no-repeat;
+      url("assets/images/anxiety.webp") 52% center / cover no-repeat;
   }
 
   html:has(link[rel="canonical"][href$="/loss-bereavement"], link[rel="canonical"][href$="/grief-loss"]) .condition-hero {
     background:
       linear-gradient(90deg, rgba(12,31,37,.92), rgba(12,31,37,.62)),
-      url("assets/images/Grief_&_Loss.png") 54% 48% / cover no-repeat;
+      url("assets/images/grief-and-loss.webp") 54% 48% / cover no-repeat;
   }
 
   html:has(link[rel="canonical"][href$="/attention-deficit-hyperactive-disorder"], link[rel="canonical"][href$="/adhd"]) .condition-hero {
     background:
       linear-gradient(90deg, rgba(12,31,37,.92), rgba(12,31,37,.62)),
-      url("assets/images/organized desk.png") 58% center / cover no-repeat;
+      url("assets/images/organized-desk.webp") 58% center / cover no-repeat;
   }
 
   html:has(link[rel="canonical"][href$="/medication-management"]) .condition-hero {
     background:
       linear-gradient(90deg, rgba(12,31,37,.92), rgba(12,31,37,.62)),
-      url("assets/images/Script Pad.png") 58% center / cover no-repeat;
+      url("assets/images/script-pad.webp") 58% center / cover no-repeat;
   }
 
   html:has(link[rel="canonical"][href$="/obsessive-compulsive-disorder"], link[rel="canonical"][href$="/ocd"]) .condition-hero {
     background:
       linear-gradient(90deg, rgba(12,31,37,.92), rgba(12,31,37,.62)),
-      url("assets/images/OCD_organizing.png") 60% center / cover no-repeat;
+      url("assets/images/ocd-organizing.webp") 60% center / cover no-repeat;
   }
 
   html:has(link[rel="canonical"][href$="/post-traumatic-stress-disorder"], link[rel="canonical"][href$="/ptsd"]) .condition-hero {
     background:
       linear-gradient(90deg, rgba(12,31,37,.92), rgba(12,31,37,.62)),
-      url("assets/images/PTSD safe.png") 62% center / cover no-repeat;
+      url("assets/images/ptsd-safe.webp") 62% center / cover no-repeat;
   }
 
   html:has(link[rel="canonical"][href$="/anxiety"]) .condition-hero h1,

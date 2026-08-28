@@ -160,7 +160,7 @@ ensureMeta('property', 'og:url', canonicalUrl);
 ensureMeta('property', 'og:type', 'website');
 ensureMeta('property', 'og:site_name', 'Back to Life Mental Health');
 
-const defaultSocialImage = `${siteOrigin}/assets/images/homepage-hero.jpg`;
+const defaultSocialImage = `${siteOrigin}/assets/images/homepage-hero.webp`;
 const socialImage = document.querySelector('meta[property="og:image"]')?.content || defaultSocialImage;
 const socialImageAlt = document.querySelector('meta[property="og:image:alt"]')?.content || 'Back to Life Mental Health psychiatric care for Anthem, North Phoenix, and the North Valley';
 ensureMeta('property', 'og:image', socialImage);

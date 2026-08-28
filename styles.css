@@ -244,7 +244,6 @@ h3 { font-size: 21px; }
   border-radius: 180px 28px 180px 28px;
   background:
     linear-gradient(180deg, rgba(255,255,255,.08), rgba(23,50,58,.15)),
-    url("assets/images/provider-introduction-poster.jpg") center/cover no-repeat,
     linear-gradient(135deg, #dce7df, #d8c0a4);
   box-shadow: var(--shadow);
 }
@@ -498,3 +497,4 @@ h3 { font-size: 21px; }
   .footer-bottom { flex-direction: column; }
   .profile-placeholder { min-height: 390px; }
 }
+.site-footer .footer-hours { display: block; opacity: .85; }

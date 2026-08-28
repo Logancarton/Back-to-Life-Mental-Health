@@ -6,7 +6,7 @@
   color: white;
   background:
     linear-gradient(90deg, rgba(12,31,37,.95) 0%, rgba(12,31,37,.84) 34%, rgba(12,31,37,.58) 62%, rgba(12,31,37,.24) 100%),
-    url("assets/images/Looking_in_office.png") center 52% / cover no-repeat;
+    url("assets/images/looking-in-office.webp") center 52% / cover no-repeat;
 }
 
 .journey-hero::after {
@@ -87,7 +87,7 @@
   inset: 0;
   background:
     linear-gradient(90deg, rgba(16,39,46,.05), rgba(16,39,46,.02) 48%, rgba(16,39,46,.22)),
-    url("assets/images/anthem-courage-path.png") center / cover no-repeat,
+    url("assets/images/anthem-courage-path.webp") center / cover no-repeat,
     linear-gradient(135deg, #d8e4dc, #e8d6bd);
   transform: scale(1.002);
 }
@@ -134,7 +134,7 @@
     padding: 64px 0 72px;
     background:
       linear-gradient(90deg, rgba(12,31,37,.94), rgba(12,31,37,.68)),
-      url("assets/images/Looking_in_office.png") 56% center / cover no-repeat;
+      url("assets/images/looking-in-office.webp") 56% center / cover no-repeat;
   }
 
   .journey-hero .journey-summary-card {
@@ -157,7 +157,7 @@
     padding: 52px 0 58px;
     background:
       linear-gradient(180deg, rgba(12,31,37,.90), rgba(12,31,37,.78)),
-      url("assets/images/Looking_in_office.png") 60% center / cover no-repeat;
+      url("assets/images/looking-in-office.webp") 60% center / cover no-repeat;
   }
 
   .journey-hero h1 {
