@@ -2,10 +2,9 @@ name: Add footer social links once
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
     paths:
-      - '.github/workflows/add-footer-social-links-once.yml'
+      - .github/workflows/add-footer-social-links-once.yml
 
 permissions:
   contents: write
@@ -17,77 +16,42 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Add Instagram and LinkedIn below Facebook
+      - name: Patch footer links only
+        shell: bash
         run: |
-          python3 - <<'PY'
-          from pathlib import Path
+          set -euo pipefail
+          test "$(grep -Fc "const facebookUrl = 'https://www.facebook.com/profile.php?id=61552499436523';" script.js)" -eq 1
+          test "$(grep -Fc "contactColumn.appendChild(facebookLink);" script.js)" -eq 1
+          ! grep -Fq "const instagramUrl =" script.js
+          ! grep -Fq "const linkedinCompanyUrl =" script.js
 
-          path = Path('script.js')
-          text = path.read_text(encoding='utf-8')
+          sed -i "/const facebookUrl = 'https:\/\/www.facebook.com\/profile.php?id=61552499436523';/a\\
+          const instagramUrl = 'https://www.instagram.com/backtolifementalhealth/';\\
+          const linkedinCompanyUrl = 'https://www.linkedin.com/company/103752686/';" script.js
 
-          instagram = "https://www.instagram.com/backtolifementalhealth/"
-          linkedin = "https://www.linkedin.com/company/103752686/"
+          sed -i "/contactColumn.appendChild(facebookLink);/a\\
+          \\
+          \\  if (!contactColumn.querySelector('[data-instagram-link]')) {\\
+          \\    const instagramLink = document.createElement('a');\\
+          \\    instagramLink.href = instagramUrl;\\
+          \\    instagramLink.target = '_blank';\\
+          \\    instagramLink.rel = 'noopener noreferrer';\\
+          \\    instagramLink.textContent = 'Instagram';\\
+          \\    instagramLink.setAttribute('data-instagram-link', '');\\
+          \\    contactColumn.appendChild(instagramLink);\\
+          \\  }\\
+          \\
+          \\  if (!contactColumn.querySelector('[data-linkedin-company-link]')) {\\
+          \\    const linkedinLink = document.createElement('a');\\
+          \\    linkedinLink.href = linkedinCompanyUrl;\\
+          \\    linkedinLink.target = '_blank';\\
+          \\    linkedinLink.rel = 'noopener noreferrer';\\
+          \\    linkedinLink.textContent = 'LinkedIn';\\
+          \\    linkedinLink.setAttribute('data-linkedin-company-link', '');\\
+          \\    contactColumn.appendChild(linkedinLink);\\
+          \\  }" script.js
 
-          if instagram in text or linkedin in text:
-              raise SystemExit('Instagram or LinkedIn link already exists; refusing to make a duplicate change.')
-
-          old_constants = "const facebookUrl = 'https://www.facebook.com/profile.php?id=61552499436523';\n"
-          new_constants = old_constants + (
-              "const instagramUrl = 'https://www.instagram.com/backtolifementalhealth/';\n"
-              "const linkedinCompanyUrl = 'https://www.linkedin.com/company/103752686/';\n"
-          )
-
-          old_footer = """  if (!contactColumn.querySelector('[data-facebook-link]')) {
-            const facebookLink = document.createElement('a');
-            facebookLink.href = facebookUrl;
-            facebookLink.target = '_blank';
-            facebookLink.rel = 'noopener noreferrer';
-            facebookLink.textContent = 'Facebook';
-            facebookLink.setAttribute('data-facebook-link', '');
-            contactColumn.appendChild(facebookLink);
-          }
-        });"""
-
-          new_footer = """  if (!contactColumn.querySelector('[data-facebook-link]')) {
-            const facebookLink = document.createElement('a');
-            facebookLink.href = facebookUrl;
-            facebookLink.target = '_blank';
-            facebookLink.rel = 'noopener noreferrer';
-            facebookLink.textContent = 'Facebook';
-            facebookLink.setAttribute('data-facebook-link', '');
-            contactColumn.appendChild(facebookLink);
-          }
-
-          if (!contactColumn.querySelector('[data-instagram-link]')) {
-            const instagramLink = document.createElement('a');
-            instagramLink.href = instagramUrl;
-            instagramLink.target = '_blank';
-            instagramLink.rel = 'noopener noreferrer';
-            instagramLink.textContent = 'Instagram';
-            instagramLink.setAttribute('data-instagram-link', '');
-            contactColumn.appendChild(instagramLink);
-          }
-
-          if (!contactColumn.querySelector('[data-linkedin-company-link]')) {
-            const linkedinLink = document.createElement('a');
-            linkedinLink.href = linkedinCompanyUrl;
-            linkedinLink.target = '_blank';
-            linkedinLink.rel = 'noopener noreferrer';
-            linkedinLink.textContent = 'LinkedIn';
-            linkedinLink.setAttribute('data-linkedin-company-link', '');
-            contactColumn.appendChild(linkedinLink);
-          }
-        });"""
-
-          if text.count(old_constants) != 1:
-              raise SystemExit('Expected Facebook URL marker was not found exactly once; refusing to edit.')
-          if text.count(old_footer) != 1:
-              raise SystemExit('Expected Facebook footer block was not found exactly once; refusing to edit.')
-
-          text = text.replace(old_constants, new_constants, 1)
-          text = text.replace(old_footer, new_footer, 1)
-          path.write_text(text, encoding='utf-8')
-          PY
+          git diff --check
 
       - name: Commit only script.js
         run: |
