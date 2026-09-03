@@ -298,6 +298,8 @@ document.querySelectorAll('[data-year]').forEach((node) => {
 // links available from the shared footer without duplicating markup everywhere.
 const googleReviewsUrl = 'https://www.google.com/maps/search/?api=1&query=Back%20to%20Life%20Mental%20Health%2C%20Anthem%20AZ&query_place_id=ChIJa6pXTtlxK4cRDzcak9fsa_s';
 const facebookUrl = 'https://www.facebook.com/profile.php?id=61552499436523';
+const instagramUrl = 'https://www.instagram.com/backtolifementalhealth/';
+const linkedinCompanyUrl = 'https://www.linkedin.com/company/103752686/';
 document.querySelectorAll('.site-footer .footer-grid').forEach((footerGrid) => {
   const contactColumn = footerGrid.querySelector('a[href^="mailto:"]')?.closest('div');
   if (!contactColumn) return;
@@ -344,6 +346,26 @@ document.querySelectorAll('.site-footer .footer-grid').forEach((footerGrid) => {
     facebookLink.textContent = 'Facebook';
     facebookLink.setAttribute('data-facebook-link', '');
     contactColumn.appendChild(facebookLink);
+
+  if (!contactColumn.querySelector('[data-instagram-link]')) {
+    const instagramLink = document.createElement('a');
+    instagramLink.href = instagramUrl;
+    instagramLink.target = '_blank';
+    instagramLink.rel = 'noopener noreferrer';
+    instagramLink.textContent = 'Instagram';
+    instagramLink.setAttribute('data-instagram-link', '');
+    contactColumn.appendChild(instagramLink);
+  }
+
+  if (!contactColumn.querySelector('[data-linkedin-company-link]')) {
+    const linkedinLink = document.createElement('a');
+    linkedinLink.href = linkedinCompanyUrl;
+    linkedinLink.target = '_blank';
+    linkedinLink.rel = 'noopener noreferrer';
+    linkedinLink.textContent = 'LinkedIn';
+    linkedinLink.setAttribute('data-linkedin-company-link', '');
+    contactColumn.appendChild(linkedinLink);
+  }
   }
 });
 
