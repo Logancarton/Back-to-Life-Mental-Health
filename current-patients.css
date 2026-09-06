@@ -106,3 +106,11 @@
   .portal-security-band{grid-template-columns:1fr;padding:26px}
   .portal-security-icon{width:60px;height:60px;border-radius:18px}
 }
+
+/* Keep the safety disclaimer without repeating the portal-security lecture. */
+.portal-security-band{display:block;padding:24px 28px}
+.portal-security-band>.portal-security-icon{display:none}
+.portal-security-band>div>.eyebrow,
+.portal-security-band>div>h2,
+.portal-security-band>div>p:not(.portal-urgent-note){display:none}
+.portal-security-band .portal-urgent-note{max-width:none;margin:0!important;padding:0;border-top:0;font-size:14px;line-height:1.6;font-weight:700;color:var(--ink)}
