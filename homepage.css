@@ -54,7 +54,7 @@
 .home-page .home-approach { background: var(--cream); }
 .home-page .home-approach-grid { display: grid; grid-template-columns: .9fr 1fr; gap: 96px; align-items: center; }
 .home-page .home-approach-photo { display: grid; grid-template-columns: 150px 1fr; gap: 24px; align-items: center; }
-.home-page .home-approach-photo > img { grid-column: 1 / -1; width: 100%; height: 320px; object-fit: cover; object-position: center 30%; border-radius: 8px 8px 96px 8px; }
+.home-page .home-approach-photo > img { grid-column: 1 / -1; width: 100%; height: 360px; object-fit: cover; object-position: center 5%; border-radius: 8px 8px 96px 8px; }
 .home-page .home-approach-photo > div { grid-column: 1 / -1; }
 .home-page .home-approach-photo .eyebrow { margin-bottom: 8px; }
 .home-page .home-approach-photo p { font-size: 17px; margin: 0 0 14px; color: var(--ink-soft); line-height: 1.6; }
