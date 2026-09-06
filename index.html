@@ -22,7 +22,9 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="enhancements.css">
+  <link rel="stylesheet" href="homepage.css">
   <script defer src="script.js"></script>
+  <script defer src="homepage.js"></script>
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -69,7 +71,7 @@
   }
   </script>
 </head>
-<body>
+<body class="home-page">
   <a class="skip-link" href="#main">Skip to content</a>
 
   <header class="site-header" data-header>
@@ -91,150 +93,94 @@
   </header>
 
   <main id="main">
-    <section class="hero">
-      <div class="container hero-grid">
-        <div class="hero-copy reveal">
-          <span class="eyebrow">Psychiatric care for Anthem, North Phoenix & the North Valley</span>
-          <h1>You Deserve <em>to Be Heard</em></h1>
-          <p class="hero-lead">Psychiatric evaluation and medication management for adolescents and adults, built around thoughtful conversations, clear options, and appointments that do not feel rushed.</p>
-          <div class="hero-actions">
-            <a class="button" href="https://d2oe0ra32qx05a.cloudfront.net/?practiceKey=k_1_108034" target="_blank" rel="noopener">Book an Appointment</a>
-            <a class="text-link" href="tel:+14803138583">Call 480-313-8583 <span aria-hidden="true">→</span></a>
+    <section class="home-hero" aria-labelledby="home-heading">
+      <div class="container home-hero-grid">
+        <div class="home-hero-copy">
+          <span class="eyebrow">Independent psychiatric care · Anthem, Arizona</span>
+          <h1 id="home-heading">You deserve<br>to be <em>heard.</em></h1>
+          <p class="home-intro">A place to talk things through.<br>A plan that makes sense for you.</p>
+          <p class="home-service">Psychiatric evaluation and medication management for adolescents and adults. In person in Anthem, with telehealth across Arizona.</p>
+          <div class="home-actions">
+            <a class="button" href="https://d2oe0ra32qx05a.cloudfront.net/?practiceKey=k_1_108034" target="_blank" rel="noopener">Book an Appointment <span aria-hidden="true">↗</span></a>
+            <a class="text-link" href="#find-your-start">Find your starting point <span aria-hidden="true">↓</span></a>
           </div>
-          <div class="provider-note">
-            <span class="provider-dot" aria-hidden="true"></span>
-            <p><strong>Logan Carton, PMHNP-BC</strong><br>Board-certified psychiatric mental health nurse practitioner, licensed in Arizona. New patients welcome.</p>
-          </div>
+          <a class="home-provider-link" href="about.html"><span class="home-provider-mark" aria-hidden="true">LC</span><span><strong>Logan Carton, PMHNP-BC</strong><small>Board-certified psychiatric mental health nurse practitioner</small></span><span aria-hidden="true">↗</span></a>
         </div>
-        <div class="hero-visual reveal">
-          <div class="hero-photo-frame">
-            <img class="hero-photo-image" src="assets/images/homepage-hero.webp" alt="Back to Life Mental Health homepage hero" fetchpriority="high" decoding="async" width="1376" height="768">
-          </div>
-          <div class="floating-card" style="z-index:4;background:#fff;backdrop-filter:none;-webkit-backdrop-filter:none;"><span class="floating-label">A different pace of care</span><strong>Time to talk. Time to understand.</strong><p>Treatment decisions made together.</p></div>
-        </div>
+        <figure class="home-portrait">
+          <img src="assets/images/homepage-hero.webp" alt="Logan Carton, PMHNP-BC, welcoming you to Back to Life Mental Health" width="1376" height="768" fetchpriority="high" decoding="async">
+          <figcaption><span class="home-availability"><span aria-hidden="true">●</span> New patients welcome</span><span>Care starts with a conversation.</span></figcaption>
+        </figure>
       </div>
+      <div class="container home-location-line"><span>Anthem office <span aria-hidden="true">/</span> Arizona telehealth</span><a href="north-phoenix-psychiatric-care.html">Serving North Phoenix &amp; the North Valley <span aria-hidden="true">↗</span></a></div>
     </section>
 
-    <section class="trust-strip" aria-label="Practice highlights">
-      <div class="container trust-grid">
-        <div><strong>Anthem office</strong><span>Serving the North Valley</span></div>
-        <div><strong>Telehealth</strong><span>Across Arizona</span></div>
-        <div><strong>Adolescents + adults</strong><span>Personalized psychiatric care</span></div>
-        <div><strong>New patients</strong><span>Currently welcome</span></div>
-      </div>
-    </section>
-
-    <section class="section">
-      <div class="container split-grid">
-        <div class="section-copy reveal">
-          <span class="eyebrow">Care that fits real life</span>
-          <h2>In-Person Psychiatric Care for Anthem & North Phoenix + Telehealth Across Arizona</h2>
-          <p>Compassionate, personalized psychiatric care for anxiety, depression, ADHD, bipolar disorder, PTSD, grief, OCD, life transitions, and other mental health concerns.</p>
-          <p>The Anthem office serves North Phoenix and nearby North Valley communities including Norterra, Tramonto, North Gateway, Desert Hills, New River, Cave Creek, and Carefree.</p>
-          <p><a class="text-link" href="north-phoenix-psychiatric-care.html">Psychiatric care for North Phoenix &amp; the North Valley <span aria-hidden="true">→</span></a></p>
-          <a class="text-link" href="services.html">Explore services <span aria-hidden="true">→</span></a>
-        </div>
-        <div class="care-card reveal">
-          <div class="care-card-top" role="img" aria-label="Saguaro landscape in Anthem, Arizona" style="background:linear-gradient(130deg,rgba(23,50,58,.74),rgba(85,114,99,.34)),url('assets/images/anthem-saguaro-in-park.webp') center/cover no-repeat;"><span>Appointments that don't feel rushed.</span></div>
-          <div class="care-card-body">
-            <p>Time to ask questions, understand your options, and make treatment decisions together.</p>
-            <div class="care-points"><span>Comprehensive evaluation</span><span>Medication management</span><span>Collaborative treatment planning</span><span>In-person + telehealth</span></div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="section brand-path-section" aria-labelledby="care-path-heading">
+    <section class="home-section home-start" id="find-your-start" aria-labelledby="start-heading" data-care-start>
       <div class="container">
-        <div class="brand-path-heading reveal">
-          <div>
-            <span class="eyebrow">The path forward</span>
-            <h2 id="care-path-heading">Understand the person. Then build the plan.</h2>
-          </div>
-          <p>Good psychiatric care is more than choosing a medication. The process starts with listening, understanding the pattern, reviewing reasonable options, and following what changes over time.</p>
+        <div class="home-section-heading"><div><span class="eyebrow">Your starting point</span><h2 id="start-heading">What brings you here?</h2></div><p>Choose what sounds like you.<br>We’ll help make the next step clearer.</p></div>
+        <div class="start-options" aria-label="Choose your starting point" data-start-options>
+          <a id="start-tab-first" href="#start-first" data-start-tab><span class="start-option-number" aria-hidden="true">01</span><span>I’m starting care</span><span class="start-option-arrow" aria-hidden="true">↘</span></a>
+          <a id="start-tab-transfer" href="#start-transfer" data-start-tab><span class="start-option-number" aria-hidden="true">02</span><span>I’m changing providers</span><span class="start-option-arrow" aria-hidden="true">↘</span></a>
+          <a id="start-tab-teen" href="#start-teen" data-start-tab><span class="start-option-number" aria-hidden="true">03</span><span>I’m looking for my teen</span><span class="start-option-arrow" aria-hidden="true">↘</span></a>
+          <a id="start-tab-options" href="#start-options" data-start-tab><span class="start-option-number" aria-hidden="true">04</span><span>I’m exploring medication</span><span class="start-option-arrow" aria-hidden="true">↘</span></a>
         </div>
-        <div class="care-path" aria-label="Back to Life Mental Health care approach">
-          <article class="care-path-step reveal"><span class="care-path-number">01</span><div><span class="care-path-label">Hear</span><h3>Start with your story</h3><p>What you are experiencing, what has changed, and what matters most to you.</p></div></article>
-          <article class="care-path-step reveal"><span class="care-path-number">02</span><div><span class="care-path-label">Understand</span><h3>Build the whole picture</h3><p>Symptoms are considered alongside history, sleep, health, previous treatment, and daily functioning.</p></div></article>
-          <article class="care-path-step reveal"><span class="care-path-number">03</span><div><span class="care-path-label">Plan</span><h3>Review your options</h3><p>Discuss the reasoning, possible benefits, tradeoffs, alternatives, and what the next step could look like.</p></div></article>
-          <article class="care-path-step reveal"><span class="care-path-number">04</span><div><span class="care-path-label">Follow</span><h3>Adjust with intention</h3><p>Follow-up focuses on response, side effects, functioning, new information, and whether the plan still fits.</p></div></article>
+        <div class="start-panels">
+          <article class="start-panel" id="start-first" aria-labelledby="start-title-first" data-start-panel>
+            <div class="start-panel-story"><span class="eyebrow">Starting psychiatric care</span><h3 id="start-title-first">You don’t need to have<br>it all figured out.</h3><p>You can start with what has been difficult and what you want to change. I’ll help you put the pieces together during your evaluation.</p><a class="button button-light" href="new-patients.html">See how your first visit works <span aria-hidden="true">↗</span></a></div>
+            <div class="start-panel-details"><div><span>What we’ll talk about</span><p>Your concerns, daily life, health, previous treatment, and goals.</p></div><div><span>Helpful to bring</span><p>Your medication list and any questions. A perfect summary is optional.</p></div><a href="insurance-payment.html">Check insurance &amp; payment <span aria-hidden="true">↗</span></a></div>
+          </article>
+          <article class="start-panel" id="start-transfer" aria-labelledby="start-title-transfer" data-start-panel>
+            <div class="start-panel-story"><span class="eyebrow">Changing psychiatric providers</span><h3 id="start-title-transfer">Your experience<br>comes with you.</h3><p>Let’s look at what has helped, what hasn’t, and what you want from your care. Your first visit includes a fresh evaluation and a discussion of next steps.</p><a class="button button-light" href="new-patients.html">Plan your first appointment <span aria-hidden="true">↗</span></a></div>
+            <div class="start-panel-details"><div><span>Helpful to bring</span><p>Your current medication list, previous treatment details, and relevant records or labs.</p></div><div><span>Before making a change</span><p>Contact the office about timing and records. Medication continuation depends on the clinical evaluation.</p></div><a href="contact.html">Ask the office a question <span aria-hidden="true">↗</span></a></div>
+          </article>
+          <article class="start-panel" id="start-teen" aria-labelledby="start-title-teen" data-start-panel>
+            <div class="start-panel-story"><span class="eyebrow">Care for adolescents</span><h3 id="start-title-teen">Room for your concerns.<br>And their perspective.</h3><p>School, friendships, sleep, and family life all help tell the story. An evaluation is a place to understand what your teen is experiencing and discuss appropriate options.</p><a class="button button-light" href="new-patients.html">Explore the first-visit process <span aria-hidden="true">↗</span></a></div>
+            <div class="start-panel-details"><div><span>Care that considers daily life</span><p>Bring questions about changes you’ve noticed and how they affect your teen.</p></div><div><span>Before you book</span><p>Call about your teen’s age, family participation, and any questions about starting care.</p></div><a href="tel:+14803138583">Call 480-313-8583 <span aria-hidden="true">↗</span></a></div>
+          </article>
+          <article class="start-panel" id="start-options" aria-labelledby="start-title-options" data-start-panel>
+            <div class="start-panel-story"><span class="eyebrow">Understanding medication options</span><h3 id="start-title-options">Understand the why.<br>Talk through the tradeoffs.</h3><p>Whether medication is new to you or something you’ve tried before, there’s room for questions. We’ll discuss your goals, reasonable options, and what follow-up would involve.</p><a class="button button-light" href="medication-management.html">Explore medication management <span aria-hidden="true">↗</span></a></div>
+            <div class="start-panel-details"><div><span>A decision made together</span><p>Review potential benefits, side effects, alternatives, and your preferences.</p></div><div><span>An evaluation comes first</span><p>Medication may be recommended when appropriate; a prescription is not guaranteed.</p></div><a href="faq.html">Read common questions <span aria-hidden="true">↗</span></a></div>
+          </article>
         </div>
-        <div class="brand-path-signoff reveal"><span aria-hidden="true"></span><p>Thoughtful care, clear explanations, and decisions made together.</p><a class="text-link" href="new-patients.html">See what starting care looks like <span aria-hidden="true">→</span></a></div>
+        <div class="home-start-footer"><span>Not sure which fits? That’s okay.</span><a class="text-link" href="tel:+14803138583">Talk with the office <span aria-hidden="true">↗</span></a></div>
       </div>
     </section>
 
-    <section class="section section-soft" id="conditions">
+    <section class="home-section home-approach" aria-labelledby="approach-heading">
+      <div class="container home-approach-grid">
+        <div class="home-approach-photo"><img src="assets/images/headshot.webp" alt="Logan Carton, your psychiatric mental health nurse practitioner" width="554" height="572" loading="lazy" decoding="async"><div><span class="eyebrow">Meet your provider</span><p>“I absolutely love working hand-in-hand with my clients to understand the root of their struggles and find a way forward that leads to healing.”</p><a class="text-link" href="about.html">More about Logan <span aria-hidden="true">↗</span></a></div></div>
+        <div class="home-approach-copy"><span class="eyebrow">How I approach care</span><h2 id="approach-heading">The whole picture.<br>Then a path forward.</h2>
+          <ol class="home-care-path">
+            <li><span class="home-path-number" aria-hidden="true">01</span><div><h3>Start with your story</h3><p>What has changed, what is difficult, and what matters most to you.</p></div></li>
+            <li><span class="home-path-number" aria-hidden="true">02</span><div><h3>Connect the pieces</h3><p>Consider symptoms alongside sleep, health, history, and daily functioning.</p></div></li>
+            <li><span class="home-path-number" aria-hidden="true">03</span><div><h3>Make the plan together</h3><p>Understand the reasoning, options, and tradeoffs before deciding.</p></div></li>
+            <li><span class="home-path-number" aria-hidden="true">04</span><div><h3>Follow what changes</h3><p>Review progress, side effects, and whether the plan still fits your life.</p></div></li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <section class="home-section home-conditions" id="conditions" aria-labelledby="conditions-heading">
+      <div class="container home-conditions-grid"><div><span class="eyebrow">Areas of care</span><h2 id="conditions-heading">Find support for<br>what you’re facing.</h2><p>You can seek help even when you’re unsure what to call it.</p><a class="text-link" href="services.html">Explore all services <span aria-hidden="true">↗</span></a></div>
+        <div class="home-condition-links">
+          <a href="anxiety.html"><span>Anxiety</span><span aria-hidden="true">↗</span></a><a href="depression.html"><span>Depression</span><span aria-hidden="true">↗</span></a>
+          <a href="adhd.html"><span>ADHD</span><span aria-hidden="true">↗</span></a><a href="ptsd.html"><span>PTSD</span><span aria-hidden="true">↗</span></a>
+          <a href="ocd.html"><span>OCD</span><span aria-hidden="true">↗</span></a><a href="bipolar.html"><span>Bipolar disorder</span><span aria-hidden="true">↗</span></a>
+          <a href="grief-loss.html"><span>Grief &amp; loss</span><span aria-hidden="true">↗</span></a><a href="life-transitions.html"><span>Life transitions</span><span aria-hidden="true">↗</span></a>
+        </div>
+      </div>
+    </section>
+
+    <section class="home-section home-practical insurance-section" aria-labelledby="practical-heading" data-patient-resources>
       <div class="container">
-        <div class="section-heading reveal">
-          <span class="eyebrow">Conditions we treat</span>
-          <h2>Mental health care for the whole person</h2>
-          <p>Treatment starts with understanding what you are experiencing, how it affects daily life, and what options fit your goals.</p>
-        </div>
-        <div class="condition-grid">
-          <a class="condition-card reveal" href="anxiety.html"><span>01</span><strong>Anxiety</strong><p>Persistent worry, panic, physical tension, and related symptoms.</p></a>
-          <a class="condition-card reveal" href="depression.html"><span>02</span><strong>Depression</strong><p>Low mood, loss of interest, low energy, and changes in daily functioning.</p></a>
-          <a class="condition-card reveal" href="adhd.html"><span>03</span><strong>ADHD</strong><p>Attention, impulsivity, organization, motivation, and executive-function concerns.</p></a>
-          <a class="condition-card reveal" href="ptsd.html"><span>04</span><strong>PTSD</strong><p>Trauma-related symptoms, hyperarousal, avoidance, and intrusive experiences.</p></a>
-          <a class="condition-card reveal" href="ocd.html"><span>05</span><strong>OCD</strong><p>Obsessions, compulsions, and patterns that interfere with daily life.</p></a>
-          <a class="condition-card reveal" href="bipolar.html"><span>06</span><strong>Bipolar Disorder</strong><p>Mood instability, depressive episodes, elevated mood, and related symptoms.</p></a>
-          <a class="condition-card reveal" href="grief-loss.html"><span>07</span><strong>Grief &amp; Loss</strong><p>Support when loss becomes difficult to process or begins affecting functioning.</p></a>
-          <a class="condition-card reveal" href="life-transitions.html"><span>08</span><strong>Life Transitions</strong><p>Psychiatric support during major changes, stress, and adjustment periods.</p></a>
-        </div>
+        <div class="home-section-heading"><div><span class="eyebrow">Before you book</span><h2 id="practical-heading">Let’s make the practical<br>part easier.</h2></div><div class="home-payment-copy"><p>In network with select commercial plans. Benefits vary by plan.</p><p>Private pay is available; call for current rates. Medicare and Medicaid/AHCCCS are not accepted.</p><a class="text-link" href="insurance-payment.html">Insurance &amp; payment details <span aria-hidden="true">↗</span></a></div></div>
+        <div class="home-insurers" aria-label="Insurance companies; participation varies by plan"><img src="assets/images/aetna.webp" alt="Aetna" width="300" height="300" loading="lazy" decoding="async"><img src="assets/images/bcbs.webp" alt="Blue Cross Blue Shield of Arizona" width="300" height="300" loading="lazy" decoding="async"><img src="assets/images/cigna.webp" alt="Cigna" width="300" height="300" loading="lazy" decoding="async"><img src="assets/images/uhc.webp" alt="UnitedHealthcare" width="300" height="300" loading="lazy" decoding="async"><span>Oscar</span></div>
+        <nav class="home-resource-links" aria-label="Patient resources"><a href="current-patients.html"><span>Already a patient?</span><strong>Open patient resources <span aria-hidden="true">↗</span></strong></a><a href="telehealth.html"><span>Visiting from home?</span><strong>Prepare for telehealth <span aria-hidden="true">↗</span></strong></a><a href="contact.html"><span>Coming to Anthem?</span><strong>Find the office <span aria-hidden="true">↗</span></strong></a></nav>
       </div>
     </section>
 
-    <section class="section insurance-section">
-      <div class="container insurance-grid">
-        <div class="section-copy reveal">
-          <span class="eyebrow">Insurance & payment</span>
-          <h2>In network with select commercial plans</h2>
-          <p>Coverage and benefits vary by plan. We recommend confirming behavioral health benefits with your insurer before your first visit.</p>
-          <p class="small-note">Medicare and Medicaid/AHCCCS are not accepted at this time. Private-pay options are available; call for current rates.</p>
-        </div>
-        <div class="insurance-logos reveal" aria-label="Accepted insurance plans">
-          <div class="insurance-logo-card"><img src="assets/images/aetna.webp" alt="Aetna" loading="lazy" decoding="async" width="300" height="300"></div>
-          <div class="insurance-logo-card"><img src="assets/images/bcbs.webp" alt="Blue Cross Blue Shield of Arizona" loading="lazy" decoding="async" width="300" height="300"></div>
-          <div class="insurance-logo-card"><img src="assets/images/cigna.webp" alt="Cigna" loading="lazy" decoding="async" width="300" height="300"></div>
-          <div class="insurance-logo-card"><img src="assets/images/uhc.webp" alt="UnitedHealthcare" loading="lazy" decoding="async" width="300" height="300"></div>
-          <div class="insurance-logo-card"><span>Oscar</span></div>
-        </div>
-      </div>
-    </section>
+    <section class="home-community" aria-labelledby="community-heading"><div class="container home-community-grid"><a href="assets/images/Anthem-Living-Suicide-Prevention-Article.webp" target="_blank" rel="noopener" aria-label="Open Logan’s Anthem Living suicide prevention article"><img src="assets/images/Anthem-Living-Suicide-Prevention-Article.webp" alt="Anthem Living article featuring Logan Carton" width="1256" height="1631" loading="lazy" decoding="async"></a><div><span class="eyebrow">From the practice · Featured in Anthem Living</span><h2 id="community-heading">A Conversation That Could Save a Life</h2><p>Recognizing warning signs, starting difficult conversations, and connecting someone with support.</p><a class="text-link" href="assets/images/Anthem-Living-Suicide-Prevention-Article.webp" target="_blank" rel="noopener">Read the article <span aria-hidden="true">↗</span></a></div></div></section>
 
-    <section class="section section-soft">
-      <div class="container home-about">
-        <img class="reveal" src="assets/images/headshot.webp" alt="Logan Carton, PMHNP-BC" style="display:block;width:100%;height:auto;object-fit:contain;object-position:center top;border-radius:32px;box-shadow:var(--shadow);" width="554" height="572" loading="lazy" decoding="async">
-        <div class="section-copy reveal">
-          <span class="eyebrow">Meet your provider</span>
-          <h2>Personal care without the corporate feel.</h2>
-          <p>Back to Life Mental Health is an independent psychiatric practice. Logan Carton, PMHNP-BC, works collaboratively with patients to understand symptoms in context and build a plan around the person—not a template.</p>
-          <div class="credential-row"><span>PMHNP-BC</span><span>Adolescents + adults</span></div>
-          <p><a class="text-link" href="about.html">Meet the practice <span aria-hidden="true">→</span></a></p>
-        </div>
-      </div>
-    </section>
-
-    <section class="section" aria-labelledby="anthem-living-heading">
-      <div class="container split-grid">
-        <a class="care-card reveal" href="assets/images/Anthem-Living-Suicide-Prevention-Article.webp" target="_blank" rel="noopener" aria-label="Open the full Anthem Living suicide prevention article" style="display:block;width:min(100%,520px);margin-inline:auto;">
-          <img src="assets/images/Anthem-Living-Suicide-Prevention-Article.webp" alt="Anthem Living article titled A Conversation That Could Save a Life featuring Logan Carton, PMHNP-BC" width="1256" height="1631" loading="lazy" decoding="async" style="width:100%;height:auto;">
-        </a>
-        <div class="section-copy reveal">
-          <span class="eyebrow">Featured in Anthem Living</span>
-          <h2 id="anthem-living-heading">A Conversation That Could Save a Life</h2>
-          <p>For Suicide Prevention Month, Logan Carton, PMHNP-BC, shared practical ways families and community members can recognize warning signs, start difficult conversations, and help someone connect with support.</p>
-          <p>Knowing what to look for—and being willing to ask directly—can create an opening for someone who may be struggling to talk and get help.</p>
-          <a class="text-link" href="assets/images/Anthem-Living-Suicide-Prevention-Article.webp" target="_blank" rel="noopener">Read the Anthem Living article <span aria-hidden="true">→</span></a>
-        </div>
-      </div>
-    </section>
-
-    <section class="cta-section">
-      <div class="container cta-card reveal">
-        <div><span class="eyebrow light">Ready to take the next step?</span><h2>Start with a conversation.</h2><p>Schedule online or call the office with questions before booking.</p></div>
-        <div class="cta-actions"><a class="button button-light" href="https://d2oe0ra32qx05a.cloudfront.net/?practiceKey=k_1_108034" target="_blank" rel="noopener">Book an Appointment</a><a class="button button-outline-light" href="tel:+14803138583">480-313-8583</a></div>
-      </div>
-    </section>
+    <section class="home-final" aria-labelledby="ready-heading"><div class="container home-final-inner"><div><span class="eyebrow">When you’re ready</span><h2 id="ready-heading">Let’s take the<br>next step <em>together.</em></h2></div><div><a class="button button-light" href="https://d2oe0ra32qx05a.cloudfront.net/?practiceKey=k_1_108034" target="_blank" rel="noopener">Book an Appointment <span aria-hidden="true">↗</span></a><a class="home-final-phone" href="tel:+14803138583">Or call 480-313-8583</a></div></div></section>
   </main>
 
   <footer class="site-footer">
