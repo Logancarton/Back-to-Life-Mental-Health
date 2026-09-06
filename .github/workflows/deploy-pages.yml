@@ -45,6 +45,9 @@ jobs:
       - name: Optimize assets, routes, and metadata
         run: python3 scripts/prepare-cloudflare-site.py public-dist
 
+      - name: Finalize static social metadata
+        run: python3 scripts/finalize-social-metadata.py public-dist
+
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
