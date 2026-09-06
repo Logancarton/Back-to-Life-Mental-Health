@@ -155,6 +155,41 @@ async function schedulerLifecycle(page, label, mobile = false) {
   await page.waitForFunction(() => document.querySelector('[data-scheduler-dialog]')?.open === false);
 }
 
+async function guidedHomepage(page, label) {
+  const tabs = page.getByRole('tab');
+  const panel = page.getByRole('tabpanel');
+  assert(await tabs.count() === 4, `${label}: expected four starting points`);
+  const titles = [
+    'You don’t need to have it all figured out.',
+    'Your experience comes with you.',
+    'Room for your concerns. And their perspective.',
+    'Understand the why. Talk through the tradeoffs.'
+  ];
+  for (let i = 0; i < titles.length; i += 1) {
+    await tabs.nth(i).click();
+    assert(await tabs.nth(i).getAttribute('aria-selected') === 'true', `${label}: selection ${i} missing`);
+    assert(await panel.count() === 1, `${label}: more than one visible panel`);
+    const heading = (await panel.locator('h3').innerText()).replace(/\s+/g, ' ').trim();
+    assert(heading === titles[i], `${label}: wrong content for selection ${i}`);
+    await noOverflow(page, `${label} path ${i}`);
+    const link = panel.locator('a').first();
+    assert(await link.isVisible(), `${label}: next-step link missing`);
+    const destination = await link.getAttribute('href');
+    const response = await page.context().request.get(new URL(destination, baseUrl).href);
+    assert(response.ok(), `${label}: next-step destination failed`);
+  }
+  await tabs.nth(3).press('ArrowRight');
+  assert(await tabs.nth(0).getAttribute('aria-selected') === 'true', `${label}: arrow wrap failed`);
+  await tabs.nth(0).press('End');
+  assert(await tabs.nth(3).getAttribute('aria-selected') === 'true', `${label}: End failed`);
+  await tabs.nth(3).press('Home');
+  assert(await tabs.nth(0).getAttribute('aria-selected') === 'true', `${label}: Home failed`);
+  assert(await tabs.nth(0).evaluate(node => node === document.activeElement), `${label}: focus lost`);
+  assert(await page.locator('[data-patient-resources]').count() === 1, `${label}: duplicated practical resources`);
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.waitForTimeout(300);
+}
+
 async function verifyStaticBuild(request) {
   for (const path of publicRoutes) {
     const response = await request.get(`${baseUrl}${path}`, { timeout: 15000 });
@@ -194,12 +229,12 @@ async function verifyStaticBuild(request) {
 }
 
 const conditionPhotography = [
-  ['/anxiety', 'assets/images/Anxiety.webp'],
-  ['/adhd', 'assets/images/organized desk.webp'],
-  ['/ptsd', 'assets/images/PTSD safe.webp'],
-  ['/ocd', 'assets/images/OCD_organizing.webp'],
-  ['/grief-loss', 'assets/images/Grief_&_Loss.webp'],
-  ['/medication-management', 'assets/images/Script Pad.webp']
+  ['/anxiety', 'assets/images/anxiety.webp'],
+  ['/adhd', 'assets/images/organized-desk.webp'],
+  ['/ptsd', 'assets/images/ptsd-safe.webp'],
+  ['/ocd', 'assets/images/ocd-organizing.webp'],
+  ['/grief-loss', 'assets/images/grief-and-loss.webp'],
+  ['/medication-management', 'assets/images/script-pad.webp']
 ];
 
 let browser;
@@ -225,6 +260,7 @@ try {
   await desktop.waitForTimeout(200);
   await noOverflow(desktop, 'desktop home');
   await schedulerLifecycle(desktop, 'desktop scheduler');
+  await guidedHomepage(desktop, 'desktop guided homepage');
   await publish('success', 'Desktop homepage and scheduler passed', 'task2-desktop-home');
 
   await goto(desktop, '/current-patients');
@@ -251,9 +287,9 @@ try {
   await publish('success', 'Active navigation and regional page passed', 'task2-navigation');
 
   await goto(desktop, '/about');
-  const providerPhoto = desktop.locator('img[src$="Me.webp"]');
-  const managerPhoto = desktop.locator('img[src$="Stacey.webp"]');
-  const officePhoto = desktop.locator('img[src$="Lobby.webp"]');
+  const providerPhoto = desktop.locator('img[src$="me.webp"]');
+  const managerPhoto = desktop.locator('img[src$="stacey.webp"]');
+  const officePhoto = desktop.locator('img[src$="lobby.webp"]');
   assert(await providerPhoto.count() === 1 && await providerPhoto.isVisible(), 'About provider photo missing or hidden');
   assert(await managerPhoto.count() === 1 && await managerPhoto.isVisible(), 'About office-manager photo missing or hidden');
   assert(await officePhoto.count() === 1 && await officePhoto.isVisible(), 'About office photo missing or hidden');
@@ -307,6 +343,7 @@ try {
   assert(await toggle.getAttribute('aria-expanded') === 'false', 'Mobile hamburger did not close');
   assert(!(await nav.evaluate((node) => node.classList.contains('open'))), 'Mobile nav stayed open');
   await noOverflow(mobile, 'mobile home');
+  await guidedHomepage(mobile, 'mobile guided homepage');
   await schedulerLifecycle(mobile, 'mobile scheduler', true);
   await publish('success', 'Mobile hamburger/scheduler passed', 'task2-mobile-home');
 
@@ -319,6 +356,13 @@ try {
   assert(JSON.stringify(await activeNav(mobile)) === JSON.stringify(['/current-patients']), 'Mobile Current Patients active navigation incorrect');
   await exactLink(mobile, schedulerUrl, 'Mobile scheduler destination');
   await mobileContext.close();
+
+  const fallbackContext = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 390, height: 844 } });
+  const fallback = await fallbackContext.newPage();
+  await goto(fallback, '/');
+  assert(await fallback.locator('[data-start-panel]:visible').count() === 4, 'No-JavaScript starting paths missing');
+  await noOverflow(fallback, 'no-JavaScript homepage');
+  await fallbackContext.close();
 
   await publish('success', 'Desktop/mobile rendered staging QA passed');
   console.log('Rendered staging QA passed.');
