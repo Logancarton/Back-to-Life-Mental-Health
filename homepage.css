@@ -75,11 +75,15 @@
 .home-page .home-resource-links strong { font-size: 14px; }
 .home-page .home-resource-links strong span { margin-left: 10px; }
 .home-page .home-community { padding: 48px 0; }
-.home-page .home-community-grid { display: grid; grid-template-columns: 140px 1fr; gap: 36px; align-items: center; max-width: 900px; }
-.home-page .home-community img { width: 140px; height: 182px; object-fit: contain; box-shadow: 0 8px 24px #17323a12; }
-.home-page .home-community .eyebrow { margin-bottom: 12px; }
-.home-page .home-community h2 { font-size: 28px; }
+.home-page .home-community-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 36px; align-items: start; }
+.home-page .home-community-card { display: grid; grid-template-columns: 116px minmax(0, 1fr); gap: 22px; align-items: center; min-width: 0; }
+.home-page .home-community img { width: 116px; height: 150px; object-fit: contain; box-shadow: 0 8px 24px #17323a12; }
+.home-page .home-community .eyebrow { margin-bottom: 10px; font-size: 10px; }
+.home-page .home-community h2 { font-size: clamp(22px, 2vw, 28px); line-height: 1.2; }
 .home-page .home-community p { color: var(--ink-soft); font-size: 14px; margin: 12px 0; }
+@media (max-width: 900px) {
+  .home-page .home-community-grid { grid-template-columns: 1fr; gap: 32px; }
+}
 .home-page .home-final { background: var(--ink); padding: 64px 0; color: var(--paper); }
 .home-page .home-final-inner { display: flex; justify-content: space-between; align-items: center; gap: 40px; }
 .home-page .home-final .eyebrow { color: #c4d4c8; }
@@ -159,7 +163,7 @@
   .home-page .home-insurers > span { width: 80px; text-align: center; font-size: 20px; }
   .home-page .home-resource-links { grid-template-columns: 1fr; gap: 16px; }
   .home-page .home-resource-links > a { border-bottom: 1px solid #cbd5ca; padding-bottom: 16px; }
-  .home-page .home-community-grid { grid-template-columns: 80px 1fr; gap: 20px; }
+  .home-page .home-community-card { grid-template-columns: 80px minmax(0, 1fr); gap: 20px; }
   .home-page .home-community img { width: 80px; height: 104px; }
   .home-page .home-community h2 { font-size: 24px; }
   .home-page .home-community p { font-size: 13px; }
