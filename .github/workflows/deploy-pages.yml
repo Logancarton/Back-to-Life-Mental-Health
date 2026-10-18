@@ -39,6 +39,10 @@ jobs:
             --exclude '.nojekyll' \
             --exclude 'cloud-run' \
             --exclude 'scripts' \
+            --exclude 'functions' \
+            --exclude 'server' \
+            --exclude 'tests' \
+            --exclude 'docs' \
             --exclude 'Dockerfile' \
             --exclude '*.md'
 
@@ -83,6 +87,14 @@ jobs:
           echo "CLOUDFLARE_PAGES_PROJECT_NAME=$CLOUDFLARE_PAGES_PROJECT_NAME_CLEAN" >> "$GITHUB_ENV"
           echo "Cloudflare Pages project: $CLOUDFLARE_PAGES_PROJECT_NAME_CLEAN"
 
+      - name: Test aggregate website measurement
+        run: node --test tests/growth.test.mjs
+
+      - name: Prepare aggregate website measurement
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: node scripts/setup-growth.mjs
+
       - name: Deploy to Cloudflare Pages
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -90,6 +102,9 @@ jobs:
           npx --yes wrangler@latest pages deploy public-dist \
             --project-name "$CLOUDFLARE_PAGES_PROJECT_NAME" \
             --branch main
+
+      - name: Verify production measurement endpoint
+        run: curl --fail --silent --show-error --retry 5 --retry-all-errors --retry-delay 2 --head https://www.back-to-life-mental-health.com/api/growth
 
       - name: Verify Cloudflare staging routes
         run: |
@@ -106,3 +121,4 @@ jobs:
         run: |
           node scripts/verify-browser-staging.mjs \
             "https://${CLOUDFLARE_PAGES_PROJECT_NAME}.pages.dev"
+

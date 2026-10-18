@@ -99,6 +99,11 @@ The obsolete GitHub Pages JavaScript compatibility-route directories have been r
 
 ## Verification
 
+Aggregate website measurement and its protected practice report are described
+in [docs/website-measurement.md](docs/website-measurement.md). Activation requires
+the production report secret and D1 permission on the existing deployment token.
+No visitor identities or completed-appointment tracking are added.
+
 Every push deployment now runs:
 
 `bash scripts/verify-production-routes.sh https://back-to-life-mental-health.pages.dev preview`
@@ -125,3 +130,4 @@ records the source name and intrinsic dimensions of each converted file.
 
 Re-run the script after adding new imagery, then commit the `.webp` output rather
 than the source PNG or JPEG.
+

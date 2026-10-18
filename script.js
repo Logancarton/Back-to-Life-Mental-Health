@@ -548,11 +548,13 @@ if (canShowSchedulingWidget && !document.querySelector('[data-scheduler-launcher
 
     if (typeof schedulerDialog.showModal !== 'function') {
       window.open(tebraSchedulerUrl, '_blank', 'noopener');
+      window.dispatchEvent(new CustomEvent('btlmh:scheduler-open', { detail: { trigger } }));
       return;
     }
 
     ensureSchedulerFrame();
     if (!schedulerDialog.open) schedulerDialog.showModal();
+    window.dispatchEvent(new CustomEvent('btlmh:scheduler-open', { detail: { trigger } }));
     launcher.setAttribute('aria-expanded', 'true');
     document.body.classList.add('scheduler-open');
     window.requestAnimationFrame(() => closeButton?.focus({ preventScroll: true }));
@@ -679,3 +681,10 @@ if ('IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-mot
 } else {
   revealItems.forEach((item) => item.classList.add('visible'));
 }
+
+// Load aggregate measurement independently of the patient-facing interface.
+// Failure to load or record activity must not affect navigation or scheduling.
+const growthMeasurement = document.createElement('script');
+growthMeasurement.src = '/growth.js';
+growthMeasurement.async = true;
+document.head.appendChild(growthMeasurement);

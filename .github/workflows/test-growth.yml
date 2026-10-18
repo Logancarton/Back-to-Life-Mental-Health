@@ -1,0 +1,27 @@
+name: Test website activity measurement
+on:
+  pull_request:
+    paths:
+      - 'growth*'
+      - 'server/**'
+      - 'functions/**'
+      - 'script.js'
+      - 'scripts/*growth*'
+      - 'tests/growth*'
+      - '.github/workflows/*growth*'
+      - '.github/workflows/deploy-pages.yml'
+permissions:
+  contents: read
+jobs:
+  measurement:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: node --test tests/growth.test.mjs
+      - run: npx --yes wrangler@latest pages functions build functions --outfile=/tmp/growth-worker.js
+      - run: npm install --no-save --no-package-lock playwright
+      - run: npx playwright install --with-deps chromium
+      - run: node tests/growth-browser.mjs

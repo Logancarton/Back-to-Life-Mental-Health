@@ -1,0 +1,13 @@
+[
+  {
+    "id": "2026-10-18-website-activity",
+    "prepared_on": "2026-10-18",
+    "activated_on": null,
+    "status": "prepared_for_review",
+    "hypothesis": "Aggregate page, booking and phone signals paired with verified practice intake totals will identify which acquisition stages need improvement.",
+    "baseline": "Master Practice Database week ending 2026-10-11: no source-linked appointment-request or new-patient totals; no website booking/phone event hooks.",
+    "expected_signal": "Verified page/booking/phone counts by broad page and source plus distinct requests and new patients recorded separately, including unknown source.",
+    "review_after": "Two complete America/Phoenix weeks after activation",
+    "result": "not_yet_measured"
+  }
+]

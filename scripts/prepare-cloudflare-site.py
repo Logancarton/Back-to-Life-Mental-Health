@@ -733,7 +733,9 @@ def main() -> int:
     rewrite_asset_references(root, replacements)
     prepare_parallel_css(root)
 
-    html_files = sorted(root.glob("*.html"))
+    # The private report is an administrative tool with its own noindex/CSP
+    # and styles; do not add public clinical content or public-page metadata.
+    html_files = sorted(path for path in root.glob("*.html") if path.name != "growth-report.html")
     img_total = 0
     img_sized = 0
     for path in html_files:
@@ -766,3 +768,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
